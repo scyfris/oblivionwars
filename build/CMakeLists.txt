@@ -15,6 +15,8 @@ set (OVN_VERSION_MINOR 1)
 # Add the binary tree to the search path for include files
 # so that we will find ovn_config.h
 include_directories("${PROJECT_BINARY_DIR}")
+include_directories(../SDL2-2.0.4/include)
 
 # Add the executable
 add_executable(Oblivion_Engine ../source/main.cpp)
+target_link_libraries(Oblivion_Engine ${CMAKE_SOURCE_DIR}/../SDL2-2.0.4/build/x64/build/.libs/libSDL2-2.0.0.dylib)
