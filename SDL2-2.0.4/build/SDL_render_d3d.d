@@ -1,0 +1,23 @@
+build/SDL_render_d3d.lo: \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/src/render/direct3d/SDL_render_d3d.c \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/src/render/direct3d/../../SDL_internal.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/src/render/direct3d/../../dynapi/SDL_dynapi.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/src/render/direct3d/../../dynapi/SDL_dynapi_overrides.h \
+  include/SDL_config.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_platform.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/begin_code.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/close_code.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_render.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_stdinc.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_config.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_rect.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_error.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_pixels.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_rwops.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_video.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_surface.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_blendmode.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_system.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_keyboard.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_keycode.h \
+  /Users/bclack/OvN/oblivionwars/SDL2-2.0.4/include/SDL_scancode.h
