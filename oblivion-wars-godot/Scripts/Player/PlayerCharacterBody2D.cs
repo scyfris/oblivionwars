@@ -19,9 +19,37 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
     private Vector2 _wallNormal = Vector2.Zero;
     private float _wallJumpInputLockTimer = 0f;
 
+    // Gravity flip
+    [ExportGroup("Gravity Flip")]
+    [Export] private float _gravityFlipRotationSpeed = 10.0f; // Player visual rotation speed
+    [Export] private bool _maintainMomentumOnFlip = true; // Rotate velocity on flip
+
+    // Gravity state tracking
+    private int _gravityRotation = 0; // 0, 90, 180, 270 degrees
+    private Vector2 _gravityDirection = Vector2.Down; // Current gravity pull direction
+    private Vector2 _upDirection = Vector2.Up; // Current up direction
+    private float _targetRotation = 0.0f; // Target rotation in radians
+    private bool _isRotatingGravity = false; // Currently animating rotation
+
     public override void _PhysicsProcess(double delta)
     {
     //    base._PhysicsProcess(delta);
+
+        // Smooth visual rotation toward target
+        if (_isRotatingGravity)
+        {
+            GlobalRotation = Mathf.LerpAngle(GlobalRotation, _targetRotation,
+                                             _gravityFlipRotationSpeed * (float)delta);
+
+            if (Mathf.Abs(GlobalRotation - _targetRotation) < 0.01f)
+            {
+                GlobalRotation = _targetRotation;
+                _isRotatingGravity = false;
+            }
+        }
+
+        // Set CharacterBody2D's up direction (Godot internal)
+        UpDirection = _upDirection;
 
         // Update wall jump input lock timer
         if (_wallJumpInputLockTimer > 0)
@@ -35,24 +63,43 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         // Apply appropriate gravity based on state
         float currentGravity = _isWallSliding ? _wallSlideSpeed : _gravity;
 
+        // Calculate horizontal direction (perpendicular to gravity)
+        // When gravity is down (0,1), horizontal should be right (1,0)
+        Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
+
         // Determine horizontal velocity based on wall jump lock state
-        float horizontalVelocity;
+        Vector2 horizontalVelocity;
         if (_wallJumpInputLockTimer > 0)
         {
-            // During wall jump lock, maintain current horizontal velocity (don't apply player input)
-            horizontalVelocity = Velocity.X;
+            // During wall jump lock, maintain current horizontal velocity
+            // Project current velocity onto horizontal direction
+            float currentHorizontalSpeed = Velocity.Dot(horizontalDirection);
+            horizontalVelocity = horizontalDirection * currentHorizontalSpeed;
         }
         else
         {
-            // Normal movement control
-            horizontalVelocity = _moveDirection * _speed;
+            // Normal movement control along horizontal direction
+            horizontalVelocity = horizontalDirection * _moveDirection * _speed;
         }
 
-        // Update velocity
-        Vector2 newVel = new Vector2(
-            horizontalVelocity,
-            _isWallSliding ? _wallSlideSpeed : Velocity.Y + currentGravity * (float)delta
-        );
+        // Start with horizontal velocity
+        Vector2 newVel = horizontalVelocity;
+
+        // Add current velocity along gravity direction (for falling/jumping)
+        float velocityAlongGravity = Velocity.Dot(_gravityDirection);
+        newVel += _gravityDirection * velocityAlongGravity;
+
+        // Apply gravity acceleration
+        if (!_isWallSliding)
+        {
+            newVel += _gravityDirection * currentGravity * (float)delta;
+        }
+        else
+        {
+            // Wall sliding: clamp velocity along gravity to slide speed
+            newVel = horizontalVelocity + _gravityDirection * _wallSlideSpeed;
+        }
+
         this.Velocity = newVel;
 
         // Move and slide along the floor with the current velocity. Updates velocity based on collisions and such.
@@ -70,12 +117,11 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         // Wall jump
         if (_isWallSliding)
         {
-            // Jump up and away from wall
-            float pushDirection = _wallNormal.X; // Wall normal points away from wall
-            Velocity = new Vector2(
-                pushDirection * _wallJumpPushAwayForce,
-                -_wallJumpStrength
-            );
+            // Jump perpendicular to gravity and away from wall
+            Vector2 jumpDirection = -_gravityDirection; // Up (opposite to gravity)
+            Vector2 pushDirection = _wallNormal; // Away from wall
+
+            Velocity = pushDirection * _wallJumpPushAwayForce + jumpDirection * _wallJumpStrength;
             _isWallSliding = false;
 
             // Lock horizontal input briefly to ensure the push-away takes effect
@@ -86,16 +132,18 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         // Ground jump
         if (!IsOnFloor()) { return; }
 
-        // XXX - Need to check the "up" direction
-        Velocity = Velocity with { Y = -_jumpStrength };
+        // Jump opposite to gravity direction
+        Velocity -= _gravityDirection * _jumpStrength;
     }
 
     public void CancelJump()
     {
-        if (!IsOnFloor() && Velocity.Y < 0.0)
+        // Check velocity against gravity, not hardcoded Y
+        float velocityAlongGravity = Velocity.Dot(_gravityDirection);
+        if (!IsOnFloor() && velocityAlongGravity < 0.0f) // Moving against gravity
         {
-            // XXX - Need to check the "up" direction
-            Velocity = Velocity with { Y = 0.0f };
+            // Cancel upward movement component
+            Velocity -= _gravityDirection * velocityAlongGravity;
         }
     }
 
@@ -164,8 +212,9 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
                 movingAwayFromWall = true;
             }
 
-            // Start wall sliding if moving down and not actively moving away
-            if (Velocity.Y >= 0 && !movingAwayFromWall)
+            // Start wall sliding if moving along gravity and not actively moving away
+            float velocityAlongGravity = Velocity.Dot(_gravityDirection);
+            if (velocityAlongGravity >= 0 && !movingAwayFromWall)
             {
                 _isWallSliding = true;
             }
@@ -178,5 +227,56 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         {
             _isWallSliding = false;
         }
+    }
+
+    /// <summary>
+    /// Rotate gravity clockwise 90° (0 -> 90 -> 180 -> 270 -> 0)
+    /// </summary>
+    public void RotateGravityClockwise()
+    {
+        RotateGravity(90);
+    }
+
+    /// <summary>
+    /// Rotate gravity counter-clockwise 90° (0 -> 270 -> 180 -> 90 -> 0)
+    /// </summary>
+    public void RotateGravityCounterClockwise()
+    {
+        RotateGravity(-90);
+    }
+
+    /// <summary>
+    /// Internal gravity rotation handler
+    /// </summary>
+    private void RotateGravity(int degrees)
+    {
+        // Update rotation state (normalize to 0-359)
+        _gravityRotation = (_gravityRotation + degrees + 360) % 360;
+
+        // Calculate new directions from rotation
+        float radians = Mathf.DegToRad(_gravityRotation);
+        _gravityDirection = new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
+        _upDirection = -_gravityDirection;
+
+        // Set target for smooth visual rotation
+        _targetRotation = radians;
+        _isRotatingGravity = true;
+
+        // Rotate velocity vector to maintain momentum
+        if (_maintainMomentumOnFlip)
+        {
+            float rotationRad = Mathf.DegToRad(degrees);
+            Velocity = Velocity.Rotated(rotationRad);
+        }
+
+        GD.Print($"Gravity rotated to {_gravityRotation}°, direction: {_gravityDirection}");
+    }
+
+    /// <summary>
+    /// Get current gravity rotation for camera
+    /// </summary>
+    public int GetGravityRotation()
+    {
+        return _gravityRotation;
     }
 }

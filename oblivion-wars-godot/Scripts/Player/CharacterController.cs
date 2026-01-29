@@ -10,6 +10,8 @@ public partial class CharacterController : Node
     [Export] string _jumpAction = "jump";
     [Export] string _useAction = "shoot"; // "shoot" for historical reasons, but it's "use" conceptually
     [Export] string _switchHoldableAction = "switch_weapon";
+    [Export] string _rotateGravityClockwiseAction = "rotate_gravity_cw";
+    [Export] string _rotateGravityCounterClockwiseAction = "rotate_gravity_ccw";
 
     public override void _UnhandledInput(InputEvent @event)
     {
@@ -57,6 +59,16 @@ public partial class CharacterController : Node
         if (@event.IsActionPressed(_switchHoldableAction))
         {
             _playerCharacter.NextHoldable();
+        }
+
+        // Gravity rotation inputs
+        if (@event.IsActionPressed(_rotateGravityClockwiseAction))
+        {
+            _playerCharacter.RotateGravityClockwise();
+        }
+        else if (@event.IsActionPressed(_rotateGravityCounterClockwiseAction))
+        {
+            _playerCharacter.RotateGravityCounterClockwise();
         }
     }
 

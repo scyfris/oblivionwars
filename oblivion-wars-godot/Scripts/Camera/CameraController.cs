@@ -24,10 +24,6 @@ public partial class CameraController : Node
 	[Export] private float _lookAheadDistance = 50.0f; // How far ahead to look based on movement
 	[Export] private float _lookAheadSpeed = 2.0f; // How quickly look-ahead adjusts
 
-	[ExportGroup("Rotation Settings")]
-	[Export] private bool _rotateWithTarget = true; // Match target's up direction
-	[Export] private float _rotationSpeed = 3.0f; // How quickly camera rotates to match
-
 	[ExportGroup("Boundaries")]
 	[Export] private bool _useBoundaries = false;
 	[Export] private Rect2 _cameraBounds = new Rect2(-10000, -10000, 20000, 20000);
@@ -74,7 +70,15 @@ public partial class CameraController : Node
 		else
 		{
 			_camera.Enabled = true;
-			GD.Print("CameraController: Camera2D ready and enabled");
+			_camera.MakeCurrent();
+
+			// Position camera on target immediately
+			if (_target != null)
+			{
+				_camera.GlobalPosition = _target.GlobalPosition + _followOffset;
+			}
+
+			GD.Print("CameraController: Camera2D ready, enabled, and made current");
 		}
 	}
 
@@ -101,12 +105,6 @@ public partial class CameraController : Node
 
 		// Apply screen shake
 		UpdateScreenShake(delta);
-
-		// Apply rotation if enabled
-		if (_rotateWithTarget)
-		{
-			UpdateRotation(delta);
-		}
 	}
 
 	private void UpdateFollowMode(double delta)
@@ -153,21 +151,6 @@ public partial class CameraController : Node
 	{
 		// Smoothly move to fixed position
 		_camera.GlobalPosition = _camera.GlobalPosition.Lerp(_fixedPosition, _followSpeed * (float)delta);
-
-		if (_rotateWithTarget)
-		{
-			_camera.GlobalRotation = Mathf.LerpAngle(_camera.GlobalRotation, _fixedRotation, _rotationSpeed * (float)delta);
-		}
-	}
-
-	private void UpdateRotation(double delta)
-	{
-		// Get target's up direction and convert to rotation
-		Vector2 targetUp = _target.Transform.Y.Normalized();
-		float targetRotation = targetUp.Angle() - Mathf.Pi / 2; // -90 degrees because up is -Y
-
-		// Smooth rotation - apply to camera
-		_camera.GlobalRotation = Mathf.LerpAngle(_camera.GlobalRotation, targetRotation, _rotationSpeed * (float)delta);
 	}
 
 	private void UpdateScreenShake(double delta)

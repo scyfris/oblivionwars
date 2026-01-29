@@ -3,93 +3,123 @@
 [ext_resource type="Script" uid="uid://c1cu0sgl231ao" path="res://Scripts/Player/CharacterController.cs" id="1_o3cl4"]
 [ext_resource type="PackedScene" uid="uid://cb4iahq5chr65" path="res://Scenes/Characters/PlayerCharacterBody2D.tscn" id="2_jxtak"]
 [ext_resource type="PackedScene" uid="uid://ceq74t0uxq1ed" path="res://Scenes/UI/crosshair.tscn" id="3_jxtak"]
-[ext_resource type="Script" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
+[ext_resource type="Script" uid="uid://b2dl33mekocnv" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
+[ext_resource type="Script" uid="uid://ng6ukwkd6oua" path="res://Scripts/Camera/ViewportRotator.cs" id="5_viewport"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_o3cl4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xx3f3"]
+size = Vector2(20, 82.9)
+
 [node name="TestLevel" type="Node2D" unique_id=995800465]
 
-[node name="CharacterController" type="Node" parent="." unique_id=424296670 node_paths=PackedStringArray("_playerCharacter")]
+[node name="ViewportRotator" type="SubViewportContainer" parent="." unique_id=719306446 node_paths=PackedStringArray("_target")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("5_viewport")
+_target = NodePath("GameViewport/PlayerCharacterBody2D")
+
+[node name="GameViewport" type="SubViewport" parent="ViewportRotator" unique_id=1447097618]
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="CharacterController" type="Node" parent="ViewportRotator/GameViewport" unique_id=424296670 node_paths=PackedStringArray("_playerCharacter")]
 script = ExtResource("1_o3cl4")
 _playerCharacter = NodePath("../PlayerCharacterBody2D")
 
-[node name="CameraController" type="Node" parent="." node_paths=PackedStringArray("_target")]
+[node name="CameraController" type="Node" parent="ViewportRotator/GameViewport" unique_id=745475055 node_paths=PackedStringArray("_target")]
 script = ExtResource("4_camera")
 _target = NodePath("../PlayerCharacterBody2D")
-_followSpeed = 5.0
-_lookAheadDistance = 50.0
-_rotateWithTarget = false
 
-[node name="Camera2D" type="Camera2D" parent="CameraController"]
+[node name="Camera2D" type="Camera2D" parent="ViewportRotator/GameViewport/CameraController" unique_id=210406581]
 
-[node name="PlayerCharacterBody2D" parent="." unique_id=52823142 instance=ExtResource("2_jxtak")]
+[node name="PlayerCharacterBody2D" parent="ViewportRotator/GameViewport" unique_id=52823142 instance=ExtResource("2_jxtak")]
 position = Vector2(573, 331)
 
-[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=822835472]
+[node name="StaticBody2D" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=822835472]
 position = Vector2(574, 361)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=789679741]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/StaticBody2D" unique_id=789679741]
 shape = SubResource("WorldBoundaryShape2D_o3cl4")
 
-[node name="FloorVisual" type="Polygon2D" parent="StaticBody2D" unique_id=171410516]
+[node name="FloorVisual" type="Polygon2D" parent="ViewportRotator/GameViewport/StaticBody2D" unique_id=171410516]
 position = Vector2(-574, 0)
 color = Color(0.4, 0.4, 0.45, 1)
 polygon = PackedVector2Array(-50, 0, 1200, 0, 1200, 400, -50, 400)
 
-[node name="Platform1" type="StaticBody2D" parent="." unique_id=858946760]
+[node name="Platform1" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=858946760]
 position = Vector2(300, 250)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1" unique_id=450853932]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/Platform1" unique_id=450853932]
 scale = Vector2(6, 1)
 shape = SubResource("RectangleShape2D_rlx2o")
 
-[node name="Visual" type="Polygon2D" parent="Platform1" unique_id=178459822]
+[node name="Visual" type="Polygon2D" parent="ViewportRotator/GameViewport/Platform1" unique_id=178459822]
 color = Color(0.5, 0.5, 0.55, 1)
 polygon = PackedVector2Array(-60, -10, 60, -10, 60, 10, -60, 10)
 
-[node name="Platform2" type="StaticBody2D" parent="." unique_id=1321267091]
+[node name="Platform2" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=1321267091]
 position = Vector2(500, 180)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2" unique_id=1697661085]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/Platform2" unique_id=1697661085]
 scale = Vector2(4, 1)
 shape = SubResource("RectangleShape2D_rlx2o")
 
-[node name="Visual" type="Polygon2D" parent="Platform2" unique_id=777497106]
+[node name="Visual" type="Polygon2D" parent="ViewportRotator/GameViewport/Platform2" unique_id=777497106]
 color = Color(0.5, 0.5, 0.55, 1)
 polygon = PackedVector2Array(-40, -10, 40, -10, 40, 10, -40, 10)
 
-[node name="Platform3" type="StaticBody2D" parent="." unique_id=330139225]
+[node name="Platform3" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=330139225]
 position = Vector2(750, 200)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform3" unique_id=1618247266]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/Platform3" unique_id=1618247266]
 scale = Vector2(5, 1)
 shape = SubResource("RectangleShape2D_rlx2o")
 
-[node name="Visual" type="Polygon2D" parent="Platform3" unique_id=2039960767]
+[node name="Visual" type="Polygon2D" parent="ViewportRotator/GameViewport/Platform3" unique_id=2039960767]
 color = Color(0.5, 0.5, 0.55, 1)
 polygon = PackedVector2Array(-50, -10, 50, -10, 50, 10, -50, 10)
 
-[node name="LeftWall" type="StaticBody2D" parent="." unique_id=921100076]
+[node name="LeftWall" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=921100076]
 position = Vector2(100, 180)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall" unique_id=747864311]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/LeftWall" unique_id=747864311]
 scale = Vector2(1, 10)
 shape = SubResource("RectangleShape2D_rlx2o")
 
-[node name="Visual" type="Polygon2D" parent="LeftWall" unique_id=2052489270]
+[node name="Visual" type="Polygon2D" parent="ViewportRotator/GameViewport/LeftWall" unique_id=2052489270]
 color = Color(0.6, 0.3, 0.3, 1)
 polygon = PackedVector2Array(-10, -100, 10, -100, 10, 100, -10, 100)
 
-[node name="RightWall" type="StaticBody2D" parent="." unique_id=1238169039]
+[node name="TopWall" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=454148215]
+position = Vector2(515, -117)
+rotation = -1.5707964
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/TopWall" unique_id=1104340474]
+position = Vector2(0, -11.5)
+scale = Vector2(1, 10)
+shape = SubResource("RectangleShape2D_xx3f3")
+
+[node name="Visual" type="Polygon2D" parent="ViewportRotator/GameViewport/TopWall" unique_id=1219084466]
+position = Vector2(0, -11.363602)
+scale = Vector2(1, 4.177273)
+color = Color(0.6, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-10, -100, 10, -100, 10, 100, -10, 100)
+
+[node name="RightWall" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=1238169039]
 position = Vector2(900, 180)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=2128665905]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/RightWall" unique_id=2128665905]
 scale = Vector2(1, 10)
 shape = SubResource("RectangleShape2D_rlx2o")
 
-[node name="Visual" type="Polygon2D" parent="RightWall" unique_id=266940832]
+[node name="Visual" type="Polygon2D" parent="ViewportRotator/GameViewport/RightWall" unique_id=266940832]
 color = Color(0.6, 0.3, 0.3, 1)
 polygon = PackedVector2Array(-10, -100, 10, -100, 10, 100, -10, 100)
 
