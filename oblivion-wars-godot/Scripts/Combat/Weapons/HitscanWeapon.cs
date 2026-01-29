@@ -9,9 +9,11 @@ public partial class HitscanWeapon : Weapon
 {
 	[Export] private float _range = 1000.0f;
 	[Export] private float _trailDuration = 0.1f;
+	[Export] private float _screenShakeStrength = 2.0f; // Screen shake when firing
 
 	private Line2D _bulletTrail; // Visual trail
 	private float _trailTimer = 0f;
+	private CameraController _cameraController;
 
 	public override void Initialize(Node2D owner)
 	{
@@ -27,6 +29,9 @@ public partial class HitscanWeapon : Weapon
 		{
 			GD.Print("HitscanWeapon: BulletTrail found and ready");
 		}
+
+		// Find camera controller for screen shake
+		_cameraController = owner.GetTree().Root.FindChild("CameraController", true, false) as CameraController;
 	}
 
 	public override void Update(double delta)
@@ -80,6 +85,12 @@ public partial class HitscanWeapon : Weapon
 		{
 			// Missed - show trail to max range
 			ShowBulletTrail(_owner.GlobalPosition, _owner.GlobalPosition + direction * _range);
+		}
+
+		// Apply screen shake
+		if (_cameraController != null && _screenShakeStrength > 0)
+		{
+			_cameraController.Shake(_screenShakeStrength);
 		}
 
 		GD.Print("HitscanWeapon fired!");

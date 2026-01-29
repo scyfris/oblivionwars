@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://cb4iahq5chr65"]
+
+[ext_resource type="Script" uid="uid://cv3wphvrguved" path="res://Scripts/Player/PlayerCharacterBody2D.cs" id="1_iyb5a"]
+[ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="2_ddu1s"]
+[ext_resource type="Script" uid="uid://c6dn1cpq8jkoy" path="res://Scripts/Combat/Weapons/ProjectileWeapon.cs" id="3_54mch"]
+[ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="4_ffrop"]
+[ext_resource type="Script" uid="uid://k61007h5kyt4" path="res://Scripts/Combat/Weapons/HitscanWeapon.cs" id="5_qwv0h"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
+
+[sub_resource type="Gradient" id="Gradient_o3cl4"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fi62q"]
+gradient = SubResource("Gradient_o3cl4")
+width = 16
+height = 16
+
+[node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem")]
+floor_constant_speed = true
+floor_snap_length = 32.0
+script = ExtResource("1_iyb5a")
+_holdableSystem = NodePath("HoldableSystem")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
+shape = SubResource("RectangleShape2D_rlx2o")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2091345877]
+texture = SubResource("GradientTexture2D_fi62q")
+
+[node name="HoldableSystem" type="Node" parent="." unique_id=276482619]
+script = ExtResource("2_ddu1s")
+
+[node name="ProjectileWeapon" type="Node" parent="HoldableSystem" unique_id=1351513700]
+script = ExtResource("3_54mch")
+_projectileScene = ExtResource("4_ffrop")
+
+[node name="HitscanWeapon" type="Node" parent="HoldableSystem" unique_id=1609647098]
+script = ExtResource("5_qwv0h")
+_damage = 15.0
+_useCooldown = 0.1
+
+[node name="BulletTrail" type="Line2D" parent="HoldableSystem/HitscanWeapon" unique_id=1518560862]
+visible = false
+top_level = true
+width = 2.0
+default_color = Color(1, 1, 0.5, 1)

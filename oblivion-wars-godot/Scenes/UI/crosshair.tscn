@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://ceq74t0uxq1ed"]
+
+[ext_resource type="Script" uid="uid://sv0rxcj3h5bj" path="res://Scripts/UI/Crosshair.cs" id="1_undt4"]
+
+[node name="Crosshair" type="Sprite2D" unique_id=1337498472]
+script = ExtResource("1_undt4")
+
+[node name="Visual" type="Polygon2D" parent="." unique_id=1150369254]
+polygon = PackedVector2Array(-8, 0, -2, 0, -2, -2, 2, -2, 2, 0, 8, 0, 8, 2, 2, 2, 2, 8, -2, 8, -2, 2, -8, 2)
