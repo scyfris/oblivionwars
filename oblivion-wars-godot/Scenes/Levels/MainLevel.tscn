@@ -1,0 +1,136 @@
+[gd_scene format=3 uid="uid://btfs5ho75a210"]
+
+[ext_resource type="Script" uid="uid://c1cu0sgl231ao" path="res://Scripts/Player/CharacterController.cs" id="1_o3cl4"]
+[ext_resource type="Script" uid="uid://cv3wphvrguved" path="res://Scripts/Player/PlayerCharacterBody2D.cs" id="2_fi62q"]
+[ext_resource type="Script" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="3_holdablesystem"]
+[ext_resource type="Script" path="res://Scripts/Combat/Weapons/ProjectileWeapon.cs" id="4_projectileweapon"]
+[ext_resource type="Script" path="res://Scripts/Combat/Weapons/HitscanWeapon.cs" id="5_hitscanweapon"]
+[ext_resource type="Script" path="res://Scripts/UI/Crosshair.cs" id="6_crosshair"]
+[ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="7_standardbullet"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
+
+[sub_resource type="Gradient" id="Gradient_o3cl4"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fi62q"]
+gradient = SubResource("Gradient_o3cl4")
+width = 16
+height = 16
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_o3cl4"]
+
+[node name="Node2D" type="Node2D" unique_id=995800465]
+
+[node name="CharacterController" type="Node" parent="." unique_id=424296670 node_paths=PackedStringArray("_playerCharacter")]
+script = ExtResource("1_o3cl4")
+_playerCharacter = NodePath("../PlayerCharacterBody2D")
+
+[node name="PlayerCharacterBody2D" type="CharacterBody2D" parent="." unique_id=1605679958 node_paths=PackedStringArray("_holdableSystem")]
+position = Vector2(573, 331)
+floor_constant_speed = true
+floor_snap_length = 32.0
+script = ExtResource("2_fi62q")
+_holdableSystem = NodePath("HoldableSystem")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerCharacterBody2D" unique_id=735289766]
+shape = SubResource("RectangleShape2D_rlx2o")
+
+[node name="Sprite2D" type="Sprite2D" parent="PlayerCharacterBody2D" unique_id=1865980902]
+texture = SubResource("GradientTexture2D_fi62q")
+
+[node name="HoldableSystem" type="Node" parent="PlayerCharacterBody2D"]
+script = ExtResource("3_holdablesystem")
+
+[node name="ProjectileWeapon" type="Node" parent="PlayerCharacterBody2D/HoldableSystem"]
+script = ExtResource("4_projectileweapon")
+_useCooldown = 0.2
+_damage = 10.0
+_projectileScene = ExtResource("7_standardbullet")
+_projectileSpawnOffset = Vector2(20, 0)
+
+[node name="HitscanWeapon" type="Node" parent="PlayerCharacterBody2D/HoldableSystem"]
+script = ExtResource("5_hitscanweapon")
+_useCooldown = 0.1
+_damage = 15.0
+_range = 1000.0
+
+[node name="BulletTrail" type="Line2D" parent="PlayerCharacterBody2D/HoldableSystem/HitscanWeapon"]
+top_level = true
+visible = false
+width = 2.0
+default_color = Color(1, 1, 0.5, 1)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=822835472]
+position = Vector2(574, 361)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=789679741]
+shape = SubResource("WorldBoundaryShape2D_o3cl4")
+
+[node name="FloorVisual" type="Polygon2D" parent="StaticBody2D"]
+position = Vector2(-574, 0)
+color = Color(0.4, 0.4, 0.45, 1)
+polygon = PackedVector2Array(-50, 0, 1200, 0, 1200, 400, -50, 400)
+
+[node name="Platform1" type="StaticBody2D" parent="."]
+position = Vector2(300, 250)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1"]
+shape = SubResource("RectangleShape2D_rlx2o")
+scale = Vector2(6, 1)
+
+[node name="Visual" type="Polygon2D" parent="Platform1"]
+color = Color(0.5, 0.5, 0.55, 1)
+polygon = PackedVector2Array(-60, -10, 60, -10, 60, 10, -60, 10)
+
+[node name="Platform2" type="StaticBody2D" parent="."]
+position = Vector2(500, 180)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
+shape = SubResource("RectangleShape2D_rlx2o")
+scale = Vector2(4, 1)
+
+[node name="Visual" type="Polygon2D" parent="Platform2"]
+color = Color(0.5, 0.5, 0.55, 1)
+polygon = PackedVector2Array(-40, -10, 40, -10, 40, 10, -40, 10)
+
+[node name="Platform3" type="StaticBody2D" parent="."]
+position = Vector2(750, 200)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform3"]
+shape = SubResource("RectangleShape2D_rlx2o")
+scale = Vector2(5, 1)
+
+[node name="Visual" type="Polygon2D" parent="Platform3"]
+color = Color(0.5, 0.5, 0.55, 1)
+polygon = PackedVector2Array(-50, -10, 50, -10, 50, 10, -50, 10)
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(100, 180)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RectangleShape2D_rlx2o")
+scale = Vector2(1, 10)
+
+[node name="Visual" type="Polygon2D" parent="LeftWall"]
+color = Color(0.6, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-10, -100, 10, -100, 10, 100, -10, 100)
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(900, 180)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("RectangleShape2D_rlx2o")
+scale = Vector2(1, 10)
+
+[node name="Visual" type="Polygon2D" parent="RightWall"]
+color = Color(0.6, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-10, -100, 10, -100, 10, 100, -10, 100)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Crosshair" type="Sprite2D" parent="UI"]
+script = ExtResource("6_crosshair")
+
+[node name="Visual" type="Polygon2D" parent="UI/Crosshair"]
+color = Color(1, 1, 1, 1)
+polygon = PackedVector2Array(-8, 0, -2, 0, -2, -2, 2, -2, 2, 0, 8, 0, 8, 2, 2, 2, 2, 8, -2, 8, -2, 2, -8, 2)
