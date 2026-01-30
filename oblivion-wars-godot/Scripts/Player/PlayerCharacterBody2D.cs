@@ -9,8 +9,8 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
     [Export] int _moveDirection = 0;
     [Export] private HoldableSystem _holdableSystem;
 
-    // Wall sliding and wall jump
-    [Export] float _wallSlideSpeed = 100.0f;
+    // Wall sliding and wall jump.  
+    [Export] float _wallSlideSpeedFraction = .5f; // Fraction of the gravity param
     [Export] float _wallJumpStrength = 700.0f;
     [Export] float _wallJumpPushAwayForce = 500.0f;
     [Export] float _wallJumpInputLockDuration = 0.2f; // Time in seconds to lock horizontal input after wall jump
@@ -61,7 +61,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         UpdateWallSliding();
 
         // Apply appropriate gravity based on state
-        float currentGravity = _isWallSliding ? _wallSlideSpeed : _gravity;
+        float currentGravity = _isWallSliding ? _gravity*_wallSlideSpeedFraction : _gravity;
 
         // Calculate horizontal direction (perpendicular to gravity)
         // When gravity is down (0,1), horizontal should be right (1,0)
@@ -97,7 +97,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         else
         {
             // Wall sliding: clamp velocity along gravity to slide speed
-            newVel = horizontalVelocity + _gravityDirection * _wallSlideSpeed;
+            newVel = horizontalVelocity + _gravityDirection * (_gravity*_wallSlideSpeedFraction);
         }
 
         this.Velocity = newVel;

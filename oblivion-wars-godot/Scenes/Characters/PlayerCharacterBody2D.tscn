@@ -20,6 +20,7 @@ floor_constant_speed = true
 floor_snap_length = 32.0
 script = ExtResource("1_iyb5a")
 _holdableSystem = NodePath("HoldableSystem")
+_wallSlideSpeed = 200.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
 shape = SubResource("RectangleShape2D_rlx2o")
