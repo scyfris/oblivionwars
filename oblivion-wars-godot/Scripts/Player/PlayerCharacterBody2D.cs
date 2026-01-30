@@ -171,6 +171,17 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         // Move and slide along the floor with the current velocity. Updates velocity based on collisions and such.
         MoveAndSlide();
 
+        // Zero out velocity along gravity when on floor to prevent jittering
+        if (IsOnFloor())
+        {
+            float gravityVelocity = Velocity.Dot(_gravityDirection);
+            if (gravityVelocity > 0) // Moving with gravity (falling down)
+            {
+                // Remove the gravity component from velocity
+                Velocity -= _gravityDirection * gravityVelocity;
+            }
+        }
+
         // Update holdable system (handles use cooldowns)
         _holdableSystem?.Update(delta);
 

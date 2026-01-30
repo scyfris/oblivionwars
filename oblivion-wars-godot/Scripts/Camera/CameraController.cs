@@ -35,9 +35,19 @@ public partial class CameraController : Node
 	[Export] private float _followSpeed = 5.0f;
 
 	/// <summary>
+	/// Minimum speed in pixels/second the camera moves when returning to player (prevents slow falloff)
+	/// </summary>
+	[Export] private float _minFollowSpeed = 200.0f;
+
+	/// <summary>
 	/// Static offset from the target's position (useful for framing the character)
 	/// </summary>
 	[Export] private Vector2 _followOffset = Vector2.Zero;
+
+	/// <summary>
+	/// Deadzone size - player can move this far from camera center before camera starts following (X = horizontal, Y = vertical)
+	/// </summary>
+	[Export] private Vector2 _deadzone = new Vector2(40.0f, 30.0f);
 
 	/// <summary>
 	/// How far ahead of the target to look based on movement direction (creates anticipation)
@@ -158,8 +168,31 @@ public partial class CameraController : Node
 		Vector2 desiredLookAhead = targetVelocity.Normalized() * _lookAheadDistance;
 		_lookAheadOffset = _lookAheadOffset.Lerp(desiredLookAhead, _lookAheadSpeed * (float)delta);
 
-		// Calculate target position with offsets
-		Vector2 targetPosition = _target.GlobalPosition + _followOffset + _lookAheadOffset + _directorOffset;
+		// Calculate ideal target position with offsets
+		Vector2 idealTargetPosition = _target.GlobalPosition + _followOffset + _lookAheadOffset + _directorOffset;
+
+		// Apply deadzone - camera only moves if target is outside the deadzone
+		Vector2 cameraToTarget = idealTargetPosition - _camera.GlobalPosition;
+		Vector2 deadzoneOffset = Vector2.Zero;
+
+		// Check horizontal deadzone
+		if (Mathf.Abs(cameraToTarget.X) > _deadzone.X)
+		{
+			// Outside deadzone - calculate how far outside
+			float sign = Mathf.Sign(cameraToTarget.X);
+			deadzoneOffset.X = cameraToTarget.X - (sign * _deadzone.X);
+		}
+
+		// Check vertical deadzone
+		if (Mathf.Abs(cameraToTarget.Y) > _deadzone.Y)
+		{
+			// Outside deadzone - calculate how far outside
+			float sign = Mathf.Sign(cameraToTarget.Y);
+			deadzoneOffset.Y = cameraToTarget.Y - (sign * _deadzone.Y);
+		}
+
+		// Calculate target position (camera center + offset needed to keep player in deadzone)
+		Vector2 targetPosition = _camera.GlobalPosition + deadzoneOffset;
 
 		// Apply boundaries if enabled
 		if (_useBoundaries)
@@ -168,14 +201,37 @@ public partial class CameraController : Node
 			targetPosition.Y = Mathf.Clamp(targetPosition.Y, _cameraBounds.Position.Y, _cameraBounds.End.Y);
 		}
 
-		// Smooth spring follow - apply to camera
-		Vector2 oldPos = _camera.GlobalPosition;
-		_camera.GlobalPosition = _camera.GlobalPosition.Lerp(targetPosition, _followSpeed * (float)delta);
+		// Calculate distance to target
+		float distanceToTarget = _camera.GlobalPosition.DistanceTo(targetPosition);
+
+		if (distanceToTarget > 0.1f) // Only move if not already at target
+		{
+			// Calculate lerp speed with minimum speed guarantee
+			float lerpAmount = _followSpeed * (float)delta;
+
+			// Calculate what the lerp would move us this frame
+			float lerpDistance = distanceToTarget * lerpAmount;
+
+			// Ensure we move at least the minimum speed
+			float minDistance = _minFollowSpeed * (float)delta;
+
+			if (lerpDistance < minDistance && distanceToTarget > minDistance)
+			{
+				// Lerp would be too slow, use minimum speed instead
+				Vector2 direction = (targetPosition - _camera.GlobalPosition).Normalized();
+				_camera.GlobalPosition += direction * minDistance;
+			}
+			else
+			{
+				// Normal lerp
+				_camera.GlobalPosition = _camera.GlobalPosition.Lerp(targetPosition, lerpAmount);
+			}
+		}
 
 		// Debug output (only on first few frames)
 		if (Engine.GetProcessFrames() < 5)
 		{
-			GD.Print($"CameraController: Frame {Engine.GetProcessFrames()} - Camera {oldPos} -> {_camera.GlobalPosition}, TargetPos: {targetPosition}");
+			GD.Print($"CameraController: Frame {Engine.GetProcessFrames()} - Camera {_camera.GlobalPosition}, Target: {idealTargetPosition}, Offset: {deadzoneOffset}");
 		}
 	}
 
