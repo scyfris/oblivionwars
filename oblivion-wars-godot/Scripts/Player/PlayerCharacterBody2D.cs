@@ -68,7 +68,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
 
         // Determine horizontal velocity based on wall jump lock state
-        Vector2 horizontalVelocity;
+        Vector2 horizontalVelocity = new Vector2(0, 0);
         if (_wallJumpInputLockTimer > 0)
         {
             // During wall jump lock, maintain current horizontal velocity
