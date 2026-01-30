@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cb4iahq5chr65"]
 
 [ext_resource type="Script" uid="uid://cv3wphvrguved" path="res://Scripts/Player/PlayerCharacterBody2D.cs" id="1_iyb5a"]
+[ext_resource type="Texture2D" uid="uid://baewbtbmg2mh2" path="res://Resources/Tilemaps/kenney_abstract-platformer/knight.png" id="2_54mch"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="2_ddu1s"]
 [ext_resource type="Script" uid="uid://c6dn1cpq8jkoy" path="res://Scripts/Combat/Weapons/ProjectileWeapon.cs" id="3_54mch"]
 [ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="4_ffrop"]
@@ -20,12 +21,19 @@ floor_constant_speed = true
 floor_snap_length = 32.0
 script = ExtResource("1_iyb5a")
 _holdableSystem = NodePath("HoldableSystem")
-_wallSlideSpeed = 200.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
 shape = SubResource("RectangleShape2D_rlx2o")
 
+[node name="SpriteTest" type="Sprite2D" parent="." unique_id=1104705581]
+texture_filter = 1
+scale = Vector2(1.529, 1)
+texture = ExtResource("2_54mch")
+region_enabled = true
+region_rect = Rect2(8, 9, 15, 19)
+
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2091345877]
+visible = false
 texture = SubResource("GradientTexture2D_fi62q")
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=276482619]
