@@ -22,8 +22,8 @@ public partial class ViewportRotator : SubViewportContainer
 		GrowHorizontal = GrowDirection.Both;
 		GrowVertical = GrowDirection.Both;
 
-		// Set pivot to center for rotation
-		PivotOffset = Size / 2;
+		// Get the size of the main window screen.
+		Size = GetViewport().GetVisibleRect().Size;
 
 		// Get the SubViewport and set its size to match the window
 		var viewport = GetNode<SubViewport>("GameViewport");
@@ -33,16 +33,47 @@ public partial class ViewportRotator : SubViewportContainer
 			GD.Print($"ViewportRotator: SubViewport sized to {viewport.Size}");
 		}
 
+
+		// Set pivot to center for rotation - do this after size is known
+		CallDeferred(MethodName.UpdatePivot);
+
 		GD.Print("ViewportRotator: Ready");
+	}
+
+	private void UpdatePivot()
+	{
+		PivotOffset = Size / 2;
+		GD.Print($"ViewportRotator: Pivot set to {PivotOffset}");
 	}
 
 	public override void _Process(double delta)
 	{
-		if (_target == null) return;
+		if (_target is not CharacterBody2D character) return;
 
-		// Get target rotation from player's transform
-		Vector2 targetUp = _target.Transform.Y.Normalized();
-		float newTargetRotation = targetUp.Angle() - Mathf.Pi / 2;
+		// Get target rotation from player's UpDirection (gravity-based, not visual transform)
+		Vector2 targetUp = character.UpDirection;
+		
+		// Main rotation, it's designed to ensure we go the right way,.
+		float newTargetRotation = targetUp.Angle() + Mathf.Pi / 2; 
+		
+		if (targetUp.X == 1 && targetUp.Y == 0)
+		{
+			newTargetRotation = -Mathf.Pi / 2;
+		} else if (targetUp.X == -1 && targetUp.Y == 0)
+		{
+			newTargetRotation =  Mathf.Pi / 2;
+		} else if (targetUp.Y == 1 && targetUp.X == 0)
+		{
+			newTargetRotation =  Mathf.Pi;
+		} else if (targetUp.Y == -1 && targetUp.X == 0)
+		{
+			// targetUp.Y < 0
+			newTargetRotation = 0;
+
+		}
+
+		GD.Print("targetUp: " + targetUp + " and target rotation: " + newTargetRotation);
+
 
 		// Detect rotation change
 		float angleDiff = Mathf.Abs(Mathf.AngleDifference(_targetRotation, newTargetRotation));
@@ -71,6 +102,12 @@ public partial class ViewportRotator : SubViewportContainer
 
 		// Smoothly rotate toward target
 		Rotation = Mathf.LerpAngle(Rotation, _targetRotation, _rotationSpeed * (float)delta);
+
+		// Snap to nearest 90-degree increment when close enough to avoid drift
+		if (Mathf.Abs(Mathf.AngleDifference(Rotation, _targetRotation)) < 0.01f)
+		{
+			Rotation = MathUtils.SnapToNearest90Radians(Rotation);
+		}
 	}
 
 	/// <summary>

@@ -255,7 +255,11 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
 
         // Calculate new directions from rotation
         float radians = Mathf.DegToRad(_gravityRotation);
-        _gravityDirection = new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
+        float gravX = Mathf.Sin(radians);
+        float gravY = Mathf.Cos(radians);
+        gravX = Mathf.IsZeroApprox(gravX) ? 0 : Mathf.IsEqualApprox(gravX, 1) ? 1 : -1;
+        gravY = Mathf.IsZeroApprox(gravY) ? 0 : Mathf.IsEqualApprox(gravY, 1) ? 1 : -1;
+        _gravityDirection = new Vector2(gravX, gravY);
         _upDirection = -_gravityDirection;
 
         // Set target for smooth visual rotation

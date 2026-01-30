@@ -17,6 +17,7 @@ public partial class CameraController : Node
 {
 	[ExportGroup("Target")]
 	[Export] private Node2D _target; // The player character to follow
+	[Export] private Camera2D _camera; // The Camera2D to control
 
 	[ExportGroup("Follow Settings")]
 	[Export] private float _followSpeed = 5.0f; // How quickly camera catches up to target
@@ -31,7 +32,6 @@ public partial class CameraController : Node
 	[ExportGroup("Screen Shake")]
 	[Export] private float _shakeDecayRate = 3.0f; // How quickly shake fades
 
-	private Camera2D _camera;
 	private Vector2 _velocity = Vector2.Zero;
 	private Vector2 _lookAheadOffset = Vector2.Zero;
 	private Vector2 _currentOffset = Vector2.Zero;
@@ -61,25 +61,28 @@ public partial class CameraController : Node
 
 	public override void _Ready()
 	{
-		// Get or create Camera2D child
-		_camera = GetNodeOrNull<Camera2D>("Camera2D");
 		if (_camera == null)
 		{
-			GD.PrintErr("CameraController: Camera2D child not found!");
+			GD.PrintErr("CameraController: Camera2D not assigned!");
+			return;
 		}
-		else
+
+		// Ensure camera is centered on its position (not top-left anchored) - set BEFORE making current
+		_camera.AnchorMode = Camera2D.AnchorModeEnum.DragCenter;
+		_camera.PositionSmoothingEnabled = false; // Disable smoothing for immediate positioning
+
+		_camera.Enabled = true;
+		_camera.MakeCurrent();
+
+		// Position camera on target immediately
+		if (_target != null)
 		{
-			_camera.Enabled = true;
-			_camera.MakeCurrent();
-
-			// Position camera on target immediately
-			if (_target != null)
-			{
-				_camera.GlobalPosition = _target.GlobalPosition + _followOffset;
-			}
-
-			GD.Print("CameraController: Camera2D ready, enabled, and made current");
+			_camera.GlobalPosition = _target.GlobalPosition + _followOffset;
+			_camera.ResetSmoothing(); // Force camera to snap to position
+			GD.Print($"CameraController: Camera GlobalPos={_camera.GlobalPosition}, Target={_target.GlobalPosition}");
 		}
+
+		GD.Print("CameraController: Camera2D ready, enabled, and made current");
 	}
 
 	public override void _Process(double delta)
@@ -130,7 +133,14 @@ public partial class CameraController : Node
 		}
 
 		// Smooth spring follow - apply to camera
+		Vector2 oldPos = _camera.GlobalPosition;
 		_camera.GlobalPosition = _camera.GlobalPosition.Lerp(targetPosition, _followSpeed * (float)delta);
+
+		// Debug output (only on first few frames)
+		if (Engine.GetProcessFrames() < 5)
+		{
+			GD.Print($"CameraController: Frame {Engine.GetProcessFrames()} - Camera {oldPos} -> {_camera.GlobalPosition}, TargetPos: {targetPosition}");
+		}
 	}
 
 	private void UpdateDirectedMode(double delta)

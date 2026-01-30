@@ -9,6 +9,7 @@
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_o3cl4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
+size = Vector2(9, 32.25)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xx3f3"]
 size = Vector2(20, 82.9)
@@ -19,25 +20,33 @@ size = Vector2(20, 82.9)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = -1.0
+offset_right = 1147.0
+offset_bottom = 646.0
 grow_horizontal = 2
 grow_vertical = 2
+stretch = true
 script = ExtResource("5_viewport")
 _target = NodePath("GameViewport/PlayerCharacterBody2D")
 
 [node name="GameViewport" type="SubViewport" parent="ViewportRotator" unique_id=1447097618]
 handle_input_locally = false
-size = Vector2i(1152, 648)
+size = Vector2i(1148, 647)
 render_target_update_mode = 4
 
 [node name="CharacterController" type="Node" parent="ViewportRotator/GameViewport" unique_id=424296670 node_paths=PackedStringArray("_playerCharacter")]
 script = ExtResource("1_o3cl4")
 _playerCharacter = NodePath("../PlayerCharacterBody2D")
 
-[node name="CameraController" type="Node" parent="ViewportRotator/GameViewport" unique_id=745475055 node_paths=PackedStringArray("_target")]
+[node name="CameraController" type="Node" parent="ViewportRotator/GameViewport" unique_id=745475055 node_paths=PackedStringArray("_target", "_camera")]
 script = ExtResource("4_camera")
 _target = NodePath("../PlayerCharacterBody2D")
+_camera = NodePath("Camera2D")
 
 [node name="Camera2D" type="Camera2D" parent="ViewportRotator/GameViewport/CameraController" unique_id=210406581]
+position_smoothing_enabled = true
+rotation_smoothing_enabled = true
 
 [node name="PlayerCharacterBody2D" parent="ViewportRotator/GameViewport" unique_id=52823142 instance=ExtResource("2_jxtak")]
 position = Vector2(573, 331)
@@ -50,7 +59,7 @@ shape = SubResource("WorldBoundaryShape2D_o3cl4")
 
 [node name="FloorVisual" type="Polygon2D" parent="ViewportRotator/GameViewport/StaticBody2D" unique_id=171410516]
 position = Vector2(-574, 0)
-color = Color(0.4, 0.4, 0.45, 1)
+color = Color(0.18837383, 0.26086605, 1, 1)
 polygon = PackedVector2Array(-50, 0, 1200, 0, 1200, 400, -50, 400)
 
 [node name="Platform1" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=858946760]
@@ -90,12 +99,15 @@ polygon = PackedVector2Array(-50, -10, 50, -10, 50, 10, -50, 10)
 position = Vector2(100, 180)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/LeftWall" unique_id=747864311]
+position = Vector2(-4.5, 23.75)
 scale = Vector2(1, 10)
 shape = SubResource("RectangleShape2D_rlx2o")
 
 [node name="Visual" type="Polygon2D" parent="ViewportRotator/GameViewport/LeftWall" unique_id=2052489270]
+position = Vector2(0, -43.44445)
+scale = Vector2(1, 1.2555555)
 color = Color(0.6, 0.3, 0.3, 1)
-polygon = PackedVector2Array(-10, -100, 10, -100, 10, 100, -10, 100)
+polygon = PackedVector2Array(-10, -100, 10, -100, 3, 170, -10, 100)
 
 [node name="TopWall" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=454148215]
 position = Vector2(515, -117)
@@ -110,18 +122,20 @@ shape = SubResource("RectangleShape2D_xx3f3")
 position = Vector2(0, -11.363602)
 scale = Vector2(1, 4.177273)
 color = Color(0.6, 0.3, 0.3, 1)
-polygon = PackedVector2Array(-10, -100, 10, -100, 10, 100, -10, 100)
+polygon = PackedVector2Array(-9.9999695, -99.26007, 10, -100, 10, 100, -10, 99.67355)
 
 [node name="RightWall" type="StaticBody2D" parent="ViewportRotator/GameViewport" unique_id=1238169039]
 position = Vector2(900, 180)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ViewportRotator/GameViewport/RightWall" unique_id=2128665905]
+position = Vector2(-1, 37.5)
 scale = Vector2(1, 10)
 shape = SubResource("RectangleShape2D_rlx2o")
 
 [node name="Visual" type="Polygon2D" parent="ViewportRotator/GameViewport/RightWall" unique_id=266940832]
+position = Vector2(0, 78)
 color = Color(0.6, 0.3, 0.3, 1)
-polygon = PackedVector2Array(-10, -100, 10, -100, 10, 100, -10, 100)
+polygon = PackedVector2Array(-10, -100, -2, -178, 10, -100, 10, 100, -10, 100)
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1326346317]
 
