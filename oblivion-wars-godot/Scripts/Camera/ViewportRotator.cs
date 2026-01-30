@@ -46,7 +46,7 @@ public partial class ViewportRotator : SubViewportContainer
 		GD.Print($"ViewportRotator: Pivot set to {PivotOffset}");
 	}
 
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
 		if (_target is not CharacterBody2D character) return;
 

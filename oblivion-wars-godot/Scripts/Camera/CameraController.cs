@@ -85,7 +85,7 @@ public partial class CameraController : Node
 		GD.Print("CameraController: Camera2D ready, enabled, and made current");
 	}
 
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
 		if (_camera == null || _target == null) return;
 
