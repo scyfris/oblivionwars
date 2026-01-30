@@ -3,8 +3,19 @@ using System;
 
 public abstract partial class Projectile : Area2D
 {
+	/// <summary>
+	/// Movement speed of the projectile in pixels per second
+	/// </summary>
 	[Export] protected float _speed = 800.0f;
+
+	/// <summary>
+	/// Maximum time in seconds the projectile exists before self-destructing
+	/// </summary>
 	[Export] protected float _lifetime = 3.0f;
+
+	/// <summary>
+	/// Amount of damage this projectile deals on impact
+	/// </summary>
 	[Export] protected float _damage = 10.0f;
 
 	protected Vector2 _direction;

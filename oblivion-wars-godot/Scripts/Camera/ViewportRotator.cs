@@ -7,9 +7,20 @@ using System;
 /// </summary>
 public partial class ViewportRotator : SubViewportContainer
 {
-	[Export] private Node2D _target; // The player to track rotation from
-	[Export] private float _rotationSpeed = 5.0f; // How fast the viewport rotates
-	[Export] private float _rotationDelay = 0.3f; // Delay before starting rotation
+	/// <summary>
+	/// The player character to track rotation from (reads UpDirection for gravity-based rotation)
+	/// </summary>
+	[Export] private Node2D _target;
+
+	/// <summary>
+	/// How quickly the viewport rotates to match player orientation (higher = faster rotation)
+	/// </summary>
+	[Export] private float _rotationSpeed = 5.0f;
+
+	/// <summary>
+	/// Delay in seconds before viewport starts rotating after gravity change (creates dramatic effect)
+	/// </summary>
+	[Export] private float _rotationDelay = 0.3f;
 
 	private float _targetRotation = 0.0f;
 	private float _delayTimer = 0.0f;

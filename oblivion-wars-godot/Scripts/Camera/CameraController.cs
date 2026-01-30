@@ -16,21 +16,57 @@ using System;
 public partial class CameraController : Node
 {
 	[ExportGroup("Target")]
-	[Export] private Node2D _target; // The player character to follow
-	[Export] private Camera2D _camera; // The Camera2D to control
+
+	/// <summary>
+	/// The player character or object for the camera to follow
+	/// </summary>
+	[Export] private Node2D _target;
+
+	/// <summary>
+	/// The Camera2D node that this controller will manipulate
+	/// </summary>
+	[Export] private Camera2D _camera;
 
 	[ExportGroup("Follow Settings")]
-	[Export] private float _followSpeed = 5.0f; // How quickly camera catches up to target
-	[Export] private Vector2 _followOffset = Vector2.Zero; // Offset from target position
-	[Export] private float _lookAheadDistance = 50.0f; // How far ahead to look based on movement
-	[Export] private float _lookAheadSpeed = 2.0f; // How quickly look-ahead adjusts
+
+	/// <summary>
+	/// How quickly the camera catches up to the target (higher = tighter following, lower = more lag)
+	/// </summary>
+	[Export] private float _followSpeed = 5.0f;
+
+	/// <summary>
+	/// Static offset from the target's position (useful for framing the character)
+	/// </summary>
+	[Export] private Vector2 _followOffset = Vector2.Zero;
+
+	/// <summary>
+	/// How far ahead of the target to look based on movement direction (creates anticipation)
+	/// </summary>
+	[Export] private float _lookAheadDistance = 50.0f;
+
+	/// <summary>
+	/// How quickly the look-ahead offset adjusts to velocity changes
+	/// </summary>
+	[Export] private float _lookAheadSpeed = 2.0f;
 
 	[ExportGroup("Boundaries")]
+
+	/// <summary>
+	/// Whether to constrain camera movement within defined bounds
+	/// </summary>
 	[Export] private bool _useBoundaries = false;
+
+	/// <summary>
+	/// Rectangle defining the area the camera can move within (only active if UseBoundaries is true)
+	/// </summary>
 	[Export] private Rect2 _cameraBounds = new Rect2(-10000, -10000, 20000, 20000);
 
 	[ExportGroup("Screen Shake")]
-	[Export] private float _shakeDecayRate = 3.0f; // How quickly shake fades
+
+	/// <summary>
+	/// How quickly screen shake effect fades out (higher = shake ends faster)
+	/// </summary>
+	[Export] private float _shakeDecayRate = 3.0f;
 
 	private Vector2 _velocity = Vector2.Zero;
 	private Vector2 _lookAheadOffset = Vector2.Zero;

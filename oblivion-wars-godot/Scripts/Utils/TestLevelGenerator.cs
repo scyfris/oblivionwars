@@ -6,11 +6,30 @@ using System;
 /// </summary>
 public partial class TestLevelGenerator : Node
 {
+	/// <summary>
+	/// The TileMapLayer to generate the level into (must be assigned in the editor)
+	/// </summary>
 	[Export] private TileMapLayer _tileMapLayer;
-	[Export] private int _levelWidth = 100;
-	[Export] private int _levelHeight = 100;
-	[Export] private Vector2I _groundTileAtlasCoord = new Vector2I(0, 0); // Atlas coordinates for ground tile
-	[Export] private Vector2I _platformTileAtlasCoord = new Vector2I(1, 0); // Atlas coordinates for platform tile
+
+	/// <summary>
+	/// Width of the generated level in tiles
+	/// </summary>
+	[Export] private int _levelWidth = 10;
+
+	/// <summary>
+	/// Height of the generated level in tiles
+	/// </summary>
+	[Export] private int _levelHeight = 10;
+
+	/// <summary>
+	/// Atlas coordinates for solid ground/wall tiles (e.g., boundaries and solid platforms)
+	/// </summary>
+	[Export] private Vector2I _groundTileAtlasCoord = new Vector2I(0, 0);
+
+	/// <summary>
+	/// Atlas coordinates for platform tiles (e.g., floating platforms and obstacles)
+	/// </summary>
+	[Export] private Vector2I _platformTileAtlasCoord = new Vector2I(1, 0);
 
 	public override void _Ready()
 	{

@@ -7,9 +7,20 @@ using System;
 /// </summary>
 public partial class HitscanWeapon : Weapon
 {
+	/// <summary>
+	/// Maximum raycast distance in pixels (how far the weapon can hit)
+	/// </summary>
 	[Export] private float _range = 1000.0f;
+
+	/// <summary>
+	/// How long the visual bullet trail remains visible after firing (in seconds)
+	/// </summary>
 	[Export] private float _trailDuration = 0.1f;
-	[Export] private float _screenShakeStrength = 2.0f; // Screen shake when firing
+
+	/// <summary>
+	/// Intensity of screen shake effect applied when firing (0 = no shake, higher = more shake)
+	/// </summary>
+	[Export] private float _screenShakeStrength = 2.0f;
 
 	private Line2D _bulletTrail; // Visual trail
 	private float _trailTimer = 0f;

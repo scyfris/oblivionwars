@@ -7,6 +7,9 @@ using System;
 /// </summary>
 public abstract partial class Holdable : Node
 {
+	/// <summary>
+	/// Minimum time in seconds between consecutive uses of this item (rate limiting)
+	/// </summary>
 	[Export] protected float _useCooldown = 0.2f;
 
 	protected float _timeSinceLastUse = 999f;

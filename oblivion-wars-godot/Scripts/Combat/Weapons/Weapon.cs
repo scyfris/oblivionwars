@@ -7,6 +7,9 @@ using System;
 /// </summary>
 public abstract partial class Weapon : Holdable
 {
+	/// <summary>
+	/// Amount of damage this weapon deals per hit/shot
+	/// </summary>
 	[Export] protected float _damage = 10.0f;
 
 	public sealed override void Use(Vector2 targetPosition)

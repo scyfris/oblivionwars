@@ -1,28 +1,76 @@
 using Godot;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public partial class PlayerCharacterBody2D : CharacterBody2D
 {
+    /// <summary>
+    /// Horizontal movement speed in pixels per second
+    /// </summary>
     [Export] float _speed = 500.0f;
+
+    /// <summary>
+    /// Gravity acceleration in pixels per second squared
+    /// </summary>
     [Export] float _gravity = 2000.0f;
+
+    /// <summary>
+    /// Initial upward velocity when jumping
+    /// </summary>
     [Export] float _jumpStrength = 800.0f;
+
+    /// <summary>
+    /// Upward velocity applied when wall jumping
+    /// </summary>
+    [Export] float _wallJumpStrength = 700.0f;
+
+
+    /// <summary>
+    /// Internal movement direction (-1 = left, 0 = stop, 1 = right). Set by input controller.
+    /// </summary>
     [Export] int _moveDirection = 0;
+
+    /// <summary>
+    /// Reference to the holdable system that manages weapons and items
+    /// </summary>
     [Export] private HoldableSystem _holdableSystem;
 
-    // Wall sliding and wall jump.  
-    [Export] float _wallSlideSpeedFraction = .5f; // Fraction of the gravity param
-    [Export] float _wallJumpStrength = 700.0f;
+    /// <summary>
+    /// Wall slide speed as a fraction of normal gravity (0.5 = half speed)
+    /// </summary>
+    [Export] float _wallSlideSpeedFraction = .5f;
+
+    /// <summary>
+    /// Horizontal force pushing player away from wall during wall jump
+    /// </summary>
     [Export] float _wallJumpPushAwayForce = 500.0f;
-    [Export] float _wallJumpInputLockDuration = 0.2f; // Time in seconds to lock horizontal input after wall jump
+
+    /// <summary>
+    /// Duration in seconds that horizontal push-away force is applied after wall jump (can be longer than input lock)
+    /// </summary>
+    [Export] float _wallJumpPushAwayDuration = 0.2f;
+
+    /// <summary>
+    /// Duration in seconds that horizontal input is locked after wall jump. Moving opposite direction cancels remaining lock time.
+    /// </summary>
+    [Export] float _wallJumpInputLockDuration = 0.2f;
 
     private bool _isWallSliding = false;
     private Vector2 _wallNormal = Vector2.Zero;
     private float _wallJumpInputLockTimer = 0f;
+    private float _wallJumpPushAwayDurationTimer = 0f;
 
-    // Gravity flip
     [ExportGroup("Gravity Flip")]
-    [Export] private float _gravityFlipRotationSpeed = 10.0f; // Player visual rotation speed
-    [Export] private bool _maintainMomentumOnFlip = true; // Rotate velocity on flip
+
+    /// <summary>
+    /// How quickly the player sprite rotates visually when gravity changes (higher = faster rotation)
+    /// </summary>
+    [Export] private float _gravityFlipRotationSpeed = 10.0f;
+
+    /// <summary>
+    /// Whether to rotate the velocity vector when gravity flips to maintain momentum in the new orientation
+    /// </summary>
+    [Export] private bool _maintainMomentumOnFlip = true;
 
     // Gravity state tracking
     private int _gravityRotation = 0; // 0, 90, 180, 270 degrees
@@ -57,6 +105,24 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
             _wallJumpInputLockTimer -= (float)delta;
         }
 
+        if (_wallJumpPushAwayDurationTimer > 0)
+        {
+            _wallJumpPushAwayDurationTimer -= (float)delta;
+
+
+            if (_moveDirection < 0 || _moveDirection > 0)
+            {
+                // Can cancel this one out. The behaviour we want is that
+                // the player can cancel horizontal momentum after wall jumping
+                // if the press the opposite direction, BUT if they don't then 
+                // the horizontal momentum will still continue for a slightly longer time
+                // before stopping.  This matches HollowKnight a bit and allows player time to
+                // press the opposite arrow key, or if they press the arrow key back towards the
+                // wall it will cancel earlier.
+                _wallJumpPushAwayDurationTimer = 0;
+            }
+        }
+
         // Check for wall sliding
         UpdateWallSliding();
 
@@ -69,7 +135,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
 
         // Determine horizontal velocity based on wall jump lock state
         Vector2 horizontalVelocity = new Vector2(0, 0);
-        if (_wallJumpInputLockTimer > 0)
+        if (_wallJumpInputLockTimer > 0 || _wallJumpPushAwayDurationTimer > 0)
         {
             // During wall jump lock, maintain current horizontal velocity
             // Project current velocity onto horizontal direction
@@ -126,6 +192,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
 
             // Lock horizontal input briefly to ensure the push-away takes effect
             _wallJumpInputLockTimer = _wallJumpInputLockDuration;
+            _wallJumpPushAwayDurationTimer = _wallJumpPushAwayDuration;
             return;
         }
 

@@ -42,8 +42,8 @@ _playerCharacter = NodePath("PlayerCharacterBody2D")
 [node name="PlayerCharacterBody2D" parent="Control/ViewportRotator/GameViewport/CharacterController" unique_id=52823142 instance=ExtResource("2_jxtak")]
 position = Vector2(573, 331)
 _speed = 300.0
+_wallJumpStrength = 800.0
 _wallSlideSpeedFraction = 0.1
-_wallJumpStrength = 500.0
 _wallJumpInputLockDuration = 0.1
 
 [node name="CameraController" type="Node" parent="Control/ViewportRotator/GameViewport" unique_id=745475055 node_paths=PackedStringArray("_target", "_camera")]

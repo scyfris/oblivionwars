@@ -6,9 +6,20 @@ using System;
 /// </summary>
 public partial class ProjectileWeapon : Weapon
 {
+	/// <summary>
+	/// The projectile scene to instantiate when firing (e.g., bullet, rocket, arrow)
+	/// </summary>
 	[Export] private PackedScene _projectileScene;
+
+	/// <summary>
+	/// Offset from the weapon owner's position where projectiles spawn (typically in front of character)
+	/// </summary>
 	[Export] private Vector2 _projectileSpawnOffset = new Vector2(20, 0);
-	[Export] private float _screenShakeStrength = 1.5f; // Screen shake when firing
+
+	/// <summary>
+	/// Intensity of screen shake effect applied when firing (0 = no shake, higher = more shake)
+	/// </summary>
+	[Export] private float _screenShakeStrength = 1.5f;
 
 	private CameraController _cameraController;
 
