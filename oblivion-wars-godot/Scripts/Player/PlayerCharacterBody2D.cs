@@ -55,10 +55,18 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
     /// </summary>
     [Export] float _wallJumpInputLockDuration = 0.2f;
 
+    [ExportGroup("Wall Slide Effects")]
+
+    /// <summary>
+    /// Node2D marker in the scene that defines where wall slide dust particles emit from. Reposition in editor to adjust.
+    /// </summary>
+    [Export] private Node2D _wallSlideDustPosition;
+
     private bool _isWallSliding = false;
     private Vector2 _wallNormal = Vector2.Zero;
     private float _wallJumpInputLockTimer = 0f;
     private float _wallJumpPushAwayDurationTimer = 0f;
+    private CpuParticles2D _wallSlideDust;
 
     [ExportGroup("Gravity Flip")]
 
@@ -84,6 +92,50 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
     private float _targetRotation = 0.0f; // Target rotation in radians
     private bool _isRotatingGravity = false; // Currently animating rotation
     private float _bodyFlipDelayTimer = 0.0f; // Countdown before rotation starts
+
+    public override void _Ready()
+    {
+        if (_wallSlideDustPosition != null)
+        {
+            _wallSlideDust = new CpuParticles2D();
+            _wallSlideDustPosition.AddChild(_wallSlideDust);
+
+            _wallSlideDust.Emitting = false;
+            _wallSlideDust.Amount = 10;
+            _wallSlideDust.Lifetime = 0.35;
+            _wallSlideDust.OneShot = false;
+            _wallSlideDust.Explosiveness = 0.0f;
+            _wallSlideDust.SpeedScale = 1.5f;
+
+            // Emission shape: small point source
+            _wallSlideDust.EmissionShape = CpuParticles2D.EmissionShapeEnum.Sphere;
+            _wallSlideDust.EmissionSphereRadius = 2.0f;
+
+            // Direction and spread (will be updated per-frame based on wall normal)
+            _wallSlideDust.Direction = new Vector2(1, 0);
+            _wallSlideDust.Spread = 30.0f;
+
+            // Velocity
+            _wallSlideDust.InitialVelocityMin = 20.0f;
+            _wallSlideDust.InitialVelocityMax = 40.0f;
+
+            // No particle gravity (world gravity handled separately)
+            _wallSlideDust.Gravity = Vector2.Zero;
+
+            // Scale: small dust specks that shrink over lifetime
+            _wallSlideDust.ScaleAmountMin = 2.0f;
+            _wallSlideDust.ScaleAmountMax = 4.0f;
+            _wallSlideDust.ScaleAmountCurve = new Curve();
+            _wallSlideDust.ScaleAmountCurve.AddPoint(new Vector2(0, 1));
+            _wallSlideDust.ScaleAmountCurve.AddPoint(new Vector2(1, 0));
+
+            // Color: white/light gray, fades out over lifetime
+            var gradient = new Gradient();
+            gradient.SetColor(0, new Color(0.9f, 0.9f, 0.9f, 1.0f));
+            gradient.SetColor(1, new Color(0.8f, 0.8f, 0.8f, 0.0f));
+            _wallSlideDust.ColorRamp = gradient;
+        }
+    }
 
     public override void _PhysicsProcess(double delta)
     {
@@ -298,6 +350,8 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         if (IsOnFloor())
         {
             _isWallSliding = false;
+            if (_wallSlideDust != null)
+                _wallSlideDust.Emitting = false;
             return;
         }
 
@@ -329,15 +383,26 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
             if (velocityAlongGravity >= 0 && !movingAwayFromWall)
             {
                 _isWallSliding = true;
+
+                // Update dust particle direction to point away from wall
+                if (_wallSlideDust != null)
+                {
+                    _wallSlideDust.Emitting = true;
+                    _wallSlideDust.Direction = _wallNormal;
+                }
             }
             else
             {
                 _isWallSliding = false;
+                if (_wallSlideDust != null)
+                    _wallSlideDust.Emitting = false;
             }
         }
         else
         {
             _isWallSliding = false;
+            if (_wallSlideDust != null)
+                _wallSlideDust.Emitting = false;
         }
     }
 

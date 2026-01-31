@@ -10,11 +10,12 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
 size = Vector2(24, 80)
 
-[node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem")]
+[node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem", "_wallSlideDustPosition")]
 floor_constant_speed = true
 floor_snap_length = 32.0
 script = ExtResource("1_iyb5a")
 _holdableSystem = NodePath("HoldableSystem")
+_wallSlideDustPosition = NodePath("WallSlideDustPosition")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
 position = Vector2(2, -12)
@@ -27,6 +28,9 @@ scale = Vector2(2.4666667, 5.078948)
 texture = ExtResource("2_54mch")
 region_enabled = true
 region_rect = Rect2(8, 9, 15, 19)
+
+[node name="WallSlideDustPosition" type="Node2D" parent="." unique_id=681449788]
+position = Vector2(0, 28)
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=276482619]
 script = ExtResource("2_ddu1s")
