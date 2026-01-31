@@ -5,7 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://ceq74t0uxq1ed" path="res://Scenes/UI/crosshair.tscn" id="3_jxtak"]
 [ext_resource type="Script" uid="uid://b2dl33mekocnv" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
 [ext_resource type="TileSet" uid="uid://cifh4slrp6lmq" path="res://Resources/Tilemaps/kenney_abstract-platformer/Godot/KenneyAbstractPlatformer-TileSet.tres" id="5_rqyoi"]
-[ext_resource type="Script" uid="uid://ng6ukwkd6oua" path="res://Scripts/Camera/ViewportRotator.cs" id="5_viewport"]
 
 [node name="TestLevel" type="Node2D" unique_id=995800465]
 
@@ -15,47 +14,28 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="ViewportRotator" type="SubViewportContainer" parent="Control" unique_id=719306446 node_paths=PackedStringArray("_target")]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -1.0
-offset_top = -1.0
-offset_right = 1147.0
-offset_bottom = 646.0
-grow_horizontal = 2
-grow_vertical = 2
-stretch = true
-script = ExtResource("5_viewport")
-_target = NodePath("GameViewport/CharacterController/PlayerCharacterBody2D")
-
-[node name="GameViewport" type="SubViewport" parent="Control/ViewportRotator" unique_id=1447097618]
-handle_input_locally = false
-size = Vector2i(1188, 687)
-render_target_update_mode = 4
-
-[node name="CharacterController" type="Node" parent="Control/ViewportRotator/GameViewport" unique_id=424296670 node_paths=PackedStringArray("_playerCharacter")]
+[node name="CharacterController" type="Node" parent="Control" unique_id=424296670 node_paths=PackedStringArray("_playerCharacter")]
 script = ExtResource("1_o3cl4")
 _playerCharacter = NodePath("PlayerCharacterBody2D")
 
-[node name="PlayerCharacterBody2D" parent="Control/ViewportRotator/GameViewport/CharacterController" unique_id=52823142 instance=ExtResource("2_jxtak")]
+[node name="PlayerCharacterBody2D" parent="Control/CharacterController" unique_id=52823142 instance=ExtResource("2_jxtak")]
 position = Vector2(573, 331)
 _speed = 300.0
 _wallJumpStrength = 800.0
 _wallSlideSpeedFraction = 0.1
 _wallJumpInputLockDuration = 0.1
 
-[node name="CameraController" type="Node" parent="Control/ViewportRotator/GameViewport" unique_id=745475055 node_paths=PackedStringArray("_target", "_camera")]
+[node name="CameraController" type="Node" parent="Control" unique_id=745475055 node_paths=PackedStringArray("_target", "_camera")]
 script = ExtResource("4_camera")
 _target = NodePath("../CharacterController/PlayerCharacterBody2D")
 _camera = NodePath("Camera2D")
+_rotationSpeed = 7.0
+_minRotationSpeed = 2.0
 
-[node name="Camera2D" type="Camera2D" parent="Control/ViewportRotator/GameViewport/CameraController" unique_id=210406581]
-position_smoothing_enabled = true
-rotation_smoothing_enabled = true
+[node name="Camera2D" type="Camera2D" parent="Control/CameraController" unique_id=210406581]
+ignore_rotation = false
 
-[node name="TileMapLayer1" type="TileMapLayer" parent="Control/ViewportRotator/GameViewport" unique_id=77805476]
+[node name="TileMapLayer1" type="TileMapLayer" parent="Control" unique_id=77805476]
 position = Vector2(-1, -1)
 tile_map_data = PackedByteArray("AAACAAYAAAAFAAUAAAADAAYAAAAGAAUAAAAEAAYAAAAFAAUAAAAFAAYAAAAGAAUAAAAGAAYAAAAFAAUAAAAHAAYAAAAGAAUAAAAIAAYAAAAFAAUAAAAJAAYAAAAGAAUAAAAKAAYAAAAFAAUAAAALAAYAAAAGAAUAAAAMAAYAAAAFAAUAAAANAAYAAAADAAMAAAABAAYAAAABAAMAAAABAAUAAAAUAAMAAAABAAQAAAAUAAIAAAABAAMAAAAUAAMAAAABAAIAAAAUAAIAAAABAAEAAAAUAAEAAAABAAAAAAABAAMAACANAAUAAAAUAAMAAAANAAQAAAAUAAIAAAANAAMAAAAUAAMAAAANAAIAAAAUAAIAAAANAAEAAAAUAAEAAAANAAAAAAADAAMAACACAAAAAAACAAMAACADAAAAAAACAAMAACAEAAAAAAACAAMAACAFAAAAAAACAAMAACAGAAAAAAACAAMAACAHAAAAAAACAAMAACAIAAAAAAACAAMAACAJAAAAAAACAAMAACAKAAAAAAACAAMAACALAAAAAAACAAMAACAMAAAAAAACAAMAACAEAAQAAAAHAAQAAAAFAAQAAAAIAAQAAAAHAAMAAAAHAAQAAAAIAAMAAAAIAAQAAAALAAMAAAAHAAQAAAAMAAMAAAAIAAQAAAAKAP//AAACAAMAACALAP//AAACAAMAACAMAP//AAACAAMAACA=")
 tile_set = ExtResource("5_rqyoi")

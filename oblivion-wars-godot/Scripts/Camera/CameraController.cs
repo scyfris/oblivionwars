@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Linq.Expressions;
 
 /// <summary>
 /// Advanced platformer camera system with smooth following, rotation support,
@@ -71,6 +72,28 @@ public partial class CameraController : Node
 	/// </summary>
 	[Export] private Rect2 _cameraBounds = new Rect2(-10000, -10000, 20000, 20000);
 
+	[ExportGroup("Rotation (Gravity Flip)")]
+
+	/// <summary>
+	/// Whether camera should rotate to match player's gravity orientation
+	/// </summary>
+	[Export] private bool _rotateWithPlayer = true;
+
+	/// <summary>
+	/// How quickly the camera rotates to match player orientation (higher = faster rotation)
+	/// </summary>
+	[Export] private float _rotationSpeed = 5.0f;
+
+	/// <summary>
+	/// Minimum rotation speed in radians/second (prevents slow falloff at end of rotation)
+	/// </summary>
+	[Export] private float _minRotationSpeed = 3.0f;
+
+	/// <summary>
+	/// Delay in seconds before camera starts rotating after gravity change (creates dramatic effect)
+	/// </summary>
+	[Export] private float _rotationDelay = 0.3f;
+
 	[ExportGroup("Screen Shake")]
 
 	/// <summary>
@@ -91,6 +114,11 @@ public partial class CameraController : Node
 	private Vector2 _directorOffset = Vector2.Zero;
 	private float _directorOffsetSpeed = 2.0f;
 	private Vector2 _targetDirectorOffset = Vector2.Zero;
+
+	// Camera rotation (for gravity flip)
+	private float _targetRotation = 0.0f;
+	private float _rotationDelayTimer = 0.0f;
+	private bool _isDelayingRotation = false;
 
 	// Camera mode
 	private CameraMode _mode = CameraMode.Follow;
@@ -150,6 +178,12 @@ public partial class CameraController : Node
 			case CameraMode.Cutscene:
 				// Cutscene mode is controlled externally
 				break;
+		}
+
+		// Apply camera rotation (for gravity flip)
+		if (_rotateWithPlayer)
+		{
+			UpdateRotation(delta);
 		}
 
 		// Apply screen shake
@@ -253,6 +287,102 @@ public partial class CameraController : Node
 	{
 		// Smoothly move to fixed position
 		_camera.GlobalPosition = _camera.GlobalPosition.Lerp(_fixedPosition, _followSpeed * (float)delta);
+	}
+
+	private void UpdateRotation(double delta)
+	{
+		if (_target is not CharacterBody2D character) return;
+
+		// Get target rotation from player's UpDirection (gravity-based, not visual transform)
+		Vector2 targetUp = character.UpDirection;
+
+		// Calculate target rotation based on up direction
+		float newTargetRotation;
+		if (targetUp.X == 1 && targetUp.Y == 0)
+		{
+			newTargetRotation = -Mathf.Pi / 2;
+		}
+		else if (targetUp.X == -1 && targetUp.Y == 0)
+		{
+			newTargetRotation = Mathf.Pi / 2;
+		}
+		else if (targetUp.Y == 1 && targetUp.X == 0)
+		{
+			newTargetRotation = Mathf.Pi;
+		}
+		else if (targetUp.Y == -1 && targetUp.X == 0)
+		{
+			newTargetRotation = 0;
+		}
+		else
+		{
+			// Fallback calculation
+			newTargetRotation = targetUp.Angle() + Mathf.Pi / 2;
+		}
+
+		// Detect rotation change
+		float angleDiff = Mathf.Abs(Mathf.AngleDifference(_targetRotation, newTargetRotation));
+		if (angleDiff > 0.1f)
+		{
+			_targetRotation = newTargetRotation;
+			_isDelayingRotation = true;
+			_rotationDelayTimer = _rotationDelay;
+			GD.Print($"CameraController: Rotation change detected, starting delay ({_rotationDelay}s)");
+		}
+
+		// Handle delay countdown
+		if (_isDelayingRotation)
+		{
+			_rotationDelayTimer -= (float)delta;
+			if (_rotationDelayTimer <= 0)
+			{
+				_isDelayingRotation = false;
+				GD.Print("CameraController: Delay expired, starting rotation");
+			}
+			else
+			{
+				return; // Still delaying
+			}
+		}
+
+		// Calculate angular distance to target
+		float angularDistance = Mathf.Abs(Mathf.AngleDifference(_camera.GlobalRotation, _targetRotation));
+
+		if (angularDistance > 0.01f) // Only rotate if not already at target
+		{
+			// Calculate lerp amount
+			float lerpAmount = _rotationSpeed * (float)delta;
+
+			// Calculate what the lerp would rotate us this frame
+			float lerpRotation = angularDistance * lerpAmount;
+
+			// Ensure we rotate at least the minimum speed
+			float minRotation = _minRotationSpeed * (float)delta;
+
+			float direction = Mathf.Sign(Mathf.AngleDifference(_camera.GlobalRotation, _targetRotation));
+
+			// Determine how much to rotate this frame
+			if (angularDistance <= minRotation)
+			{
+				// Very close - just apply remaining distance to finish rotation
+				_camera.GlobalRotation += direction * angularDistance;
+			}
+			else if (lerpRotation < minRotation)
+			{
+				// Lerp would be too slow, use minimum speed instead
+				_camera.GlobalRotation += direction * minRotation;
+			}
+			else
+			{
+				// Normal lerp is fast enough
+				_camera.GlobalRotation = Mathf.LerpAngle(_camera.GlobalRotation, _targetRotation, lerpAmount);
+			}
+		}
+		else
+		{
+			// Snap to target when very close
+			_camera.GlobalRotation = MathUtils.SnapToNearest90Radians(_targetRotation);
+		}
 	}
 
 	private void UpdateScreenShake(double delta)
@@ -362,6 +492,16 @@ public partial class CameraController : Node
 	public void SetTarget(Node2D newTarget)
 	{
 		_target = newTarget;
+	}
+
+	/// <summary>
+	/// Set camera rotation immediately without delay (useful for initialization)
+	/// </summary>
+	public void SetRotationImmediate(float rotation)
+	{
+		_camera.GlobalRotation = rotation;
+		_targetRotation = rotation;
+		_isDelayingRotation = false;
 	}
 
 	#endregion
