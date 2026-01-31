@@ -300,11 +300,11 @@ public partial class CameraController : Node
 		float newTargetRotation;
 		if (targetUp.X == 1 && targetUp.Y == 0)
 		{
-			newTargetRotation = -Mathf.Pi / 2;
+			newTargetRotation = Mathf.Pi / 2;
 		}
 		else if (targetUp.X == -1 && targetUp.Y == 0)
 		{
-			newTargetRotation = Mathf.Pi / 2;
+			newTargetRotation = -Mathf.Pi / 2;
 		}
 		else if (targetUp.Y == 1 && targetUp.X == 0)
 		{

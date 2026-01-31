@@ -278,14 +278,20 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         {
             _wallNormal = GetWallNormal();
 
-            // Determine if player is moving away from wall
-            // Wall normal points away from wall, so if move direction matches wall normal direction, player is moving away
+            // Calculate horizontal direction (perpendicular to gravity)
+            Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
+
+            // Determine if player is moving away from wall in gravity-relative space
+            // Wall normal points away from wall
+            // Check if input direction (along horizontal) matches wall normal direction
+            float wallHorizontalDirection = _wallNormal.Dot(horizontalDirection);
+
             bool movingAwayFromWall = false;
-            if (_wallNormal.X > 0 && _moveDirection > 0) // Wall on left, moving right (away)
+            if (wallHorizontalDirection > 0.1f && _moveDirection > 0) // Wall on "left" (relative to gravity), moving "right"
             {
                 movingAwayFromWall = true;
             }
-            else if (_wallNormal.X < 0 && _moveDirection < 0) // Wall on right, moving left (away)
+            else if (wallHorizontalDirection < -0.1f && _moveDirection < 0) // Wall on "right" (relative to gravity), moving "left"
             {
                 movingAwayFromWall = true;
             }
