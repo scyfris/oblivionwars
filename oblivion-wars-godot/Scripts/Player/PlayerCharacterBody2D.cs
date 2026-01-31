@@ -68,6 +68,11 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
     [Export] private float _gravityFlipRotationSpeed = 10.0f;
 
     /// <summary>
+    /// Delay in seconds before the player sprite begins rotating after a gravity flip
+    /// </summary>
+    [Export] private float _bodyFlipDelay = 0.0f;
+
+    /// <summary>
     /// Whether to rotate the velocity vector when gravity flips to maintain momentum in the new orientation
     /// </summary>
     [Export] private bool _maintainMomentumOnFlip = true;
@@ -78,21 +83,44 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
     private Vector2 _upDirection = Vector2.Up; // Current up direction
     private float _targetRotation = 0.0f; // Target rotation in radians
     private bool _isRotatingGravity = false; // Currently animating rotation
+    private float _bodyFlipDelayTimer = 0.0f; // Countdown before rotation starts
 
     public override void _PhysicsProcess(double delta)
     {
     //    base._PhysicsProcess(delta);
 
-        // Smooth visual rotation toward target
+        // Smooth visual rotation toward target (with optional delay)
         if (_isRotatingGravity)
         {
-            GlobalRotation = Mathf.LerpAngle(GlobalRotation, _targetRotation,
-                                             _gravityFlipRotationSpeed * (float)delta);
-
-            if (Mathf.Abs(GlobalRotation - _targetRotation) < 0.01f)
+            if (_bodyFlipDelayTimer > 0)
             {
-                GlobalRotation = _targetRotation;
-                _isRotatingGravity = false;
+                _bodyFlipDelayTimer -= (float)delta;
+            }
+            else
+            {
+                float angularDistance = Mathf.Abs(Mathf.AngleDifference(GlobalRotation, _targetRotation));
+
+                if (angularDistance > 0.01f)
+                {
+                    float direction = Mathf.Sign(Mathf.AngleDifference(GlobalRotation, _targetRotation));
+                    float stepAmount = _gravityFlipRotationSpeed * (float)delta;
+
+                    if (angularDistance <= stepAmount)
+                    {
+                        // Close enough - snap to target
+                        GlobalRotation = _targetRotation;
+                        _isRotatingGravity = false;
+                    }
+                    else
+                    {
+                        GlobalRotation += direction * stepAmount;
+                    }
+                }
+                else
+                {
+                    GlobalRotation = _targetRotation;
+                    _isRotatingGravity = false;
+                }
             }
         }
 
@@ -330,31 +358,48 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
     }
 
     /// <summary>
-    /// Internal gravity rotation handler
+    /// Internal gravity rotation handler. Degrees must be a multiple of 90.
     /// </summary>
     private void RotateGravity(int degrees)
     {
-        // Update rotation state (normalize to 0-359)
-        _gravityRotation = (_gravityRotation + degrees + 360) % 360;
+        // Snap to nearest 90° and normalize to 0, 90, 180, 270
+        _gravityRotation = ((_gravityRotation + degrees + 360) % 360 / 90) * 90;
 
-        // Calculate new directions from rotation
-        float radians = Mathf.DegToRad(_gravityRotation);
-        float gravX = Mathf.Sin(radians);
-        float gravY = Mathf.Cos(radians);
-        gravX = Mathf.IsZeroApprox(gravX) ? 0 : Mathf.IsEqualApprox(gravX, 1) ? 1 : -1;
-        gravY = Mathf.IsZeroApprox(gravY) ? 0 : Mathf.IsEqualApprox(gravY, 1) ? 1 : -1;
-        _gravityDirection = new Vector2(gravX, gravY);
+        // Hardcode all values from the 4 possible gravity states
+        // No trig functions - all values are exact integers/constants
+        switch (_gravityRotation)
+        {
+            case 0:   // Gravity down
+                _gravityDirection = new Vector2(0, 1);
+                _targetRotation = 0;
+                break;
+            case 90:  // Gravity right
+                _gravityDirection = new Vector2(1, 0);
+                _targetRotation = -Mathf.Pi / 2;
+                break;
+            case 180: // Gravity up
+                _gravityDirection = new Vector2(0, -1);
+                _targetRotation = Mathf.Pi;
+                break;
+            case 270: // Gravity left
+                _gravityDirection = new Vector2(-1, 0);
+                _targetRotation = Mathf.Pi / 2;
+                break;
+            default:  // Should never happen, but clamp to nearest 90
+                GD.PrintErr("ERror - incorrect gravity rotation");
+                _gravityRotation = (_gravityRotation + 45) / 90 * 90 % 360;
+                RotateGravity(0); // Re-enter with clamped value
+                return;
+        }
         _upDirection = -_gravityDirection;
 
-        // Set target for smooth visual rotation
-        _targetRotation = radians;
         _isRotatingGravity = true;
+        _bodyFlipDelayTimer = _bodyFlipDelay;
 
         // Rotate velocity vector to maintain momentum
         if (_maintainMomentumOnFlip)
         {
-            float rotationRad = Mathf.DegToRad(degrees);
-            Velocity = Velocity.Rotated(rotationRad);
+            Velocity = Velocity.Rotated(Mathf.DegToRad(degrees));
         }
 
         GD.Print($"Gravity rotated to {_gravityRotation}°, direction: {_gravityDirection}");

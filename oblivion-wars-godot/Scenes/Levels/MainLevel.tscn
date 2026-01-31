@@ -24,6 +24,7 @@ _speed = 300.0
 _wallJumpStrength = 800.0
 _wallSlideSpeedFraction = 0.1
 _wallJumpInputLockDuration = 0.1
+_bodyFlipDelay = 0.3
 
 [node name="CameraController" type="Node" parent="Control" unique_id=745475055 node_paths=PackedStringArray("_target", "_camera")]
 script = ExtResource("4_camera")
@@ -31,6 +32,7 @@ _target = NodePath("../CharacterController/PlayerCharacterBody2D")
 _camera = NodePath("Camera2D")
 _rotationSpeed = 7.0
 _minRotationSpeed = 2.0
+_rotationDelay = 0.0
 
 [node name="Camera2D" type="Camera2D" parent="Control/CameraController" unique_id=210406581]
 ignore_rotation = false

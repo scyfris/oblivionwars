@@ -9,13 +9,6 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
 
-[sub_resource type="Gradient" id="Gradient_o3cl4"]
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_fi62q"]
-gradient = SubResource("Gradient_o3cl4")
-width = 16
-height = 16
-
 [node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem")]
 floor_constant_speed = true
 floor_snap_length = 32.0
@@ -31,10 +24,6 @@ scale = Vector2(1.529, 1)
 texture = ExtResource("2_54mch")
 region_enabled = true
 region_rect = Rect2(8, 9, 15, 19)
-
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2091345877]
-visible = false
-texture = SubResource("GradientTexture2D_fi62q")
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=276482619]
 script = ExtResource("2_ddu1s")
