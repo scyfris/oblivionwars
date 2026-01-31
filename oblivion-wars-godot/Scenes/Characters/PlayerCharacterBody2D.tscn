@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://k61007h5kyt4" path="res://Scripts/Combat/Weapons/HitscanWeapon.cs" id="5_qwv0h"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
+size = Vector2(24, 80)
 
 [node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem")]
 floor_constant_speed = true
@@ -16,11 +17,13 @@ script = ExtResource("1_iyb5a")
 _holdableSystem = NodePath("HoldableSystem")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
+position = Vector2(2, -12)
 shape = SubResource("RectangleShape2D_rlx2o")
 
 [node name="SpriteTest" type="Sprite2D" parent="." unique_id=1104705581]
 texture_filter = 1
-scale = Vector2(1.529, 1)
+position = Vector2(1.0000007, -17.749996)
+scale = Vector2(2.4666667, 5.078948)
 texture = ExtResource("2_54mch")
 region_enabled = true
 region_rect = Rect2(8, 9, 15, 19)
