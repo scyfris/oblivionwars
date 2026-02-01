@@ -20,7 +20,7 @@ _playerCharacter = NodePath("PlayerCharacterBody2D")
 
 [node name="PlayerCharacterBody2D" parent="Control/CharacterController" unique_id=52823142 instance=ExtResource("2_jxtak")]
 position = Vector2(610, 352)
-_speed = 300.0
+_speed = 400.0
 _wallJumpStrength = 800.0
 _wallSlideSpeedFraction = 0.1
 _wallJumpInputLockDuration = 0.1

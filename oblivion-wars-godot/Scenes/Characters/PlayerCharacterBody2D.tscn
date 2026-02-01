@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://c6dn1cpq8jkoy" path="res://Scripts/Combat/Weapons/ProjectileWeapon.cs" id="3_54mch"]
 [ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="4_ffrop"]
 [ext_resource type="Script" uid="uid://k61007h5kyt4" path="res://Scripts/Combat/Weapons/HitscanWeapon.cs" id="5_qwv0h"]
+[ext_resource type="PackedScene" uid="uid://bngampa7uejn8" path="res://Scenes/Effects/WallSlideDust.tscn" id="6_dust"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
 size = Vector2(24, 80)
@@ -16,6 +17,7 @@ floor_snap_length = 32.0
 script = ExtResource("1_iyb5a")
 _holdableSystem = NodePath("HoldableSystem")
 _wallSlideDustPosition = NodePath("WallSlideDustPosition")
+_wallSlideDustScene = ExtResource("6_dust")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
 position = Vector2(2, -12)
@@ -30,7 +32,7 @@ region_enabled = true
 region_rect = Rect2(8, 9, 15, 19)
 
 [node name="WallSlideDustPosition" type="Node2D" parent="." unique_id=681449788]
-position = Vector2(0, 28)
+position = Vector2(-12, 28)
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=276482619]
 script = ExtResource("2_ddu1s")

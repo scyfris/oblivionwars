@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://bngampa7uejn8"]
+
+[sub_resource type="Curve" id="Curve_scale"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_color"]
+colors = PackedColorArray(0.9, 0.9, 0.9, 1, 0.8, 0.8, 0.8, 0)
+
+[node name="WallSlideDust" type="CPUParticles2D" unique_id=904046343]
+lifetime = 0.35
+speed_scale = 1.5
+emission_shape = 1
+emission_sphere_radius = 2.0
+spread = 58.02
+gravity = Vector2(0, 0)
+initial_velocity_min = 60.0
+initial_velocity_max = 100.0
+scale_amount_min = 4.0
+scale_amount_max = 8.0
+scale_amount_curve = SubResource("Curve_scale")
+color_ramp = SubResource("Gradient_color")
