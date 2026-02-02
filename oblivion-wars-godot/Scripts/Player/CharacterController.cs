@@ -23,15 +23,8 @@ public partial class CharacterController : Node
     /// </summary>
     [Export] string _jumpAction = "jump";
 
-    /// <summary>
-    /// Input action name for using held item/weapon (configured in Project Settings > Input Map)
-    /// </summary>
-    [Export] string _useAction = "shoot";
-
-    /// <summary>
-    /// Input action name for switching to next weapon/item (configured in Project Settings > Input Map)
-    /// </summary>
-    [Export] string _switchHoldableAction = "switch_weapon";
+    [Export] string _useLeftAction = "shoot";
+    [Export] string _useRightAction = "shoot_right";
 
     /// <summary>
     /// Input action name for rotating gravity clockwise 90° (configured in Project Settings > Input Map)
@@ -77,18 +70,18 @@ public partial class CharacterController : Node
             _playerCharacter.Stop();
         }
 
-        // Use current holdable (weapon/tool/gadget)
-        if (@event.IsActionPressed(_useAction))
+        // Use left holdable (left mouse)
+        if (@event.IsActionPressed(_useLeftAction))
         {
-            // Get mouse position in world space (using player's CanvasItem method)
             var targetPos = _playerCharacter.GetGlobalMousePosition();
-            _playerCharacter.UseHoldable(targetPos);
+            _playerCharacter.UseHoldableLeft(targetPos);
         }
 
-        // Switch to next holdable
-        if (@event.IsActionPressed(_switchHoldableAction))
+        // Use right holdable (right mouse)
+        if (@event.IsActionPressed(_useRightAction))
         {
-            _playerCharacter.NextHoldable();
+            var targetPos = _playerCharacter.GetGlobalMousePosition();
+            _playerCharacter.UseHoldableRight(targetPos);
         }
 
         // Gravity rotation inputs

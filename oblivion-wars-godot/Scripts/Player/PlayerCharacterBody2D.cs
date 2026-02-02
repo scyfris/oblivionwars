@@ -1,59 +1,13 @@
 using Godot;
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 
 public partial class PlayerCharacterBody2D : CharacterBody2D
 {
-    /// <summary>
-    /// Horizontal movement speed in pixels per second
-    /// </summary>
-    [Export] float _speed = 500.0f;
+    [Export] private PlayerDefinition _definition;
 
-    /// <summary>
-    /// Gravity acceleration in pixels per second squared
-    /// </summary>
-    [Export] float _gravity = 2000.0f;
-
-    /// <summary>
-    /// Initial upward velocity when jumping
-    /// </summary>
-    [Export] float _jumpStrength = 800.0f;
-
-    /// <summary>
-    /// Upward velocity applied when wall jumping
-    /// </summary>
-    [Export] float _wallJumpStrength = 700.0f;
-
-
-    /// <summary>
-    /// Internal movement direction (-1 = left, 0 = stop, 1 = right). Set by input controller.
-    /// </summary>
-    [Export] int _moveDirection = 0;
-
-    /// <summary>
-    /// Reference to the holdable system that manages weapons and items
-    /// </summary>
     [Export] private HoldableSystem _holdableSystem;
 
-    /// <summary>
-    /// Wall slide speed as a fraction of normal gravity (0.5 = half speed)
-    /// </summary>
-    [Export] float _wallSlideSpeedFraction = .5f;
-
-    /// <summary>
-    /// Horizontal force pushing player away from wall during wall jump
-    /// </summary>
-    [Export] float _wallJumpPushAwayForce = 500.0f;
-
-    /// <summary>
-    /// Duration in seconds that horizontal push-away force is applied after wall jump (can be longer than input lock)
-    /// </summary>
-    [Export] float _wallJumpPushAwayDuration = 0.2f;
-
-    /// <summary>
-    /// Duration in seconds that horizontal input is locked after wall jump. Moving opposite direction cancels remaining lock time.
-    /// </summary>
-    [Export] float _wallJumpInputLockDuration = 0.2f;
+    private int _moveDirection = 0;
 
     [ExportGroup("Wall Slide Effects")]
 
@@ -106,6 +60,8 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
             _wallSlideDust.Emitting = false;
             _wallSlideDustPosition.AddChild(_wallSlideDust);
         }
+
+        _holdableSystem?.Initialize(this);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -165,7 +121,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
             {
                 // Can cancel this one out. The behaviour we want is that
                 // the player can cancel horizontal momentum after wall jumping
-                // if the press the opposite direction, BUT if they don't then 
+                // if the press the opposite direction, BUT if they don't then
                 // the horizontal momentum will still continue for a slightly longer time
                 // before stopping.  This matches HollowKnight a bit and allows player time to
                 // press the opposite arrow key, or if they press the arrow key back towards the
@@ -178,7 +134,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         UpdateWallSliding();
 
         // Apply appropriate gravity based on state
-        float currentGravity = _isWallSliding ? _gravity*_wallSlideSpeedFraction : _gravity;
+        float currentGravity = _isWallSliding ? _definition.Gravity * _definition.WallSlideSpeedFraction : _definition.Gravity;
 
         // Calculate horizontal direction (perpendicular to gravity)
         // When gravity is down (0,1), horizontal should be right (1,0)
@@ -196,7 +152,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         else
         {
             // Normal movement control along horizontal direction
-            horizontalVelocity = horizontalDirection * _moveDirection * _speed;
+            horizontalVelocity = horizontalDirection * _moveDirection * _definition.MoveSpeed;
         }
 
         // Start with horizontal velocity
@@ -214,7 +170,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         else
         {
             // Wall sliding: clamp velocity along gravity to slide speed
-            newVel = horizontalVelocity + _gravityDirection * (_gravity*_wallSlideSpeedFraction);
+            newVel = horizontalVelocity + _gravityDirection * (_definition.Gravity * _definition.WallSlideSpeedFraction);
         }
 
         this.Velocity = newVel;
@@ -249,12 +205,12 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
             Vector2 jumpDirection = -_gravityDirection; // Up (opposite to gravity)
             Vector2 pushDirection = _wallNormal; // Away from wall
 
-            Velocity = pushDirection * _wallJumpPushAwayForce + jumpDirection * _wallJumpStrength;
+            Velocity = pushDirection * _definition.WallJumpPushAwayForce + jumpDirection * _definition.WallJumpStrength;
             _isWallSliding = false;
 
             // Lock horizontal input briefly to ensure the push-away takes effect
-            _wallJumpInputLockTimer = _wallJumpInputLockDuration;
-            _wallJumpPushAwayDurationTimer = _wallJumpPushAwayDuration;
+            _wallJumpInputLockTimer = _definition.WallJumpInputLockDuration;
+            _wallJumpPushAwayDurationTimer = _definition.WallJumpPushAwayDuration;
             return;
         }
 
@@ -262,7 +218,7 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         if (!IsOnFloor()) { return; }
 
         // Jump opposite to gravity direction
-        Velocity -= _gravityDirection * _jumpStrength;
+        Velocity -= _gravityDirection * _definition.JumpStrength;
     }
 
     public void CancelJump()
@@ -290,21 +246,14 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         _moveDirection = 0;
     }
 
-    /// <summary>
-    /// Use the currently held item targeting the given position.
-    /// For player: target comes from mouse. For NPC: target comes from AI.
-    /// </summary>
-    public void UseHoldable(Vector2 targetPosition)
+    public void UseHoldableLeft(Vector2 targetPosition)
     {
-        _holdableSystem?.Use(targetPosition);
+        _holdableSystem?.UseLeft(targetPosition);
     }
 
-    /// <summary>
-    /// Switch to next holdable in the inventory
-    /// </summary>
-    public void NextHoldable()
+    public void UseHoldableRight(Vector2 targetPosition)
     {
-        _holdableSystem?.NextHoldable();
+        _holdableSystem?.UseRight(targetPosition);
     }
 
     /// <summary>

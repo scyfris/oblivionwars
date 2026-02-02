@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://c1cu0sgl231ao" path="res://Scripts/Player/CharacterController.cs" id="1_o3cl4"]
 [ext_resource type="PackedScene" uid="uid://cb4iahq5chr65" path="res://Scenes/Characters/PlayerCharacterBody2D.tscn" id="2_jxtak"]
 [ext_resource type="PackedScene" uid="uid://ceq74t0uxq1ed" path="res://Scenes/UI/crosshair.tscn" id="3_jxtak"]
+[ext_resource type="Resource" uid="uid://dj7t8h8cwg5cv" path="res://Resources/Data/Characters/Player/player.tres" id="3_rqyoi"]
 [ext_resource type="Script" uid="uid://b2dl33mekocnv" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
 [ext_resource type="TileSet" uid="uid://cifh4slrp6lmq" path="res://Resources/Tilemaps/kenney_abstract-platformer/Godot/KenneyAbstractPlatformer-TileSet.tres" id="5_rqyoi"]
 
@@ -20,10 +21,7 @@ _playerCharacter = NodePath("PlayerCharacterBody2D")
 
 [node name="PlayerCharacterBody2D" parent="Control/CharacterController" unique_id=52823142 instance=ExtResource("2_jxtak")]
 position = Vector2(610, 352)
-_speed = 400.0
-_wallJumpStrength = 800.0
-_wallSlideSpeedFraction = 0.1
-_wallJumpInputLockDuration = 0.1
+_definition = ExtResource("3_rqyoi")
 _bodyFlipDelay = 0.3
 
 [node name="CameraController" type="Node" parent="Control" unique_id=745475055 node_paths=PackedStringArray("_target", "_camera")]

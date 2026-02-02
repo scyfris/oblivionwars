@@ -13,10 +13,7 @@ public abstract partial class Projectile : Area2D
 	/// </summary>
 	[Export] protected float _lifetime = 3.0f;
 
-	/// <summary>
-	/// Amount of damage this projectile deals on impact
-	/// </summary>
-	[Export] protected float _damage = 10.0f;
+	protected float _damage = 10.0f;
 
 	protected Vector2 _direction;
 	protected float _timeAlive = 0f;

@@ -2,78 +2,88 @@ using Godot;
 using System;
 
 /// <summary>
-/// Manages the currently active holdable item and switching between them.
+/// Manages left and right holdable slots for an entity.
+/// Instantiates holdable scenes, positions them, and routes Use() calls.
 /// Works with any entity (player or NPC) - input-agnostic.
 /// </summary>
 public partial class HoldableSystem : Node
 {
-	private Holdable[] _holdables; // Array of available holdables (weapons, tools, gadgets)
-	private int _currentHoldableIndex = 0;
-	private Holdable _currentHoldable;
+	[Export] private PackedScene _leftHoldableScene;
+	[Export] private PackedScene _rightHoldableScene;
+
+	private Holdable _leftHoldable;
+	private Holdable _rightHoldable;
 	private Node2D _owner;
 
-	public override void _Ready()
+	public void Initialize(Node2D owner)
 	{
-		_owner = GetParent<Node2D>();
+		_owner = owner;
 
-		// Get all Holdable children automatically
-		var holdableList = new System.Collections.Generic.List<Holdable>();
-		foreach (Node child in GetChildren())
+		if (_leftHoldableScene != null)
 		{
-			if (child is Holdable holdable)
-			{
-				holdableList.Add(holdable);
-			}
-		}
-		_holdables = holdableList.ToArray();
-
-		// Initialize all holdables
-		foreach (var holdable in _holdables)
-		{
-			holdable.Initialize(_owner);
+			_leftHoldable = InstantiateHoldable(_leftHoldableScene);
 		}
 
-		if (_holdables.Length > 0)
+		if (_rightHoldableScene != null)
 		{
-			_currentHoldable = _holdables[0];
-			GD.Print($"HoldableSystem ready with {_holdables.Length} holdables. Starting with: {_currentHoldable.GetType().Name}");
+			_rightHoldable = InstantiateHoldable(_rightHoldableScene);
 		}
 	}
 
 	public void Update(double delta)
 	{
-		_currentHoldable?.Update(delta);
+		_leftHoldable?.Update(delta);
+		_rightHoldable?.Update(delta);
 	}
 
-	/// <summary>
-	/// Use current holdable with given target position.
-	/// Target can come from mouse (player), AI (NPC), or any other source.
-	/// </summary>
-	public void Use(Vector2 targetPosition)
+	public void UseLeft(Vector2 targetPosition)
 	{
-		if (_currentHoldable != null && _currentHoldable.CanUse())
+		_leftHoldable?.Use(targetPosition);
+	}
+
+	public void UseRight(Vector2 targetPosition)
+	{
+		_rightHoldable?.Use(targetPosition);
+	}
+
+	public void SwapLeft(PackedScene newScene)
+	{
+		if (_leftHoldable != null)
 		{
-			_currentHoldable.Use(targetPosition);
+			_leftHoldable.OnUnequip();
+			_leftHoldable.QueueFree();
+			_leftHoldable = null;
+		}
+
+		if (newScene != null)
+		{
+			_leftHoldableScene = newScene;
+			_leftHoldable = InstantiateHoldable(newScene);
 		}
 	}
 
-	public void SwitchHoldable(int index)
+	public void SwapRight(PackedScene newScene)
 	{
-		if (_holdables != null && index >= 0 && index < _holdables.Length)
+		if (_rightHoldable != null)
 		{
-			_currentHoldableIndex = index;
-			_currentHoldable = _holdables[index];
-			GD.Print($"Switched to holdable: {_currentHoldable.GetType().Name}");
+			_rightHoldable.OnUnequip();
+			_rightHoldable.QueueFree();
+			_rightHoldable = null;
+		}
+
+		if (newScene != null)
+		{
+			_rightHoldableScene = newScene;
+			_rightHoldable = InstantiateHoldable(newScene);
 		}
 	}
 
-	public void NextHoldable()
+	private Holdable InstantiateHoldable(PackedScene scene)
 	{
-		if (_holdables != null && _holdables.Length > 0)
-		{
-			_currentHoldableIndex = (_currentHoldableIndex + 1) % _holdables.Length;
-			_currentHoldable = _holdables[_currentHoldableIndex];
-			GD.Print($"Switched to holdable: {_currentHoldable.GetType().Name}");
-		}
+		var instance = scene.Instantiate<Holdable>();
+		AddChild(instance);
+		instance.InitOwner(_owner);
+		instance.OnEquip();
+		return instance;
 	}
 }
