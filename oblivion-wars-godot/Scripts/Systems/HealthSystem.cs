@@ -1,3 +1,5 @@
+using System.Reflection.Emit;
+using System.Runtime;
 using Godot;
 
 public partial class HealthSystem : GameSystem
@@ -29,7 +31,19 @@ public partial class HealthSystem : GameSystem
 
     private void OnDamageApplied(DamageAppliedEvent evt)
     {
-        if (evt.RemainingHealth <= 0)
+        var target =
+            GodotObject.InstanceFromId(evt.TargetInstanceId) as IGameEntity;
+
+        if (target is not IGameEntity entity)
+        {
+            return;
+        }
+
+        entity.RuntimeData.CurrentHealth -= evt.FinalDamage;
+        if (entity.RuntimeData.CurrentHealth < 0)
+            entity.RuntimeData.CurrentHealth = 0;
+
+        if (entity.RuntimeData.CurrentHealth <= 0)
         {
             EventBus.Instance.Raise(new EntityDiedEvent
             {

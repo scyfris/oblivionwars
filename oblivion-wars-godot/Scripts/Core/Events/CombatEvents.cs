@@ -21,5 +21,4 @@ public struct DamageAppliedEvent : IGameEvent
 {
     public ulong TargetInstanceId;
     public float FinalDamage;
-    public float RemainingHealth;
 }

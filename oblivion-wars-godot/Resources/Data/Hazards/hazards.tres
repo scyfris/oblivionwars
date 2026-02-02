@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="HazardDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Data/Definitions/HazardDefinition.cs" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+SpikeDamage = 10.0
+LavaDamage = 20.0
+AcidDamage = 15.0

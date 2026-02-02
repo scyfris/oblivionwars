@@ -7,16 +7,19 @@
 [ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="3_pistol"]
 [ext_resource type="PackedScene" path="res://Scenes/Weapons/Shotgun.tscn" id="4_shotgun"]
 [ext_resource type="PackedScene" uid="uid://bngampa7uejn8" path="res://Scenes/Effects/WallSlideDust.tscn" id="6_dust"]
+[ext_resource type="Resource" path="res://Resources/Data/Hazards/hazards.tres" id="7_hazard"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
 size = Vector2(24, 80)
 
-[node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem", "_wallSlideDustPosition")]
+[node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem", "_spriteNode", "_wallSlideDustPosition")]
 floor_constant_speed = true
 floor_snap_length = 32.0
 script = ExtResource("1_iyb5a")
 _definition = ExtResource("2_ffrop")
 _holdableSystem = NodePath("HoldableSystem")
+_hazardDefinition = ExtResource("7_hazard")
+_spriteNode = NodePath("SpriteTest")
 _wallSlideDustPosition = NodePath("WallSlideDustPosition")
 _wallSlideDustScene = ExtResource("6_dust")
 

@@ -1,11 +1,28 @@
 using Godot;
 using System;
 
-public partial class PlayerCharacterBody2D : CharacterBody2D
+public partial class PlayerCharacterBody2D : CharacterBody2D, IGameEntity
 {
     [Export] private PlayerDefinition _definition;
 
     [Export] private HoldableSystem _holdableSystem;
+
+    [ExportGroup("Hazards")]
+    [Export] private HazardDefinition _hazardDefinition;
+    [Export] private Node2D _spriteNode;
+
+    // IGameEntity implementation
+    private EntityRuntimeData _runtimeData;
+    public EntityRuntimeData RuntimeData => _runtimeData;
+    public CharacterDefinition Definition => _definition;
+    public Node2D EntityNode => this;
+
+    // Invincibility state
+    private bool _isInvincible = false;
+    private float _invincibilityTimer = 0f;
+    private float _flashTimer = 0f;
+    private const float FlashInterval = 0.1f;
+    public bool IsInvincible => _isInvincible;
 
     private int _moveDirection = 0;
 
@@ -54,6 +71,18 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
 
     public override void _Ready()
     {
+        if (_definition != null)
+        {
+            _runtimeData = new EntityRuntimeData
+            {
+                EntityId = _definition.EntityId,
+                RuntimeInstanceId = GetInstanceId(),
+                CurrentHealth = _definition.MaxHealth,
+                MaxHealth = _definition.MaxHealth,
+                Definition = _definition
+            };
+        }
+
         if (_wallSlideDustPosition != null && _wallSlideDustScene != null)
         {
             _wallSlideDust = _wallSlideDustScene.Instantiate<CpuParticles2D>();
@@ -62,6 +91,21 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
         }
 
         _holdableSystem?.Initialize(this);
+
+        EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
+    }
+
+    public override void _ExitTree()
+    {
+        EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
+    }
+
+    private void OnEntityDied(EntityDiedEvent evt)
+    {
+        if (evt.EntityInstanceId != GetInstanceId()) return;
+
+        GD.Print("Player died! Reloading scene...");
+        GetTree().ReloadCurrentScene();
     }
 
     public override void _PhysicsProcess(double delta)
@@ -189,11 +233,14 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
             }
         }
 
+        // Check for hazard tiles after movement
+        CheckHazardTiles();
+
+        // Update invincibility (sprite flashing)
+        UpdateInvincibility(delta);
+
         // Update holdable system (handles use cooldowns)
         _holdableSystem?.Update(delta);
-
-        // MoveAndCollide - this is more basic and returns collision, but we can create a custom MoveAndSlide with this in the future if
-        // we want more functionality.
     }
 
     public void Jump()
@@ -396,5 +443,79 @@ public partial class PlayerCharacterBody2D : CharacterBody2D
     public int GetGravityRotation()
     {
         return _gravityRotation;
+    }
+
+    private void StartInvincibility()
+    {
+        _isInvincible = true;
+        _invincibilityTimer = _definition.InvincibilityDuration;
+        _flashTimer = 0f;
+    }
+
+    private void UpdateInvincibility(double delta)
+    {
+        if (!_isInvincible) return;
+
+        _invincibilityTimer -= (float)delta;
+        _flashTimer += (float)delta;
+
+        if (_flashTimer >= FlashInterval)
+        {
+            _flashTimer -= FlashInterval;
+            if (_spriteNode != null)
+                _spriteNode.Visible = !_spriteNode.Visible;
+        }
+
+        if (_invincibilityTimer <= 0)
+        {
+            _isInvincible = false;
+            if (_spriteNode != null)
+                _spriteNode.Visible = true;
+        }
+    }
+
+    private void CheckHazardTiles()
+    {
+        if (_isInvincible || _hazardDefinition == null) return;
+
+        for (int i = 0; i < GetSlideCollisionCount(); i++)
+        {
+            var collision = GetSlideCollision(i);
+            if (collision.GetCollider() is TileMapLayer tileMap)
+            {
+                var collisionPos = collision.GetPosition();
+                var tileCoords = tileMap.LocalToMap(tileMap.ToLocal(collisionPos));
+                var tileData = tileMap.GetCellTileData(tileCoords);
+                if (tileData == null) continue;
+
+                var hazardValue = tileData.GetCustomData("hazard_type");
+                if (hazardValue.VariantType == Variant.Type.Int)
+                {
+                    var hazardType = (TileHazardType)(int)hazardValue;
+                    if (hazardType != TileHazardType.None)
+                    {
+                        float damage = _hazardDefinition.GetDamage(hazardType);
+                        ApplyHazardDamage(damage);
+                        return; // Only apply once per frame
+                    }
+                }
+            }
+        }
+    }
+
+    private void ApplyHazardDamage(float damage)
+    {
+        EventBus.Instance.Raise(new HitEvent
+        {
+            TargetInstanceId = GetInstanceId(),
+            SourceInstanceId = 0,
+            BaseDamage = damage,
+            HitDirection = Vector2.Zero,
+            HitPosition = GlobalPosition
+        });
+
+        StartInvincibility();
+
+        GD.Print($"Player hit by hazard! Damage: {damage}, Health: {_runtimeData?.CurrentHealth}");
     }
 }

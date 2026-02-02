@@ -41,18 +41,10 @@ public partial class CombatSystem : GameSystem
             finalDamage *= effect.Definition.DamageMultiplier;
         }
 
-        // Apply knockback resistance from definition
-        // (knockback itself is applied directly to the physics body by the caller if needed)
-
-        entity.RuntimeData.CurrentHealth -= finalDamage;
-        if (entity.RuntimeData.CurrentHealth < 0)
-            entity.RuntimeData.CurrentHealth = 0;
-
         EventBus.Instance.Raise(new DamageAppliedEvent
         {
             TargetInstanceId = evt.TargetInstanceId,
             FinalDamage = finalDamage,
-            RemainingHealth = entity.RuntimeData.CurrentHealth
         });
     }
 }
