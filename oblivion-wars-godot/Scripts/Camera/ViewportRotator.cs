@@ -12,6 +12,8 @@ public partial class ViewportRotator : SubViewportContainer
 	/// </summary>
 	[Export] private Node2D _target;
 
+	[Export] private SubViewport _gameViewport;
+
 	/// <summary>
 	/// How quickly the viewport rotates to match player orientation (higher = faster rotation)
 	/// </summary>
@@ -36,12 +38,11 @@ public partial class ViewportRotator : SubViewportContainer
 		// Get the size of the main window screen.
 		Size = GetViewport().GetVisibleRect().Size;
 
-		// Get the SubViewport and set its size to match the window
-		var viewport = GetNode<SubViewport>("GameViewport");
-		if (viewport != null)
+		// Set SubViewport size to match the window
+		if (_gameViewport != null)
 		{
-			viewport.Size = (Vector2I)GetViewportRect().Size;
-			GD.Print($"ViewportRotator: SubViewport sized to {viewport.Size}");
+			_gameViewport.Size = (Vector2I)GetViewportRect().Size;
+			GD.Print($"ViewportRotator: SubViewport sized to {_gameViewport.Size}");
 		}
 
 

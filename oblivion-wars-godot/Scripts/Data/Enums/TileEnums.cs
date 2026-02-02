@@ -1,15 +1,15 @@
 public enum TileSurfaceType
 {
-    Normal,
-    Slippery,
-    Sticky,
-    Bouncy
+    Normal = 0,
+    Slippery = 1,
+    Sticky = 2,
+    Bouncy = 3
 }
 
 public enum TileHazardType
 {
-    None,
-    Spikes,
-    Lava,
-    Acid
+    None = 0,
+    Spikes = 1,
+    Lava = 2,
+    Acid = 3
 }

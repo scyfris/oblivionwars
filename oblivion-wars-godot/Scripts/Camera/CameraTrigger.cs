@@ -32,14 +32,10 @@ public partial class CameraTrigger : Area2D
 		_resetTimer.Timeout += OnResetTimeout;
 		AddChild(_resetTimer);
 
-		// Auto-find camera if not assigned
+		// Use singleton if not manually assigned
 		if (_cameraController == null)
 		{
-			_cameraController = GetTree().Root.FindChild("CameraController", true, false) as CameraController;
-			if (_cameraController == null)
-			{
-				GD.PrintErr("CameraTrigger: Could not find CameraController in scene!");
-			}
+			_cameraController = CameraController.Instance;
 		}
 	}
 

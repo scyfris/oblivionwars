@@ -3,9 +3,10 @@
 [ext_resource type="Script" uid="uid://els0tjl7ehxn" path="res://Scripts/Combat/Weapons/Weapon.cs" id="1_weapon"]
 [ext_resource type="Resource" uid="uid://cww0rvnlhlgj3" path="res://Resources/Data/Weapons/hitscan_test_weapon.tres" id="2_t511x"]
 
-[node name="Pistol" type="Node2D" unique_id=1927252115]
+[node name="Pistol" type="Node2D" unique_id=1927252115 node_paths=PackedStringArray("_bulletTrail")]
 script = ExtResource("1_weapon")
 _weaponDefinition = ExtResource("2_t511x")
+_bulletTrail = NodePath("BulletTrail")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=950512530]
 offset_left = -4.0
@@ -17,7 +18,7 @@ color = Color(0.2, 0.4, 0.8, 1)
 [node name="ProjectileSpawn" type="Node2D" parent="." unique_id=483511198]
 position = Vector2(20, 0)
 
-[node name="BulletTrail" type="Line2D" parent="."]
+[node name="BulletTrail" type="Line2D" parent="." unique_id=2112040487]
 visible = false
 top_level = true
 width = 2.0

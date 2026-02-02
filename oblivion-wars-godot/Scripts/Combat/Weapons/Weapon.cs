@@ -8,10 +8,10 @@ using System;
 public partial class Weapon : Holdable
 {
 	[Export] protected WeaponDefinition _weaponDefinition;
+	[Export] private Line2D _bulletTrail;
+	[Export] private AnimationPlayer _animationPlayer;
 
-	private Line2D _bulletTrail;
 	private float _trailTimer = 0f;
-	private CameraController _cameraController;
 
 	public override void _Ready()
 	{
@@ -19,17 +19,6 @@ public partial class Weapon : Holdable
 		{
 			_useCooldown = _weaponDefinition.UseCooldown;
 		}
-
-		// Look for optional BulletTrail child (used by hitscan weapons)
-		_bulletTrail = GetNodeOrNull<Line2D>("BulletTrail");
-	}
-
-	public override void InitOwner(Node2D owner)
-	{
-		base.InitOwner(owner);
-
-		// Find camera controller for screen shake
-		_cameraController = owner.GetTree().Root.FindChild("CameraController", true, false) as CameraController;
 	}
 
 	public override void Update(double delta)
@@ -59,12 +48,12 @@ public partial class Weapon : Holdable
 		ResetCooldown();
 
 		// Trigger animation if present
-		GetNodeOrNull<AnimationPlayer>("AnimationPlayer")?.Play("shoot");
+		_animationPlayer?.Play("shoot");
 
 		// Apply screen shake
-		if (_cameraController != null && _weaponDefinition.ScreenShake > 0)
+		if (CameraController.Instance != null && _weaponDefinition.ScreenShake > 0)
 		{
-			_cameraController.Shake(_weaponDefinition.ScreenShake);
+			CameraController.Instance.Shake(_weaponDefinition.ScreenShake);
 		}
 	}
 

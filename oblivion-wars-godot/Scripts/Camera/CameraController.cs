@@ -16,6 +16,8 @@ using System.Linq.Expressions;
 /// </summary>
 public partial class CameraController : Node
 {
+	public static CameraController Instance { get; private set; }
+
 	[ExportGroup("Target")]
 
 	/// <summary>
@@ -135,6 +137,14 @@ public partial class CameraController : Node
 
 	public override void _Ready()
 	{
+		if (Instance != null)
+		{
+			GD.PrintErr("CameraController: Duplicate instance detected, removing this one.");
+			QueueFree();
+			return;
+		}
+		Instance = this;
+
 		if (_camera == null)
 		{
 			GD.PrintErr("CameraController: Camera2D not assigned!");
@@ -157,6 +167,12 @@ public partial class CameraController : Node
 		}
 
 		GD.Print("CameraController: Camera2D ready, enabled, and made current");
+	}
+
+	public override void _ExitTree()
+	{
+		if (Instance == this)
+			Instance = null;
 	}
 
 	public override void _PhysicsProcess(double delta)

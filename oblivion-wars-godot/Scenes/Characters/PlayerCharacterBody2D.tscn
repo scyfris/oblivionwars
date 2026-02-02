@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://cb4iahq5chr65"]
+[gd_scene format=3 uid="uid://cb4iahq5chr65"]
 
 [ext_resource type="Script" uid="uid://cv3wphvrguved" path="res://Scripts/Player/PlayerCharacterBody2D.cs" id="1_iyb5a"]
 [ext_resource type="Texture2D" uid="uid://baewbtbmg2mh2" path="res://Resources/Tilemaps/kenney_abstract-platformer/knight.png" id="2_54mch"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="2_ddu1s"]
-[ext_resource type="PackedScene" path="res://Scenes/Weapons/Pistol.tscn" id="3_pistol"]
+[ext_resource type="Resource" uid="uid://dj7t8h8cwg5cv" path="res://Resources/Data/Characters/Player/player.tres" id="2_ffrop"]
+[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="3_pistol"]
 [ext_resource type="PackedScene" path="res://Scenes/Weapons/Shotgun.tscn" id="4_shotgun"]
 [ext_resource type="PackedScene" uid="uid://bngampa7uejn8" path="res://Scenes/Effects/WallSlideDust.tscn" id="6_dust"]
 
@@ -14,6 +15,7 @@ size = Vector2(24, 80)
 floor_constant_speed = true
 floor_snap_length = 32.0
 script = ExtResource("1_iyb5a")
+_definition = ExtResource("2_ffrop")
 _holdableSystem = NodePath("HoldableSystem")
 _wallSlideDustPosition = NodePath("WallSlideDustPosition")
 _wallSlideDustScene = ExtResource("6_dust")
