@@ -20,6 +20,7 @@ _holdableSystem = NodePath("HoldableSystem")
 _spriteNode = NodePath("SpriteTest")
 _wallSlideDustPosition = NodePath("WallSlideDustPosition")
 _wallSlideDustScene = ExtResource("6_dust")
+_definition = ExtResource("2_ffrop")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
 position = Vector2(2, -12)

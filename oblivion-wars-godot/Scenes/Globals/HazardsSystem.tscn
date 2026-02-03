@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://ft0smiupa8ld"]
+
+[ext_resource type="Script" uid="uid://b4r7je5gisxgk" path="res://Scripts/Systems/HazardSystem.cs" id="1_slk12"]
+[ext_resource type="Resource" path="res://Resources/Data/Hazards/hazards.tres" id="2_ipgsx"]
+
+[node name="HazardsSystem" type="Node" unique_id=2047797779]
+script = ExtResource("1_slk12")
+_hazardDefinition = ExtResource("2_ipgsx")

@@ -1,15 +1,11 @@
-[gd_resource type="Resource" script_class="ProjectileDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ProjectileDefinition" format=3 uid="uid://d17y8xwqekvkh"]
 
-[ext_resource type="Script" path="res://Scripts/Data/Definitions/ProjectileDefinition.cs" id="1_script"]
+[ext_resource type="Script" uid="uid://ccc31phpdd2at" path="res://Scripts/Data/Definitions/ProjectileDefinition.cs" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="2_scene"]
 
 [resource]
 script = ExtResource("1_script")
 ProjectileId = "bullet"
-Speed = 800.0
-Lifetime = 3.0
-Damage = 10.0
-HitscanRange = 1000.0
 TrailDuration = 0.1
 ProjectileScene = ExtResource("2_scene")
-metadata/_custom_type_script = ExtResource("1_script")
+metadata/_custom_type_script = "uid://ccc31phpdd2at"

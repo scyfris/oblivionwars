@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://bkksyfiyb5e3y"]
 
 [ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="1_script"]
 [ext_resource type="Resource" path="res://Resources/Data/Projectiles/bullet.tres" id="2_projectile"]
@@ -11,7 +11,6 @@ IsAutomatic = false
 DamageScale = 0.5
 Knockback = 150.0
 ScreenShake = 3.0
-ProjectileSpawnOffset = Vector2(20, 0)
 Projectile = ExtResource("2_projectile")
 SpreadCount = 5
 SpreadAngle = 30.0
