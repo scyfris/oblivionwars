@@ -14,9 +14,6 @@ public partial class WeaponDefinition : Resource
     [ExportGroup("Projectile")]
     [Export] public ProjectileDefinition Projectile;
 
-    [ExportGroup("Scene")]
-    [Export] public PackedScene WeaponScene;
-
     [ExportGroup("Spread")]
     [Export] public int SpreadCount = 1;
     [Export] public float SpreadAngle = 15.0f;

@@ -27,4 +27,5 @@ public partial class ProjectileDefinition : Resource
 
     [ExportGroup("Visuals")]
     [Export] public PackedScene ProjectileScene;
+    [Export] public PackedScene HitEffect;
 }

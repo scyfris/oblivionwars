@@ -105,7 +105,18 @@ public abstract partial class Projectile : Area2D
             return;
 
         OnHit(body);
+        SpawnHitEffect();
         QueueFree();
+    }
+
+    protected void SpawnHitEffect()
+    {
+        if (_projectileDefinition?.HitEffect == null) return;
+
+        var effect = _projectileDefinition.HitEffect.Instantiate<Node2D>();
+        effect.GlobalPosition = GlobalPosition;
+        effect.Rotation = _direction.Angle() + Mathf.Pi;
+        GetTree().Root.AddChild(effect);
     }
 
     protected virtual void OnHit(Node2D body)

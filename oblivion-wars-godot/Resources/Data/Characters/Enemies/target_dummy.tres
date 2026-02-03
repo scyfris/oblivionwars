@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="EnemyDefinition" format=3]
+[gd_resource type="Resource" script_class="EnemyDefinition" format=3 uid="uid://ccy1qxn7wx5au"]
 
 [ext_resource type="Script" uid="uid://dbdtd1ea68ii6" path="res://Scripts/Data/Definitions/EnemyDefinition.cs" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
+DropTable = null
 EntityId = "target_dummy"
-MaxHealth = 100.0
 MoveSpeed = 0.0
+Gravity = 0.0
 metadata/_custom_type_script = "uid://dbdtd1ea68ii6"

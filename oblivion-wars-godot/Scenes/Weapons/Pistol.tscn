@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://r33xmyppd6s2"]
 
 [ext_resource type="Script" uid="uid://els0tjl7ehxn" path="res://Scripts/Combat/Weapons/Weapon.cs" id="1_weapon"]
-[ext_resource type="Resource" uid="uid://cww0rvnlhlgj3" path="res://Resources/Data/Weapons/raycast_pistol.tres" id="2_t511x"]
+[ext_resource type="Resource" uid="uid://t1a573wpeldn" path="res://Resources/Data/Weapons/pistol.tres" id="2_definition"]
 
 [node name="Pistol" type="Node2D" unique_id=1927252115]
 script = ExtResource("1_weapon")
-_weaponDefinition = ExtResource("2_t511x")
+_weaponDefinition = ExtResource("2_definition")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=950512530]
 offset_left = -4.0

@@ -13,12 +13,6 @@ public partial class Weapon : Holdable
             _useCooldown = _weaponDefinition.UseCooldown;
     }
 
-    public void InitWeapon(WeaponDefinition definition)
-    {
-        _weaponDefinition = definition;
-        _useCooldown = definition.UseCooldown;
-    }
-
     public override void OnUsePressed(Vector2 targetPosition)
     {
         _hasFiredThisPress = false;
@@ -131,14 +125,23 @@ public partial class Weapon : Holdable
             hitPosition = _owner.GlobalPosition + direction * projDef.HitscanRange;
         }
 
-        // Spawn projectile scene for trail VFX
+        // Spawn hit effect at impact point
+        if (result.Count > 0 && projDef.HitEffect != null)
+        {
+            var effect = projDef.HitEffect.Instantiate<Node2D>();
+            effect.GlobalPosition = hitPosition;
+            effect.Rotation = direction.Angle() + Mathf.Pi;
+            _owner.GetTree().Root.AddChild(effect);
+        }
+
+        // Spawn projectile scene for trail VFX — AddChild first so _trail export resolves
         if (projDef.ProjectileScene != null)
         {
             var trailProjectile = projDef.ProjectileScene.Instantiate<Projectile>();
             trailProjectile.GlobalPosition = _owner.GlobalPosition;
             trailProjectile.Initialize(direction, 0, projDef, _owner);
-            trailProjectile.InitializeAsHitscanTrail(_owner.GlobalPosition, hitPosition);
             _owner.GetParent().AddChild(trailProjectile);
+            trailProjectile.InitializeAsHitscanTrail(_owner.GlobalPosition, hitPosition);
         }
     }
 }
