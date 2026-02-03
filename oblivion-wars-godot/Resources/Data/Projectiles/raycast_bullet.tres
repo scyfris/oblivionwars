@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ProjectileDefinition" format=3 uid="uid://d4mosgvbycq4v"]
+
+[ext_resource type="Script" uid="uid://ccc31phpdd2at" path="res://Scripts/Data/Definitions/ProjectileDefinition.cs" id="1_dodc7"]
+
+[resource]
+script = ExtResource("1_dodc7")
+ProjectileId = "raycast_bullet"
+Speed = 0.0
+metadata/_custom_type_script = "uid://ccc31phpdd2at"

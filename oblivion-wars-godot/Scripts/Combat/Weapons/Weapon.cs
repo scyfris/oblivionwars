@@ -3,10 +3,8 @@ using Godot;
 public partial class Weapon : Holdable
 {
     [Export] private WeaponDefinition _weaponDefinition;
-    [Export] private Line2D _bulletTrail;
     [Export] private AnimationPlayer _animationPlayer;
 
-    private float _trailTimer = 0f;
     private bool _hasFiredThisPress = false;
 
     public override void _Ready()
@@ -15,16 +13,10 @@ public partial class Weapon : Holdable
             _useCooldown = _weaponDefinition.UseCooldown;
     }
 
-    public override void Update(double delta)
+    public void InitWeapon(WeaponDefinition definition)
     {
-        base.Update(delta);
-
-        if (_bulletTrail != null && _trailTimer > 0)
-        {
-            _trailTimer -= (float)delta;
-            if (_trailTimer <= 0)
-                _bulletTrail.Visible = false;
-        }
+        _weaponDefinition = definition;
+        _useCooldown = definition.UseCooldown;
     }
 
     public override void OnUsePressed(Vector2 targetPosition)
@@ -139,25 +131,14 @@ public partial class Weapon : Holdable
             hitPosition = _owner.GlobalPosition + direction * projDef.HitscanRange;
         }
 
-        ShowBulletTrail(_owner.GlobalPosition, hitPosition, projDef);
-
-        // Spawn projectile scene at hit point for VFX if available
+        // Spawn projectile scene for trail VFX
         if (projDef.ProjectileScene != null)
         {
-            var vfx = projDef.ProjectileScene.Instantiate<Node2D>();
-            vfx.GlobalPosition = hitPosition;
-            _owner.GetParent().AddChild(vfx);
+            var trailProjectile = projDef.ProjectileScene.Instantiate<Projectile>();
+            trailProjectile.GlobalPosition = _owner.GlobalPosition;
+            trailProjectile.Initialize(direction, 0, projDef, _owner);
+            trailProjectile.InitializeAsHitscanTrail(_owner.GlobalPosition, hitPosition);
+            _owner.GetParent().AddChild(trailProjectile);
         }
-    }
-
-    private void ShowBulletTrail(Vector2 from, Vector2 to, ProjectileDefinition projDef)
-    {
-        if (_bulletTrail == null) return;
-
-        _bulletTrail.ClearPoints();
-        _bulletTrail.AddPoint(from);
-        _bulletTrail.AddPoint(to);
-        _bulletTrail.Visible = true;
-        _trailTimer = projDef.TrailDuration;
     }
 }

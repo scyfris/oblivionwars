@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://crkdvcoseefv1"]
+
+[ext_resource type="Script" uid="uid://els0tjl7ehxn" path="res://Scripts/Combat/Weapons/Weapon.cs" id="1_k7388"]
+[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="2_k7388"]
+
+[sub_resource type="Resource" id="Resource_ybsh0"]
+script = ExtResource("2_k7388")
+metadata/_custom_type_script = "uid://i6xsa0mr56ur"
+
+[node name="Pistol" type="Node2D" unique_id=1927252115]
+script = ExtResource("1_k7388")
+_weaponDefinition = SubResource("Resource_ybsh0")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=950512530]
+offset_left = -4.0
+offset_top = -3.0
+offset_right = 16.0
+offset_bottom = 3.0
+color = Color(0.2, 0.4, 0.8, 1)
+
+[node name="ProjectileSpawn" type="Node2D" parent="." unique_id=483511198]
+position = Vector2(20, 0)

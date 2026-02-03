@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://cww0rvnlhlgj3"]
+
+[ext_resource type="Resource" uid="uid://d4mosgvbycq4v" path="res://Resources/Data/Projectiles/raycast_bullet.tres" id="1_6bvv2"]
+[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="2_8ve3t"]
+[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="3_oxlom"]
+
+[resource]
+script = ExtResource("3_oxlom")
+WeaponId = "raycast_pistol"
+UseCooldown = 0.2
+Projectile = ExtResource("1_6bvv2")
+WeaponScene = ExtResource("2_8ve3t")
+metadata/_custom_type_script = "uid://i6xsa0mr56ur"

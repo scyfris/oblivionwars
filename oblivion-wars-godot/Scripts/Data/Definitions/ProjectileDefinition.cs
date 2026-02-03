@@ -22,6 +22,9 @@ public partial class ProjectileDefinition : Resource
     [Export] public float ExplosionRadius = 0.0f;
     [Export] public float FuseTime = 0.0f;
 
+    [ExportGroup("Trail")]
+    [Export] public int TrailLength = 10;
+
     [ExportGroup("Visuals")]
     [Export] public PackedScene ProjectileScene;
 }

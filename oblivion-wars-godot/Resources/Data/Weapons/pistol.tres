@@ -1,11 +1,13 @@
 [gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://t1a573wpeldn"]
 
 [ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="1_85pdd"]
-[ext_resource type="Resource" path="res://Resources/Data/Projectiles/bullet.tres" id="2_projectile"]
+[ext_resource type="Resource" uid="uid://d17y8xwqekvkh" path="res://Resources/Data/Projectiles/bullet.tres" id="2_projectile"]
+[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="3_scene"]
 
 [resource]
 script = ExtResource("1_85pdd")
 WeaponId = "pistol"
-UseCooldown = 0.0
+UseCooldown = 0.2
 Projectile = ExtResource("2_projectile")
+WeaponScene = ExtResource("3_scene")
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"

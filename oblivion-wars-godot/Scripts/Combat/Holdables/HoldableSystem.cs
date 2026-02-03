@@ -2,8 +2,8 @@ using Godot;
 
 public partial class HoldableSystem : Node
 {
-    [Export] private PackedScene _leftHoldableScene;
-    [Export] private PackedScene _rightHoldableScene;
+    [Export] private WeaponDefinition _leftWeaponDefinition;
+    [Export] private WeaponDefinition _rightWeaponDefinition;
 
     private Holdable _leftHoldable;
     private Holdable _rightHoldable;
@@ -13,11 +13,11 @@ public partial class HoldableSystem : Node
     {
         _owner = owner;
 
-        if (_leftHoldableScene != null)
-            _leftHoldable = InstantiateHoldable(_leftHoldableScene);
+        if (_leftWeaponDefinition != null)
+            _leftHoldable = InstantiateWeapon(_leftWeaponDefinition);
 
-        if (_rightHoldableScene != null)
-            _rightHoldable = InstantiateHoldable(_rightHoldableScene);
+        if (_rightWeaponDefinition != null)
+            _rightHoldable = InstantiateWeapon(_rightWeaponDefinition);
     }
 
     public void Update(double delta)
@@ -33,7 +33,7 @@ public partial class HoldableSystem : Node
     public void ReleaseLeft(Vector2 target) { _leftHoldable?.OnUseReleased(target); }
     public void ReleaseRight(Vector2 target) { _rightHoldable?.OnUseReleased(target); }
 
-    public void SwapLeft(PackedScene newScene)
+    public void SwapLeft(WeaponDefinition newDefinition)
     {
         if (_leftHoldable != null)
         {
@@ -42,14 +42,14 @@ public partial class HoldableSystem : Node
             _leftHoldable = null;
         }
 
-        if (newScene != null)
+        if (newDefinition != null)
         {
-            _leftHoldableScene = newScene;
-            _leftHoldable = InstantiateHoldable(newScene);
+            _leftWeaponDefinition = newDefinition;
+            _leftHoldable = InstantiateWeapon(newDefinition);
         }
     }
 
-    public void SwapRight(PackedScene newScene)
+    public void SwapRight(WeaponDefinition newDefinition)
     {
         if (_rightHoldable != null)
         {
@@ -58,17 +58,24 @@ public partial class HoldableSystem : Node
             _rightHoldable = null;
         }
 
-        if (newScene != null)
+        if (newDefinition != null)
         {
-            _rightHoldableScene = newScene;
-            _rightHoldable = InstantiateHoldable(newScene);
+            _rightWeaponDefinition = newDefinition;
+            _rightHoldable = InstantiateWeapon(newDefinition);
         }
     }
 
-    private Holdable InstantiateHoldable(PackedScene scene)
+    private Holdable InstantiateWeapon(WeaponDefinition definition)
     {
-        var instance = scene.Instantiate<Holdable>();
+        if (definition.WeaponScene == null)
+        {
+            GD.PrintErr($"HoldableSystem: WeaponDefinition '{definition.WeaponId}' has no WeaponScene assigned.");
+            return null;
+        }
+
+        var instance = definition.WeaponScene.Instantiate<Weapon>();
         AddChild(instance);
+        instance.InitWeapon(definition);
         instance.InitOwner(_owner);
         instance.OnEquip();
         return instance;

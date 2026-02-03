@@ -2,15 +2,23 @@ using Godot;
 
 public abstract partial class Projectile : Area2D
 {
+    [Export] protected Line2D _trail;
+
     protected ProjectileDefinition _projectileDefinition;
     protected float _damage;
     protected Vector2 _direction;
     protected float _timeAlive = 0f;
     protected Node2D _shooter;
 
+    private bool _isHitscanTrail = false;
+    private float _hitscanTrailTimer = 0f;
+
     public override void _Ready()
     {
         BodyEntered += _OnBodyEntered;
+
+        if (_trail != null)
+            _trail.TopLevel = true;
     }
 
     public virtual void Initialize(Vector2 direction, float damage,
@@ -23,13 +31,63 @@ public abstract partial class Projectile : Area2D
         Rotation = direction.Angle();
     }
 
+    public void InitializeAsHitscanTrail(Vector2 from, Vector2 to)
+    {
+        _isHitscanTrail = true;
+        _hitscanTrailTimer = _projectileDefinition?.TrailDuration ?? 0.1f;
+
+        // Disable collision for trail-only projectiles
+        SetDeferred("monitoring", false);
+        SetDeferred("monitorable", false);
+
+        // Hide the projectile visual, only show trail
+        var visual = GetNodeOrNull<Node2D>("Visual");
+        if (visual != null)
+            visual.Visible = false;
+
+        if (_trail != null)
+        {
+            _trail.ClearPoints();
+            _trail.AddPoint(from);
+            _trail.AddPoint(to);
+            _trail.Visible = true;
+        }
+    }
+
     public override void _PhysicsProcess(double delta)
     {
+        if (_isHitscanTrail)
+        {
+            UpdateHitscanTrail(delta);
+            return;
+        }
+
         UpdateMovement(delta);
+        UpdateTrail();
         UpdateLifetime(delta);
     }
 
     protected abstract void UpdateMovement(double delta);
+
+    private void UpdateTrail()
+    {
+        if (_trail == null || _isHitscanTrail) return;
+
+        int maxPoints = _projectileDefinition?.TrailLength ?? 10;
+        _trail.AddPoint(GlobalPosition);
+
+        while (_trail.GetPointCount() > maxPoints)
+            _trail.RemovePoint(0);
+
+        _trail.Visible = _trail.GetPointCount() > 1;
+    }
+
+    private void UpdateHitscanTrail(double delta)
+    {
+        _hitscanTrailTimer -= (float)delta;
+        if (_hitscanTrailTimer <= 0)
+            QueueFree();
+    }
 
     protected virtual void UpdateLifetime(double delta)
     {
