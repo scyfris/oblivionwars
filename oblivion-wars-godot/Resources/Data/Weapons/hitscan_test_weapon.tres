@@ -1,8 +1,10 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://cww0rvnlhlgj3"]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3 uid="uid://cww0rvnlhlgj3"]
 
 [ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="1_njcnb"]
+[ext_resource type="Resource" path="res://Resources/Data/Projectiles/bullet.tres" id="2_projectile"]
 
 [resource]
 script = ExtResource("1_njcnb")
 WeaponId = "hitscan_test"
+Projectile = ExtResource("2_projectile")
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"

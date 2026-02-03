@@ -23,6 +23,7 @@ config/icon="res://icon.svg"
 EventBus="res://Scripts/Core/EventBus.cs"
 CombatSystem="res://Scripts/Systems/CombatSystem.cs"
 HealthSystem="res://Scripts/Systems/HealthSystem.cs"
+HazardSystem="res://Scripts/Systems/HazardSystem.cs"
 
 [display]
 

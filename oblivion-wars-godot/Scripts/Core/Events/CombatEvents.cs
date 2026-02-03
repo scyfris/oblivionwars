@@ -9,6 +9,7 @@ public struct HitEvent : IGameEvent
     public float BaseDamage;
     public Vector2 HitDirection;
     public Vector2 HitPosition;
+    public ProjectileDefinition Projectile;
 }
 
 public struct EntityDiedEvent : IGameEvent

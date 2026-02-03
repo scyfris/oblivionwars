@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://b2dl33mekocnv" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
 [ext_resource type="TileSet" uid="uid://cifh4slrp6lmq" path="res://Resources/Tilemaps/kenney_abstract-platformer/Godot/KenneyAbstractPlatformer-TileSet.tres" id="5_rqyoi"]
 [ext_resource type="Script" uid="uid://b3dp1tcocrav0" path="res://Scripts/UI/DebugHUD.cs" id="6_debughud"]
+[ext_resource type="PackedScene" path="res://Scenes/Characters/TargetDummy.tscn" id="7_dummy"]
 
 [node name="TestLevel" type="Node2D" unique_id=461833474]
 
@@ -50,3 +51,6 @@ script = ExtResource("6_debughud")
 _playerPath = NodePath("../../Control/CharacterController/PlayerCharacterBody2D")
 
 [node name="Crosshair" parent="UI" unique_id=617101699 instance=ExtResource("3_jxtak")]
+
+[node name="TargetDummy" parent="Control" instance=ExtResource("7_dummy")]
+position = Vector2(448, 960)
