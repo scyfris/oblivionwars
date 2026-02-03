@@ -29,14 +29,12 @@ public partial class CombatSystem : GameSystem
 
     private void OnHit(HitEvent evt)
     {
-        GD.Print("HIT EBENT");
-        var target = GodotObject.InstanceFromId(evt.TargetInstanceId) as Node2D;
-        if (target is not IGameEntity entity)
+        var target = GodotObject.InstanceFromId(evt.TargetInstanceId);
+        if (target is not EntityCharacterBody2D entity)
             return;
 
         float finalDamage = evt.BaseDamage;
 
-        // Apply status effect modifiers (e.g., vulnerable increases damage taken)
         foreach (var effect in entity.RuntimeData.StatusEffects)
         {
             finalDamage *= effect.Definition.DamageMultiplier;

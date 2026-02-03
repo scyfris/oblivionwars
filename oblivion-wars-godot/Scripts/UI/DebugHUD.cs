@@ -4,14 +4,14 @@ public partial class DebugHUD : Label
 {
     [Export] private NodePath _playerPath;
 
-    private IGameEntity _player;
+    private EntityCharacterBody2D _player;
 
     public override void _Ready()
     {
         if (_playerPath != null)
         {
             var node = GetNode(_playerPath);
-            if (node is IGameEntity entity)
+            if (node is EntityCharacterBody2D entity)
                 _player = entity;
         }
     }

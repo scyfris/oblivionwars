@@ -73,7 +73,7 @@ public partial class StatusEffectSystem : GameSystem
         // or we can iterate registered entities here in the future.
     }
 
-    public void ApplyEffect(IGameEntity entity, string effectId, float duration = -1f)
+    public void ApplyEffect(EntityCharacterBody2D entity, string effectId, float duration = -1f)
     {
         if (!_registry.TryGetValue(effectId, out var def))
         {
@@ -113,7 +113,7 @@ public partial class StatusEffectSystem : GameSystem
         });
     }
 
-    public void RemoveEffect(IGameEntity entity, string effectId)
+    public void RemoveEffect(EntityCharacterBody2D entity, string effectId)
     {
         var idx = entity.RuntimeData.StatusEffects.FindIndex(e => e.EffectId == effectId);
         if (idx >= 0)
@@ -127,7 +127,7 @@ public partial class StatusEffectSystem : GameSystem
         }
     }
 
-    public bool HasEffect(IGameEntity entity, string effectId)
+    public bool HasEffect(EntityCharacterBody2D entity, string effectId)
     {
         return entity.RuntimeData.StatusEffects.Exists(e => e.EffectId == effectId);
     }
@@ -135,7 +135,7 @@ public partial class StatusEffectSystem : GameSystem
     /// <summary>
     /// Tick all status effects on an entity. Call this from the entity's _PhysicsProcess or from a managing system.
     /// </summary>
-    public void TickEffects(IGameEntity entity, float delta)
+    public void TickEffects(EntityCharacterBody2D entity, float delta)
     {
         for (int i = entity.RuntimeData.StatusEffects.Count - 1; i >= 0; i--)
         {

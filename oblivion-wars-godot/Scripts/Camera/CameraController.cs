@@ -1,6 +1,4 @@
 using Godot;
-using System;
-using System.Linq.Expressions;
 
 /// <summary>
 /// Advanced platformer camera system with smooth following, rotation support,

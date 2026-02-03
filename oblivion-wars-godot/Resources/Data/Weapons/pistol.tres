@@ -1,13 +1,16 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://t1a573wpeldn"]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3 uid="uid://t1a573wpeldn"]
 
 [ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="1_85pdd"]
-[ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="2_projectile"]
+[ext_resource type="Resource" path="res://Resources/Data/Projectiles/bullet.tres" id="2_projectile"]
 
 [resource]
 script = ExtResource("1_85pdd")
 WeaponId = "pistol"
-FireRate = 0.2
-ProjectileScene = ExtResource("2_projectile")
 UseCooldown = 0.2
-TrailDuration = 0.1
+IsAutomatic = true
+DamageScale = 1.0
+Knockback = 100.0
+ScreenShake = 1.5
+ProjectileSpawnOffset = Vector2(20, 0)
+Projectile = ExtResource("2_projectile")
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"

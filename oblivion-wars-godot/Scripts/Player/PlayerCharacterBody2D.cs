@@ -1,87 +1,32 @@
 using Godot;
-using System;
 
-public partial class PlayerCharacterBody2D : CharacterBody2D, IGameEntity
+public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 {
-    [Export] private PlayerDefinition _definition;
+    [Export] private new PlayerDefinition _definition;
 
     [Export] private HoldableSystem _holdableSystem;
 
-    [ExportGroup("Hazards")]
-    [Export] private HazardDefinition _hazardDefinition;
+    [ExportGroup("Visuals")]
     [Export] private Node2D _spriteNode;
 
-    // IGameEntity implementation
-    private EntityRuntimeData _runtimeData;
-    public EntityRuntimeData RuntimeData => _runtimeData;
-    public CharacterDefinition Definition => _definition;
-    public Node2D EntityNode => this;
+    [ExportGroup("Wall Slide Effects")]
+    [Export] private Node2D _wallSlideDustPosition;
+    [Export] private PackedScene _wallSlideDustScene;
 
-    // Invincibility state
+    // Invincibility state (player-only)
     private bool _isInvincible = false;
     private float _invincibilityTimer = 0f;
     private float _flashTimer = 0f;
     private const float FlashInterval = 0.1f;
     public bool IsInvincible => _isInvincible;
 
-    private int _moveDirection = 0;
-
-    [ExportGroup("Wall Slide Effects")]
-
-    /// <summary>
-    /// Node2D marker in the scene that defines where wall slide dust particles emit from. Reposition in editor to adjust.
-    /// </summary>
-    [Export] private Node2D _wallSlideDustPosition;
-
-    /// <summary>
-    /// Particle scene to instantiate for wall slide dust. Assign a CpuParticles2D scene to customize the effect in the editor.
-    /// </summary>
-    [Export] private PackedScene _wallSlideDustScene;
-
-    private bool _isWallSliding = false;
-    private Vector2 _wallNormal = Vector2.Zero;
-    private float _wallJumpInputLockTimer = 0f;
-    private float _wallJumpPushAwayDurationTimer = 0f;
     private CpuParticles2D _wallSlideDust;
-
-    [ExportGroup("Gravity Flip")]
-
-    /// <summary>
-    /// How quickly the player sprite rotates visually when gravity changes (higher = faster rotation)
-    /// </summary>
-    [Export] private float _gravityFlipRotationSpeed = 10.0f;
-
-    /// <summary>
-    /// Delay in seconds before the player sprite begins rotating after a gravity flip
-    /// </summary>
-    [Export] private float _bodyFlipDelay = 0.0f;
-
-    /// <summary>
-    /// Whether to rotate the velocity vector when gravity flips to maintain momentum in the new orientation
-    /// </summary>
-    [Export] private bool _maintainMomentumOnFlip = true;
-
-    // Gravity state tracking
-    private int _gravityRotation = 0; // 0, 90, 180, 270 degrees
-    private Vector2 _gravityDirection = Vector2.Down; // Current gravity pull direction
-    private Vector2 _upDirection = Vector2.Up; // Current up direction
-    private float _targetRotation = 0.0f; // Target rotation in radians
-    private bool _isRotatingGravity = false; // Currently animating rotation
-    private float _bodyFlipDelayTimer = 0.0f; // Countdown before rotation starts
 
     public override void _Ready()
     {
-        if (_definition != null)
-        {
-            _runtimeData = new EntityRuntimeData
-            {
-                EntityId = _definition.EntityId,
-                RuntimeInstanceId = GetInstanceId(),
-                CurrentHealth = _definition.MaxHealth,
-                MaxHealth = _definition.MaxHealth,
-                Definition = _definition
-            };
-        }
+        // Set the base class _definition so base code works
+        base._definition = _definition;
+        base._Ready();
 
         if (_wallSlideDustPosition != null && _wallSlideDustScene != null)
         {
@@ -93,11 +38,21 @@ public partial class PlayerCharacterBody2D : CharacterBody2D, IGameEntity
         _holdableSystem?.Initialize(this);
 
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
+        EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
     }
 
     public override void _ExitTree()
     {
         EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
+        EventBus.Instance?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        base._PhysicsProcess(delta);
+
+        UpdateInvincibility(delta);
+        _holdableSystem?.Update(delta);
     }
 
     private void OnEntityDied(EntityDiedEvent evt)
@@ -108,341 +63,54 @@ public partial class PlayerCharacterBody2D : CharacterBody2D, IGameEntity
         GetTree().ReloadCurrentScene();
     }
 
-    public override void _PhysicsProcess(double delta)
+    private void OnDamageApplied(DamageAppliedEvent evt)
     {
-    //    base._PhysicsProcess(delta);
+        if (evt.TargetInstanceId != GetInstanceId()) return;
 
-        // Smooth visual rotation toward target (with optional delay)
-        if (_isRotatingGravity)
+        StartInvincibility();
+    }
+
+    // Override hazard check to skip while invincible
+    protected override void CheckHazardTiles()
+    {
+        if (_isInvincible) return;
+        base.CheckHazardTiles();
+    }
+
+    // Wall slide dust particle management
+    protected override void SetWallSliding(bool sliding)
+    {
+        base.SetWallSliding(sliding);
+        if (_wallSlideDust != null)
         {
-            if (_bodyFlipDelayTimer > 0)
-            {
-                _bodyFlipDelayTimer -= (float)delta;
-            }
-            else
-            {
-                float angularDistance = Mathf.Abs(Mathf.AngleDifference(GlobalRotation, _targetRotation));
-
-                if (angularDistance > 0.01f)
-                {
-                    float direction = Mathf.Sign(Mathf.AngleDifference(GlobalRotation, _targetRotation));
-                    float stepAmount = _gravityFlipRotationSpeed * (float)delta;
-
-                    if (angularDistance <= stepAmount)
-                    {
-                        // Close enough - snap to target
-                        GlobalRotation = _targetRotation;
-                        _isRotatingGravity = false;
-                    }
-                    else
-                    {
-                        GlobalRotation += direction * stepAmount;
-                    }
-                }
-                else
-                {
-                    GlobalRotation = _targetRotation;
-                    _isRotatingGravity = false;
-                }
-            }
+            _wallSlideDust.Emitting = sliding;
+            if (sliding)
+                _wallSlideDust.Direction = _wallNormal;
         }
+    }
 
-        // Set CharacterBody2D's up direction (Godot internal)
-        UpDirection = _upDirection;
-
-        // Update wall jump input lock timer
-        if (_wallJumpInputLockTimer > 0)
-        {
-            _wallJumpInputLockTimer -= (float)delta;
-        }
-
-        if (_wallJumpPushAwayDurationTimer > 0)
-        {
-            _wallJumpPushAwayDurationTimer -= (float)delta;
-
-
-            if (_moveDirection < 0 || _moveDirection > 0)
-            {
-                // Can cancel this one out. The behaviour we want is that
-                // the player can cancel horizontal momentum after wall jumping
-                // if the press the opposite direction, BUT if they don't then
-                // the horizontal momentum will still continue for a slightly longer time
-                // before stopping.  This matches HollowKnight a bit and allows player time to
-                // press the opposite arrow key, or if they press the arrow key back towards the
-                // wall it will cancel earlier.
-                _wallJumpPushAwayDurationTimer = 0;
-            }
-        }
-
-        // Check for wall sliding
-        UpdateWallSliding();
-
-        // Apply appropriate gravity based on state
-        float currentGravity = _isWallSliding ? _definition.Gravity * _definition.WallSlideSpeedFraction : _definition.Gravity;
-
-        // Calculate horizontal direction (perpendicular to gravity)
-        // When gravity is down (0,1), horizontal should be right (1,0)
-        Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
-
-        // Determine horizontal velocity based on wall jump lock state
-        Vector2 horizontalVelocity = new Vector2(0, 0);
-        if (_wallJumpInputLockTimer > 0 || _wallJumpPushAwayDurationTimer > 0)
-        {
-            // During wall jump lock, maintain current horizontal velocity
-            // Project current velocity onto horizontal direction
-            float currentHorizontalSpeed = Velocity.Dot(horizontalDirection);
-            horizontalVelocity = horizontalDirection * currentHorizontalSpeed;
-        }
+    public void UseHoldablePressed(Vector2 targetPosition, bool isLeft)
+    {
+        if (isLeft)
+            _holdableSystem?.PressLeft(targetPosition);
         else
-        {
-            // Normal movement control along horizontal direction
-            horizontalVelocity = horizontalDirection * _moveDirection * _definition.MoveSpeed;
-        }
+            _holdableSystem?.PressRight(targetPosition);
+    }
 
-        // Start with horizontal velocity
-        Vector2 newVel = horizontalVelocity;
-
-        // Add current velocity along gravity direction (for falling/jumping)
-        float velocityAlongGravity = Velocity.Dot(_gravityDirection);
-        newVel += _gravityDirection * velocityAlongGravity;
-
-        // Apply gravity acceleration
-        if (!_isWallSliding)
-        {
-            newVel += _gravityDirection * currentGravity * (float)delta;
-        }
+    public void UseHoldableReleased(Vector2 targetPosition, bool isLeft)
+    {
+        if (isLeft)
+            _holdableSystem?.ReleaseLeft(targetPosition);
         else
-        {
-            // Wall sliding: clamp velocity along gravity to slide speed
-            newVel = horizontalVelocity + _gravityDirection * (_definition.Gravity * _definition.WallSlideSpeedFraction);
-        }
-
-        this.Velocity = newVel;
-
-        // Move and slide along the floor with the current velocity. Updates velocity based on collisions and such.
-        MoveAndSlide();
-
-        // Zero out velocity along gravity when on floor to prevent jittering
-        if (IsOnFloor())
-        {
-            float gravityVelocity = Velocity.Dot(_gravityDirection);
-            if (gravityVelocity > 0) // Moving with gravity (falling down)
-            {
-                // Remove the gravity component from velocity
-                Velocity -= _gravityDirection * gravityVelocity;
-            }
-        }
-
-        // Check for hazard tiles after movement
-        CheckHazardTiles();
-
-        // Update invincibility (sprite flashing)
-        UpdateInvincibility(delta);
-
-        // Update holdable system (handles use cooldowns)
-        _holdableSystem?.Update(delta);
+            _holdableSystem?.ReleaseRight(targetPosition);
     }
 
-    public void Jump()
+    public void UseHoldableHeld(Vector2 targetPosition, bool isLeft)
     {
-        // Wall jump
-        if (_isWallSliding)
-        {
-            // Jump perpendicular to gravity and away from wall
-            Vector2 jumpDirection = -_gravityDirection; // Up (opposite to gravity)
-            Vector2 pushDirection = _wallNormal; // Away from wall
-
-            Velocity = pushDirection * _definition.WallJumpPushAwayForce + jumpDirection * _definition.WallJumpStrength;
-            _isWallSliding = false;
-
-            // Lock horizontal input briefly to ensure the push-away takes effect
-            _wallJumpInputLockTimer = _definition.WallJumpInputLockDuration;
-            _wallJumpPushAwayDurationTimer = _definition.WallJumpPushAwayDuration;
-            return;
-        }
-
-        // Ground jump
-        if (!IsOnFloor()) { return; }
-
-        // Jump opposite to gravity direction
-        Velocity -= _gravityDirection * _definition.JumpStrength;
-    }
-
-    public void CancelJump()
-    {
-        // Check velocity against gravity, not hardcoded Y
-        float velocityAlongGravity = Velocity.Dot(_gravityDirection);
-        if (!IsOnFloor() && velocityAlongGravity < 0.0f) // Moving against gravity
-        {
-            // Cancel upward movement component
-            Velocity -= _gravityDirection * velocityAlongGravity;
-        }
-    }
-
-    public void MoveLeft()
-    {
-        _moveDirection = -1;
-    }
-    public void MoveRight()
-    {
-        _moveDirection = 1;
-    }
-
-    public void Stop()
-    {
-        _moveDirection = 0;
-    }
-
-    public void UseHoldableLeft(Vector2 targetPosition)
-    {
-        _holdableSystem?.UseLeft(targetPosition);
-    }
-
-    public void UseHoldableRight(Vector2 targetPosition)
-    {
-        _holdableSystem?.UseRight(targetPosition);
-    }
-
-    /// <summary>
-    /// Check if player should be wall sliding and update state accordingly.
-    /// Wall slide conditions:
-    /// - Player is touching a wall (IsOnWall)
-    /// - Player is in the air (not on floor)
-    /// - Player is moving downward or stationary
-    /// - Player is not actively moving away from the wall
-    /// </summary>
-    private void UpdateWallSliding()
-    {
-        // Can't wall slide if on the ground
-        if (IsOnFloor())
-        {
-            _isWallSliding = false;
-            if (_wallSlideDust != null)
-                _wallSlideDust.Emitting = false;
-            return;
-        }
-
-        // Check if touching a wall
-        if (IsOnWall())
-        {
-            _wallNormal = GetWallNormal();
-
-            // Calculate horizontal direction (perpendicular to gravity)
-            Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
-
-            // Determine if player is moving away from wall in gravity-relative space
-            // Wall normal points away from wall
-            // Check if input direction (along horizontal) matches wall normal direction
-            float wallHorizontalDirection = _wallNormal.Dot(horizontalDirection);
-
-            bool movingAwayFromWall = false;
-            if (wallHorizontalDirection > 0.1f && _moveDirection > 0) // Wall on "left" (relative to gravity), moving "right"
-            {
-                movingAwayFromWall = true;
-            }
-            else if (wallHorizontalDirection < -0.1f && _moveDirection < 0) // Wall on "right" (relative to gravity), moving "left"
-            {
-                movingAwayFromWall = true;
-            }
-
-            // Start wall sliding if moving along gravity and not actively moving away
-            float velocityAlongGravity = Velocity.Dot(_gravityDirection);
-            if (velocityAlongGravity >= 0 && !movingAwayFromWall)
-            {
-                _isWallSliding = true;
-
-                // Update dust particle direction to point away from wall
-                if (_wallSlideDust != null)
-                {
-                    _wallSlideDust.Emitting = true;
-                    _wallSlideDust.Direction = _wallNormal;
-                }
-            }
-            else
-            {
-                _isWallSliding = false;
-                if (_wallSlideDust != null)
-                    _wallSlideDust.Emitting = false;
-            }
-        }
+        if (isLeft)
+            _holdableSystem?.HeldLeft(targetPosition);
         else
-        {
-            _isWallSliding = false;
-            if (_wallSlideDust != null)
-                _wallSlideDust.Emitting = false;
-        }
-    }
-
-    /// <summary>
-    /// Rotate gravity clockwise 90° (0 -> 90 -> 180 -> 270 -> 0)
-    /// </summary>
-    public void RotateGravityClockwise()
-    {
-        RotateGravity(90);
-    }
-
-    /// <summary>
-    /// Rotate gravity counter-clockwise 90° (0 -> 270 -> 180 -> 90 -> 0)
-    /// </summary>
-    public void RotateGravityCounterClockwise()
-    {
-        RotateGravity(-90);
-    }
-
-    /// <summary>
-    /// Internal gravity rotation handler. Degrees must be a multiple of 90.
-    /// </summary>
-    private void RotateGravity(int degrees)
-    {
-        // Snap to nearest 90° and normalize to 0, 90, 180, 270
-        _gravityRotation = ((_gravityRotation + degrees + 360) % 360 / 90) * 90;
-
-        // Hardcode all values from the 4 possible gravity states
-        // No trig functions - all values are exact integers/constants
-        switch (_gravityRotation)
-        {
-            case 0:   // Gravity down
-                _gravityDirection = new Vector2(0, 1);
-                _targetRotation = 0;
-                break;
-            case 90:  // Gravity right
-                _gravityDirection = new Vector2(1, 0);
-                _targetRotation = -Mathf.Pi / 2;
-                break;
-            case 180: // Gravity up
-                _gravityDirection = new Vector2(0, -1);
-                _targetRotation = Mathf.Pi;
-                break;
-            case 270: // Gravity left
-                _gravityDirection = new Vector2(-1, 0);
-                _targetRotation = Mathf.Pi / 2;
-                break;
-            default:  // Should never happen, but clamp to nearest 90
-                GD.PrintErr("ERror - incorrect gravity rotation");
-                _gravityRotation = (_gravityRotation + 45) / 90 * 90 % 360;
-                RotateGravity(0); // Re-enter with clamped value
-                return;
-        }
-        _upDirection = -_gravityDirection;
-
-        _isRotatingGravity = true;
-        _bodyFlipDelayTimer = _bodyFlipDelay;
-
-        // Rotate velocity vector to maintain momentum
-        if (_maintainMomentumOnFlip)
-        {
-            Velocity = Velocity.Rotated(Mathf.DegToRad(degrees));
-        }
-
-        GD.Print($"Gravity rotated to {_gravityRotation}°, direction: {_gravityDirection}");
-    }
-
-    /// <summary>
-    /// Get current gravity rotation for camera
-    /// </summary>
-    public int GetGravityRotation()
-    {
-        return _gravityRotation;
+            _holdableSystem?.HeldRight(targetPosition);
     }
 
     private void StartInvincibility()
@@ -472,50 +140,5 @@ public partial class PlayerCharacterBody2D : CharacterBody2D, IGameEntity
             if (_spriteNode != null)
                 _spriteNode.Visible = true;
         }
-    }
-
-    private void CheckHazardTiles()
-    {
-        if (_isInvincible || _hazardDefinition == null) return;
-
-        for (int i = 0; i < GetSlideCollisionCount(); i++)
-        {
-            var collision = GetSlideCollision(i);
-            if (collision.GetCollider() is TileMapLayer tileMap)
-            {
-                var collisionPos = collision.GetPosition();
-                var tileCoords = tileMap.LocalToMap(tileMap.ToLocal(collisionPos));
-                var tileData = tileMap.GetCellTileData(tileCoords);
-                if (tileData == null) continue;
-
-                var hazardValue = tileData.GetCustomData("hazard_type");
-                if (hazardValue.VariantType == Variant.Type.Int)
-                {
-                    var hazardType = (TileHazardType)(int)hazardValue;
-                    if (hazardType != TileHazardType.None)
-                    {
-                        float damage = _hazardDefinition.GetDamage(hazardType);
-                        ApplyHazardDamage(damage);
-                        return; // Only apply once per frame
-                    }
-                }
-            }
-        }
-    }
-
-    private void ApplyHazardDamage(float damage)
-    {
-        EventBus.Instance.Raise(new HitEvent
-        {
-            TargetInstanceId = GetInstanceId(),
-            SourceInstanceId = 0,
-            BaseDamage = damage,
-            HitDirection = Vector2.Zero,
-            HitPosition = GlobalPosition
-        });
-
-        StartInvincibility();
-
-        GD.Print($"Player hit by hazard! Damage: {damage}, Health: {_runtimeData?.CurrentHealth}");
     }
 }
