@@ -29,6 +29,7 @@ public partial class CombatSystem : GameSystem
 
     private void OnHit(HitEvent evt)
     {
+        GD.Print("HIT EBENT");
         var target = GodotObject.InstanceFromId(evt.TargetInstanceId) as Node2D;
         if (target is not IGameEntity entity)
             return;

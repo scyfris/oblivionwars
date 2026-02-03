@@ -1,3 +1,5 @@
+
+// Tile types for surfaces that affect movement.
 public enum TileSurfaceType
 {
     Normal = 0,
@@ -6,6 +8,7 @@ public enum TileSurfaceType
     Bouncy = 3
 }
 
+// Tile hazards that may affect player.
 public enum TileHazardType
 {
     None = 0,
