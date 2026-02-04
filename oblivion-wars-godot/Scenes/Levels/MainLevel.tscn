@@ -31,6 +31,7 @@ _camera = NodePath("Camera2D")
 _rotationSpeed = 7.0
 _minRotationSpeed = 2.0
 _rotationDelay = 0.0
+_shakeDecayRate = 5.0
 
 [node name="Camera2D" type="Camera2D" parent="Control/CameraController" unique_id=210406581]
 ignore_rotation = false
