@@ -10,7 +10,6 @@ public partial class WeaponDefinition : Resource
     [Export] public float Knockback = 100.0f;
     [Export] public float ScreenShakeScale = 1.0f;
     [Export] public float ScreenShakeDurationScale = 1.0f;
-    [Export] public Vector2 ProjectileSpawnOffset = new Vector2(20, 0);
 
     [ExportGroup("Projectile")]
     [Export] public ProjectileDefinition Projectile;

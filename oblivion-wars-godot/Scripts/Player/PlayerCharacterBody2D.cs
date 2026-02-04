@@ -7,7 +7,10 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     [Export] private HoldableSystem _holdableSystem;
 
     [ExportGroup("Visuals")]
-    [Export] private Node2D _spriteNode;
+    [Export] private Node2D _flipRoot;
+    [Export] private AnimatedSprite2D _spriteNode;
+    [Export] private string _idleAnimation = "default";
+    [Export] private string _walkAnimation = "walk";
 
     [ExportGroup("Wall Slide Effects")]
     [Export] private Node2D _wallSlideDustPosition;
@@ -51,6 +54,7 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     {
         base._PhysicsProcess(delta);
 
+        UpdateAnimation();
         UpdateInvincibility(delta);
         _holdableSystem?.Update(delta);
     }
@@ -111,6 +115,19 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
             _holdableSystem?.HeldLeft(targetPosition);
         else
             _holdableSystem?.HeldRight(targetPosition);
+    }
+
+    private void UpdateAnimation()
+    {
+        if (_spriteNode == null) return;
+
+        if (_moveDirection != 0 && _flipRoot != null)
+            _flipRoot.Scale = new Vector2(_moveDirection < 0 ? -1 : 1, 1);
+
+        if (_moveDirection != 0 && IsOnFloor())
+            _spriteNode.Play(_walkAnimation);
+        else
+            _spriteNode.Play(_idleAnimation);
     }
 
     private void StartInvincibility()

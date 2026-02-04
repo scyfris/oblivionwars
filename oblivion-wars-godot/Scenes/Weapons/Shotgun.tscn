@@ -3,9 +3,10 @@
 [ext_resource type="Script" uid="uid://els0tjl7ehxn" path="res://Scripts/Combat/Weapons/Weapon.cs" id="1_weapon"]
 [ext_resource type="Resource" uid="uid://bkksyfiyb5e3y" path="res://Resources/Data/Weapons/shotgun.tres" id="2_definition"]
 
-[node name="Shotgun" type="Node2D" unique_id=951896950]
+[node name="Shotgun" type="Node2D" unique_id=951896950 node_paths=PackedStringArray("_projectileSpawn")]
 script = ExtResource("1_weapon")
 _weaponDefinition = ExtResource("2_definition")
+_projectileSpawn = NodePath("ProjectileSpawn")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=2078399736]
 offset_left = -6.0

@@ -4,6 +4,7 @@ public partial class HoldableSystem : Node
 {
     [Export] private PackedScene _leftHoldableScene;
     [Export] private PackedScene _rightHoldableScene;
+    [Export] private Node2D _weaponPosition;
 
     private Holdable _leftHoldable;
     private Holdable _rightHoldable;
@@ -68,7 +69,8 @@ public partial class HoldableSystem : Node
     private Holdable InstantiateHoldable(PackedScene scene)
     {
         var instance = scene.Instantiate<Holdable>();
-        AddChild(instance);
+        var parent = _weaponPosition != null ? (Node)_weaponPosition : this;
+        parent.AddChild(instance);
         instance.InitOwner(_owner);
         instance.OnEquip();
         return instance;

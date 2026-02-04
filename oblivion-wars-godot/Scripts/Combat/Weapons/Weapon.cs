@@ -3,6 +3,7 @@ using Godot;
 public partial class Weapon : Holdable
 {
     [Export] private WeaponDefinition _weaponDefinition;
+    [Export] private Node2D _projectileSpawn;
     [Export] private AnimationPlayer _animationPlayer;
 
     private bool _hasFiredThisPress = false;
@@ -53,7 +54,7 @@ public partial class Weapon : Holdable
 
     private void FireProjectile(Vector2 targetPosition, float damage, ProjectileDefinition projDef)
     {
-        Vector2 baseDirection = (targetPosition - _owner.GlobalPosition).Normalized();
+        Vector2 baseDirection = (targetPosition - GetSpawnPosition()).Normalized();
 
         if (_weaponDefinition.SpreadCount <= 1)
         {
@@ -76,12 +77,17 @@ public partial class Weapon : Holdable
         }
     }
 
+    private Vector2 GetSpawnPosition()
+    {
+        return _projectileSpawn != null ? _projectileSpawn.GlobalPosition : _owner.GlobalPosition;
+    }
+
     private void SpawnProjectile(Vector2 direction, float damage, ProjectileDefinition projDef)
     {
         if (projDef.ProjectileScene == null) return;
 
         var projectile = projDef.ProjectileScene.Instantiate<Projectile>();
-        projectile.GlobalPosition = _owner.GlobalPosition + _weaponDefinition.ProjectileSpawnOffset;
+        projectile.GlobalPosition = GetSpawnPosition();
         projectile.Initialize(direction, damage, projDef, _owner);
 
         _owner.GetParent().AddChild(projectile);
@@ -89,12 +95,13 @@ public partial class Weapon : Holdable
 
     private void FireInstant(Vector2 targetPosition, float damage, ProjectileDefinition projDef)
     {
-        Vector2 direction = (targetPosition - _owner.GlobalPosition).Normalized();
+        Vector2 spawnPos = GetSpawnPosition();
+        Vector2 direction = (targetPosition - spawnPos).Normalized();
 
         var spaceState = _owner.GetWorld2D().DirectSpaceState;
         var query = PhysicsRayQueryParameters2D.Create(
-            _owner.GlobalPosition,
-            _owner.GlobalPosition + direction * projDef.HitscanRange
+            spawnPos,
+            spawnPos + direction * projDef.HitscanRange
         );
 
         if (_owner is CollisionObject2D collisionOwner)
@@ -122,7 +129,7 @@ public partial class Weapon : Holdable
         }
         else
         {
-            hitPosition = _owner.GlobalPosition + direction * projDef.HitscanRange;
+            hitPosition = spawnPos + direction * projDef.HitscanRange;
         }
 
         // Spawn hit effect at impact point
@@ -138,10 +145,10 @@ public partial class Weapon : Holdable
         if (projDef.ProjectileScene != null)
         {
             var trailProjectile = projDef.ProjectileScene.Instantiate<Projectile>();
-            trailProjectile.GlobalPosition = _owner.GlobalPosition;
+            trailProjectile.GlobalPosition = spawnPos;
             trailProjectile.Initialize(direction, 0, projDef, _owner);
             _owner.GetParent().AddChild(trailProjectile);
-            trailProjectile.InitializeAsHitscanTrail(_owner.GlobalPosition, hitPosition);
+            trailProjectile.InitializeAsHitscanTrail(spawnPos, hitPosition);
         }
     }
 }
