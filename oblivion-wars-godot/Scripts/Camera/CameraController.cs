@@ -97,9 +97,14 @@ public partial class CameraController : Node
 	[ExportGroup("Screen Shake")]
 
 	/// <summary>
-	/// How quickly screen shake effect fades out (higher = shake ends faster)
+	/// Base screen shake intensity in pixels
 	/// </summary>
-	[Export] private float _shakeDecayRate = 3.0f;
+	[Export] private float _baseShakeStrength = 5.0f;
+
+	/// <summary>
+	/// Base duration in seconds for the shake to decay to zero
+	/// </summary>
+	[Export] private float _baseShakeDuration = 0.3f;
 
 	private Vector2 _velocity = Vector2.Zero;
 	private Vector2 _lookAheadOffset = Vector2.Zero;
@@ -107,8 +112,7 @@ public partial class CameraController : Node
 
 	// Screen shake
 	private float _shakeStrength = 0.0f;
-	private float _shakeFrequency = 20.0f;
-	private float _shakeTime = 0.0f;
+	private float _shakeDecayRate = 0.0f;
 
 	// Camera directing/offset (for showing level elements, cutscenes)
 	private Vector2 _directorOffset = Vector2.Zero;
@@ -403,8 +407,6 @@ public partial class CameraController : Node
 	{
 		if (_shakeStrength > 0)
 		{
-			_shakeTime += (float)delta;
-
 			// Apply shake offset to camera
 			float shakeX = (float)(GD.RandRange(-1.0, 1.0) * _shakeStrength);
 			float shakeY = (float)(GD.RandRange(-1.0, 1.0) * _shakeStrength);
@@ -422,13 +424,15 @@ public partial class CameraController : Node
 	#region Public API
 
 	/// <summary>
-	/// Apply screen shake effect
+	/// Apply screen shake effect. Strength and duration are scaled from the base values.
 	/// </summary>
-	public void Shake(float strength, float frequency = 20.0f)
+	public void Shake(float strengthScale = 1.0f, float durationScale = 1.0f)
 	{
-		_shakeStrength = Mathf.Max(_shakeStrength, strength); // Use strongest shake
-		_shakeFrequency = frequency;
-		_shakeTime = 0.0f;
+		float strength = _baseShakeStrength * strengthScale;
+		float duration = _baseShakeDuration * durationScale;
+
+		_shakeStrength = Mathf.Max(_shakeStrength, strength);
+		_shakeDecayRate = duration > 0 ? strength / duration : strength / 0.01f;
 	}
 
 	/// <summary>

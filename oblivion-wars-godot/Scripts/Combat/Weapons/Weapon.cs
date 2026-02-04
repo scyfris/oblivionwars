@@ -47,8 +47,8 @@ public partial class Weapon : Holdable
 
         _animationPlayer?.Play("shoot");
 
-        if (CameraController.Instance != null && _weaponDefinition.ScreenShake > 0)
-            CameraController.Instance.Shake(_weaponDefinition.ScreenShake);
+        if (CameraController.Instance != null && _weaponDefinition.ScreenShakeScale > 0)
+            CameraController.Instance.Shake(_weaponDefinition.ScreenShakeScale, _weaponDefinition.ScreenShakeDurationScale);
     }
 
     private void FireProjectile(Vector2 targetPosition, float damage, ProjectileDefinition projDef)
