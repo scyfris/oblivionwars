@@ -226,20 +226,20 @@ public partial class CameraController : Node
 
 		// Compute effective parameters (zone overrides or defaults)
 		float effectiveFollowSpeed = (_activeZone?.OverrideFollowSpeed == true)
-			? _activeZone.FollowSpeedL : _followSpeed;
+			? _activeZone.FollowSpeed : _followSpeed;
 		Vector2 effectiveDeadzone = (_activeZone?.OverrideDeadzone == true)
-			? _activeZone.DeadzoneL : _deadzone;
+			? _activeZone.DeadzonePixels : _deadzone;
 		float effectiveLookAhead = (_activeZone?.OverrideLookAheadDistance == true)
-			? _activeZone.LookAheadDistanceL : _lookAheadDistance;
+			? _activeZone.LookAheadDistancePixels : _lookAheadDistance;
 
 		// Lerp follow offset toward zone value (smooth transition, no position jump)
 		Vector2 targetFollowOffset = (_activeZone?.OverrideFollowOffset == true)
-			? _activeZone.FollowOffsetL : _followOffset;
+			? _activeZone.FollowOffset : _followOffset;
 		_zoneFollowOffset = _zoneFollowOffset.Lerp(targetFollowOffset, effectiveFollowSpeed * (float)delta);
 
 		// Lerp zoom toward zone value
 		_targetZoom = (_activeZone?.OverrideZoom == true)
-			? _activeZone.ZoomL : new Vector2(1, 1);
+			? _activeZone.Zoom : new Vector2(1, 1);
 		_currentZoom = _currentZoom.Lerp(_targetZoom, effectiveFollowSpeed * (float)delta);
 		_camera.Zoom = _currentZoom;
 
@@ -289,14 +289,59 @@ public partial class CameraController : Node
 		{
 			var (minX, maxX, minY, maxY) = _activeZone.GetEffectiveBounds();
 
-			if (_activeZone.ConstrainMinXW || _activeZone.LockAxisXW)
+			if (_activeZone.ConstrainMinXWorld || _activeZone.LockAxisXWorld)
 				targetPosition.X = Mathf.Max(targetPosition.X, minX);
-			if (_activeZone.ConstrainMaxXW || _activeZone.LockAxisXW)
+			if (_activeZone.ConstrainMaxXWorld || _activeZone.LockAxisXWorld)
 				targetPosition.X = Mathf.Min(targetPosition.X, maxX);
-			if (_activeZone.ConstrainMinYW || _activeZone.LockAxisYW)
+			if (_activeZone.ConstrainMinYWorld || _activeZone.LockAxisYWorld)
 				targetPosition.Y = Mathf.Max(targetPosition.Y, minY);
-			if (_activeZone.ConstrainMaxYW || _activeZone.LockAxisYW)
+			if (_activeZone.ConstrainMaxYWorld || _activeZone.LockAxisYWorld)
 				targetPosition.Y = Mathf.Min(targetPosition.Y, maxY);
+
+			// Apply player-relative distance constraints (local space)
+			if (_activeZone.HasPlayerRelativeConstraints && _target is CharacterBody2D charBody)
+			{
+				Vector2 playerPos = charBody.GlobalPosition;
+				Vector2 localUp = charBody.UpDirection;
+				Vector2 localRight = new Vector2(localUp.Y, -localUp.X);
+
+				// Project camera offset from player onto local axes
+				Vector2 offset = targetPosition - playerPos;
+				float projUp = offset.Dot(localUp);       // positive = above player
+				float projRight = offset.Dot(localRight);  // positive = right of player
+
+				bool changed = false;
+
+				// Above = positive projection on localUp
+				if (_activeZone.ConstrainDistanceAbove && projUp > _activeZone.MaxDistanceAbovePixels)
+				{
+					projUp = _activeZone.MaxDistanceAbovePixels;
+					changed = true;
+				}
+				// Below = negative projection on localUp
+				if (_activeZone.ConstrainDistanceBelow && projUp < -_activeZone.MaxDistanceBelowPixels)
+				{
+					projUp = -_activeZone.MaxDistanceBelowPixels;
+					changed = true;
+				}
+				// Right = positive projection on localRight
+				if (_activeZone.ConstrainDistanceRight && projRight > _activeZone.MaxDistanceRightPixels)
+				{
+					projRight = _activeZone.MaxDistanceRightPixels;
+					changed = true;
+				}
+				// Left = negative projection on localRight
+				if (_activeZone.ConstrainDistanceLeft && projRight < -_activeZone.MaxDistanceLeftPixels)
+				{
+					projRight = -_activeZone.MaxDistanceLeftPixels;
+					changed = true;
+				}
+
+				if (changed)
+				{
+					targetPosition = playerPos + localUp * projUp + localRight * projRight;
+				}
+			}
 		}
 
 		// Calculate distance to target
@@ -611,6 +656,7 @@ public partial class CameraController : Node
 		if (!_occupiedZones.Contains(zone))
 			_occupiedZones.Add(zone);
 		ResolveActiveZone();
+		GD.Print($"CameraController: Entered zone '{zone.Name}', active zone: {_activeZone?.Name ?? "none"}, total zones: {_occupiedZones.Count}");
 	}
 
 	/// <summary>
@@ -620,6 +666,7 @@ public partial class CameraController : Node
 	{
 		_occupiedZones.Remove(zone);
 		ResolveActiveZone();
+		GD.Print($"CameraController: Exited zone '{zone.Name}', active zone: {_activeZone?.Name ?? "none"}, total zones: {_occupiedZones.Count}");
 	}
 
 	#endregion
