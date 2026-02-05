@@ -30,6 +30,8 @@ public abstract partial class Holdable : Node2D
     public virtual void OnUseReleased(Vector2 targetPosition) { }
     public virtual void OnUseHeld(Vector2 targetPosition) { }
 
+    public virtual void UpdateAim(Vector2 targetPosition) { }
+
     public virtual void OnEquip() { }
     public virtual void OnUnequip() { }
 }

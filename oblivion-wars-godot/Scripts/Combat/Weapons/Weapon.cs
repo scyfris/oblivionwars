@@ -8,6 +8,18 @@ public partial class Weapon : Holdable
 
     private bool _hasFiredThisPress = false;
 
+    public override void UpdateAim(Vector2 targetPosition)
+    {
+        LookAt(targetPosition);
+
+        // When under a parent with negative X scale (FlipRoot facing left),
+        // the sprite appears flipped vertically. Correct by checking the
+        // parent's transform determinant.
+        var pt = GetParent<Node2D>().GlobalTransform;
+        bool parentFlipped = (pt.X.X * pt.Y.Y - pt.X.Y * pt.Y.X) < 0;
+        Scale = new Vector2(1, parentFlipped ? -1 : 1);
+    }
+
     public override void _Ready()
     {
         if (_weaponDefinition != null)

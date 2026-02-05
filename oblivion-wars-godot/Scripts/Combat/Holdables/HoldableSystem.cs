@@ -27,6 +27,12 @@ public partial class HoldableSystem : Node
         _rightHoldable?.Update(delta);
     }
 
+    public void UpdateAim(Vector2 target)
+    {
+        _leftHoldable?.UpdateAim(target);
+        _rightHoldable?.UpdateAim(target);
+    }
+
     public void PressLeft(Vector2 target) { _leftHoldable?.OnUsePressed(target); }
     public void PressRight(Vector2 target) { _rightHoldable?.OnUsePressed(target); }
     public void HeldLeft(Vector2 target) { _leftHoldable?.OnUseHeld(target); }

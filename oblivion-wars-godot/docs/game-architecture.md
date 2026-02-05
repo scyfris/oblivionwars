@@ -221,7 +221,7 @@ public partial class ProjectileDefinition : Resource
 
 **WeaponDefinition.cs** — Defines weapon behavior
 
-Weapons reference a ProjectileDefinition. Damage is calculated as `ProjectileDefinition.Damage * WeaponDefinition.DamageScale`, so the same projectile can deal different damage from different weapons.
+Weapons reference a ProjectileDefinition. Damage is calculated as `ProjectileDefinition.Damage * WeaponDefinition.DamageScale`, so the same projectile can deal different damage from different weapons. Screen shake values are scale factors applied to the camera's base shake strength and duration.
 
 ```csharp
 [GlobalClass]
@@ -229,18 +229,18 @@ public partial class WeaponDefinition : Resource
 {
     [Export] public string WeaponId = "";
     [Export] public float UseCooldown = 0.2f;
-    [Export] public bool IsAutomatic = true;        // hold to repeat fire vs. click per shot
-    [Export] public float DamageScale = 1.0f;       // multiplier on projectile's base damage
+    [Export] public bool IsAutomatic = true;            // hold to repeat fire vs. click per shot
+    [Export] public float DamageScale = 1.0f;           // multiplier on projectile's base damage
     [Export] public float Knockback = 100.0f;
-    [Export] public float ScreenShake = 1.5f;
-    [Export] public Vector2 ProjectileSpawnOffset = new Vector2(20, 0);
+    [Export] public float ScreenShakeScale = 1.0f;      // multiplier on camera's base shake strength
+    [Export] public float ScreenShakeDurationScale = 1.0f; // multiplier on camera's base shake duration
 
     [ExportGroup("Projectile")]
-    [Export] public ProjectileDefinition Projectile; // reference to projectile definition
+    [Export] public ProjectileDefinition Projectile;     // reference to projectile definition
 
     [ExportGroup("Spread")]
-    [Export] public int SpreadCount = 1;            // 1 = single, >1 = shotgun
-    [Export] public float SpreadAngle = 15.0f;      // total arc in degrees
+    [Export] public int SpreadCount = 1;                // 1 = single, >1 = shotgun
+    [Export] public float SpreadAngle = 15.0f;          // total arc in degrees
 }
 ```
 
@@ -373,24 +373,62 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
 Player-specific behavior. Extends EntityCharacterBody2D.
 
+#### FlipRoot Pattern
+
+All visual/positional children (sprite, dust, weapon position) live under a `FlipRoot` Node2D. The character faces left or right by setting `FlipRoot.Scale.X = ±1` based on the aim target (mouse position), not movement direction. This ensures the sprite, weapons, particles, and any future child nodes all flip together automatically.
+
+```
+PlayerCharacterBody2D (CharacterBody2D)
+  ├─ CollisionShape2D           ← stays at root (physics shouldn't flip)
+  ├─ FlipRoot (Node2D)          ← Scale.X = ±1 based on mouse position
+  │   ├─ AnimatedSprite2D       ← walk/idle animations from spritesheet
+  │   ├─ WallSlideDustPosition  ← dust particle spawn point
+  │   └─ WeaponPosition         ← weapons are instantiated here
+  ├─ HoldableSystem (Node)      ← manages holdable slots, references WeaponPosition
+  └─ AnimationPlayer
+```
+
+#### Animation
+
+Uses `AnimatedSprite2D` with `SpriteFrames` from a spritesheet (atlas textures). Animation names are exported properties (`_idleAnimation`, `_walkAnimation`) for configurability. Walk animation plays when moving on the floor; idle plays otherwise. The `AnimationPlayer` node is available for future use with `AnimationTree` state machines.
+
 ```csharp
 public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 {
     [Export] private new PlayerDefinition _definition;
     [Export] private HoldableSystem _holdableSystem;
 
-    // Invincibility (player-only) — subscribes to DamageAppliedEvent
-    private bool _isInvincible;
-    [Export] private Node2D _spriteNode;
+    [ExportGroup("Visuals")]
+    [Export] private Node2D _flipRoot;
+    [Export] private AnimatedSprite2D _spriteNode;
+    [Export] private string _idleAnimation = "default";
+    [Export] private string _walkAnimation = "walk";
 
-    // Visual effects
+    [ExportGroup("Wall Slide Effects")]
     [Export] private Node2D _wallSlideDustPosition;
     [Export] private PackedScene _wallSlideDustScene;
+
+    private Vector2 _aimTarget;
+
+    // Aim — stores target and forwards to holdable system
+    public void UpdateAim(Vector2 targetPosition);
 
     // Holdable routing — press/release/held API
     public void UseHoldablePressed(Vector2 target, bool isLeft);
     public void UseHoldableReleased(Vector2 target, bool isLeft);
     public void UseHoldableHeld(Vector2 target, bool isLeft);
+
+    // Facing is based on aim (mouse) position, not movement direction.
+    // This allows running one way while aiming/facing another.
+    private void UpdateAnimation()
+    {
+        if (_flipRoot != null)
+        {
+            bool aimingLeft = _aimTarget.X < GlobalPosition.X;
+            _flipRoot.Scale = new Vector2(aimingLeft ? -1 : 1, 1);
+        }
+        // Animation state: walk when moving on floor, idle otherwise
+    }
 
     // Overrides CheckHazardTiles to skip while invincible
     // Subscribes to EntityDiedEvent → ReloadCurrentScene()
@@ -580,6 +618,10 @@ public abstract partial class Holdable : Node2D
     public virtual void OnUseReleased(Vector2 targetPosition) { }
     public virtual void OnUseHeld(Vector2 targetPosition) { }
 
+    // Aim — called every physics frame with the current aim target (mouse position).
+    // Weapons override to rotate toward target. Can be driven by animation scripts later.
+    public virtual void UpdateAim(Vector2 targetPosition) { }
+
     public virtual void OnEquip() { }
     public virtual void OnUnequip() { }
 }
@@ -591,28 +633,31 @@ public abstract partial class Holdable : Node2D
 
 Single class for all weapon types. Behavior driven by `WeaponDefinition` + `ProjectileDefinition`.
 
+Each weapon scene has a `ProjectileSpawn` Node2D child that defines the muzzle position. The weapon references this via `[Export] private Node2D _projectileSpawn`. All projectile spawning and hitscan raycasts originate from this node's GlobalPosition, so the spawn point flips correctly with the character via the FlipRoot hierarchy.
+
+Weapons rotate to face the aim target every frame via `UpdateAim`. When under a parent with negative X scale (FlipRoot facing left), the weapon corrects the vertical flip by checking the parent's transform determinant.
+
 ```csharp
 public partial class Weapon : Holdable
 {
     [Export] private WeaponDefinition _weaponDefinition;
+    [Export] private Node2D _projectileSpawn;      // muzzle position (child Node2D)
+    [Export] private AnimationPlayer _animationPlayer;
 
-    private bool _hasFiredThisPress = false;  // for non-automatic weapons
+    private bool _hasFiredThisPress = false;
 
-    public override void OnUsePressed(Vector2 targetPosition)
+    public override void UpdateAim(Vector2 targetPosition)
     {
-        _hasFiredThisPress = false;
-        TryFire(targetPosition);
+        LookAt(targetPosition);
+        // Correct vertical flip when parent has negative X scale
+        var pt = GetParent<Node2D>().GlobalTransform;
+        bool parentFlipped = (pt.X.X * pt.Y.Y - pt.X.Y * pt.Y.X) < 0;
+        Scale = new Vector2(1, parentFlipped ? -1 : 1);
     }
 
-    public override void OnUseHeld(Vector2 targetPosition)
+    private Vector2 GetSpawnPosition()
     {
-        if (!_weaponDefinition.IsAutomatic && _hasFiredThisPress) return;
-        TryFire(targetPosition);
-    }
-
-    public override void OnUseReleased(Vector2 targetPosition)
-    {
-        _hasFiredThisPress = false;
+        return _projectileSpawn != null ? _projectileSpawn.GlobalPosition : _owner.GlobalPosition;
     }
 
     private void TryFire(Vector2 targetPosition)
@@ -624,11 +669,14 @@ public partial class Weapon : Holdable
         float damage = projDef.Damage * _weaponDefinition.DamageScale;
 
         if (projDef.Speed == 0)
-            FireInstant(targetPosition, damage, projDef);   // raycast
+            FireInstant(targetPosition, damage, projDef);   // raycast from ProjectileSpawn
         else
-            FireProjectile(targetPosition, damage, projDef); // physical
+            FireProjectile(targetPosition, damage, projDef); // physical from ProjectileSpawn
 
         ResetCooldown();
+
+        if (CameraController.Instance != null && _weaponDefinition.ScreenShakeScale > 0)
+            CameraController.Instance.Shake(_weaponDefinition.ScreenShakeScale, _weaponDefinition.ScreenShakeDurationScale);
     }
 }
 ```
@@ -681,13 +729,20 @@ protected override void OnHit(Node2D body)
 
 **File:** `Scripts/Combat/Holdables/HoldableSystem.cs`
 
-Routes press/release/held calls from the character to the equipped holdables. Manages left and right holdable slots.
+Routes press/release/held/aim calls from the character to the equipped holdables. Manages left and right holdable slots. Weapons are instantiated as children of a `WeaponPosition` Node2D (located under FlipRoot) so they inherit the character's facing direction and flip automatically.
 
 ```csharp
 public partial class HoldableSystem : Node
 {
     [Export] private PackedScene _leftHoldableScene;
     [Export] private PackedScene _rightHoldableScene;
+    [Export] private Node2D _weaponPosition;     // under FlipRoot — weapons are children of this
+
+    public void UpdateAim(Vector2 target)
+    {
+        _leftHoldable?.UpdateAim(target);
+        _rightHoldable?.UpdateAim(target);
+    }
 
     public void PressLeft(Vector2 target)   { _leftHoldable?.OnUsePressed(target); }
     public void PressRight(Vector2 target)  { _rightHoldable?.OnUsePressed(target); }
@@ -695,6 +750,16 @@ public partial class HoldableSystem : Node
     public void HeldRight(Vector2 target)   { _rightHoldable?.OnUseHeld(target); }
     public void ReleaseLeft(Vector2 target) { _leftHoldable?.OnUseReleased(target); }
     public void ReleaseRight(Vector2 target){ _rightHoldable?.OnUseReleased(target); }
+
+    private Holdable InstantiateHoldable(PackedScene scene)
+    {
+        var instance = scene.Instantiate<Holdable>();
+        var parent = _weaponPosition != null ? (Node)_weaponPosition : this;
+        parent.AddChild(instance);  // added under WeaponPosition for transform inheritance
+        instance.InitOwner(_owner);
+        instance.OnEquip();
+        return instance;
+    }
 }
 ```
 
@@ -703,8 +768,9 @@ public partial class HoldableSystem : Node
 **File:** `Scripts/Player/CharacterController.cs`
 
 - `_UnhandledInput`: detect `IsActionPressed` → call `UseHoldablePressed`, detect `IsActionReleased` → call `UseHoldableReleased`
-- `_PhysicsProcess`: while action is held (`Input.IsActionPressed`), call `UseHoldableHeld` every frame
+- `_PhysicsProcess`: calls `UpdateAim(mousePosition)` every frame for weapon rotation and character facing; while action is held (`Input.IsActionPressed`), call `UseHoldableHeld` every frame
 - The holdable/weapon handles cooldown and automatic vs. semi-auto internally
+- Mouse position is obtained via `_playerCharacter.GetGlobalMousePosition()` and passed through the aim pipeline — this decouples the input source, allowing AI controllers to feed a different target position later
 
 ---
 
@@ -759,18 +825,78 @@ CharacterController._UnhandledInput()
   → IsActionReleased("shoot") → PlayerCharacterBody2D.UseHoldableReleased(target, left)
 
 CharacterController._PhysicsProcess()
+  → Get mouse world position
+  → PlayerCharacterBody2D.UpdateAim(mousePos)
+      → stores _aimTarget (used for character facing in UpdateAnimation)
+      → HoldableSystem.UpdateAim(mousePos)
+          → Weapon.UpdateAim(mousePos) — LookAt + flip correction
   → Input.IsActionPressed("shoot") → PlayerCharacterBody2D.UseHoldableHeld(target, left)
   ↓
 PlayerCharacterBody2D → HoldableSystem → Holdable.OnUsePressed/Held/Released
   ↓
 Weapon.OnUseHeld()
   → IsAutomatic && hasFiredThisPress? skip (semi-auto)
-  → CanUse()? → TryFire() → spawn projectile or raycast
+  → CanUse()? → TryFire() → spawn projectile or raycast from ProjectileSpawn node
+  → CameraController.Instance.Shake(strengthScale, durationScale)
 ```
 
 ---
 
-## 8. File Structure
+## 8. Camera
+
+**File:** `Scripts/Camera/CameraController.cs` — Singleton (static `Instance`)
+
+Follows the player with smoothing, look-ahead, and screen shake. Also handles camera rotation for gravity flips.
+
+### Screen Shake
+
+Camera owns the base shake values. Weapons (and other systems) request shake with scale factors, not absolute overrides. This keeps weapon data simple and lets designers tune the base feel globally.
+
+```csharp
+[ExportGroup("Screen Shake")]
+[Export] private float _baseShakeStrength = 5.0f;   // base intensity in pixels
+[Export] private float _baseShakeDuration = 0.3f;    // base duration in seconds
+
+// Strength and duration are scaled from the base values.
+public void Shake(float strengthScale = 1.0f, float durationScale = 1.0f)
+{
+    float strength = _baseShakeStrength * strengthScale;
+    float duration = _baseShakeDuration * durationScale;
+    _shakeStrength = Mathf.Max(_shakeStrength, strength);
+    _shakeDecayRate = duration > 0 ? strength / duration : strength / 0.01f;
+}
+```
+
+### Other Features
+
+- **Follow smoothing** with look-ahead based on movement direction
+- **Director offset** for cutscenes/level reveals (`DirectAttention()`)
+- **Gravity rotation** — camera rotates to match entity gravity, with configurable delay and speed
+
+---
+
+## 9. File Structure & Scene Hierarchy
+
+### Player Scene Hierarchy
+
+```
+PlayerCharacterBody2D (CharacterBody2D)
+  ├─ CollisionShape2D
+  ├─ FlipRoot (Node2D)              ← Scale.X = ±1 for facing
+  │   ├─ AnimatedSprite2D            ← spritesheet animations (walk, idle)
+  │   ├─ WallSlideDustPosition       ← dust particle spawn marker
+  │   └─ WeaponPosition (Node2D)     ← weapons instantiated here
+  │       ├─ Pistol (Weapon)          ← runtime child
+  │       │   ├─ ColorRect            ← placeholder visual
+  │       │   └─ ProjectileSpawn      ← muzzle position
+  │       └─ Shotgun (Weapon)         ← runtime child
+  │           ├─ ColorRect
+  │           └─ ProjectileSpawn
+  ├─ HoldableSystem (Node)           ← manages holdable slots
+  └─ AnimationPlayer                  ← for future AnimationTree integration
+```
+
+### Scripts
 
 ```
 Scripts/
@@ -846,8 +972,8 @@ Scenes/
 │   ├── PlayerCharacterBody2D.tscn
 │   └── TargetDummy.tscn
 ├── Weapons/
-│   ├── Pistol.tscn                 (Weapon node with visual + bullet trail)
-│   └── Shotgun.tscn                (Weapon node with visual)
+│   ├── Pistol.tscn                 (Weapon node + ColorRect + ProjectileSpawn)
+│   └── Shotgun.tscn                (Weapon node + ColorRect + ProjectileSpawn)
 ├── Projectiles/
 │   └── StandardBullet.tscn         (projectile scene)
 └── Levels/
@@ -890,7 +1016,7 @@ Scenes/
 
 ---
 
-## 10. Save/Load (Future)
+## 11. Save/Load (Future)
 
 **File:** `Scripts/Core/SaveManager.cs` (autoload singleton, static Instance pattern)
 

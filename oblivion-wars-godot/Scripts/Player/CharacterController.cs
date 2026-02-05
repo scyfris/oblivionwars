@@ -63,16 +63,14 @@ public partial class CharacterController : Node
 
     public override void _PhysicsProcess(double delta)
     {
+        var targetPos = _playerCharacter.GetGlobalMousePosition();
+
+        _playerCharacter.UpdateAim(targetPos);
+
         // Call held every frame while button is pressed (for automatic weapons, charged items, etc.)
         if (Input.IsActionPressed(_useLeftAction))
-        {
-            var targetPos = _playerCharacter.GetGlobalMousePosition();
             _playerCharacter.UseHoldableHeld(targetPos, true);
-        }
         if (Input.IsActionPressed(_useRightAction))
-        {
-            var targetPos = _playerCharacter.GetGlobalMousePosition();
             _playerCharacter.UseHoldableHeld(targetPos, false);
-        }
     }
 }

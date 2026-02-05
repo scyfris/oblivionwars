@@ -10,7 +10,8 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     [Export] private Node2D _flipRoot;
     [Export] private AnimatedSprite2D _spriteNode;
     [Export] private string _idleAnimation = "default";
-    [Export] private string _walkAnimation = "walk";
+    [Export] private string _walkFacingDirAnimation = "walk-facingdir";
+    [Export] private string _walkNonFacingDirAnimation = "walk-nonfacingdir";
 
     [ExportGroup("Wall Slide Effects")]
     [Export] private Node2D _wallSlideDustPosition;
@@ -24,6 +25,8 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     public bool IsInvincible => _isInvincible;
 
     private CpuParticles2D _wallSlideDust;
+    private Vector2 _aimTarget;
+    private bool _facingRight = true;
 
     public override void _Ready()
     {
@@ -93,6 +96,12 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
         }
     }
 
+    public void UpdateAim(Vector2 targetPosition)
+    {
+        _aimTarget = targetPosition;
+        _holdableSystem?.UpdateAim(targetPosition);
+    }
+
     public void UseHoldablePressed(Vector2 targetPosition, bool isLeft)
     {
         if (isLeft)
@@ -121,13 +130,28 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     {
         if (_spriteNode == null) return;
 
-        if (_moveDirection != 0 && _flipRoot != null)
-            _flipRoot.Scale = new Vector2(_moveDirection < 0 ? -1 : 1, 1);
+        // Update facing direction only when moving — persists when idle
+        if (_moveDirection != 0)
+            _facingRight = _moveDirection > 0;
+
+        if (_flipRoot != null)
+            _flipRoot.Scale = new Vector2(_facingRight ? 1 : -1, 1);
 
         if (_moveDirection != 0 && IsOnFloor())
-            _spriteNode.Play(_walkAnimation);
+        {
+            // Project aim direction onto the entity's local horizontal axis
+            // so the comparison works regardless of gravity rotation
+            Vector2 horizontalDir = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
+            float aimDot = (_aimTarget - GlobalPosition).Dot(horizontalDir);
+            bool aimToLocalRight = aimDot > 0;
+            bool movingTowardAim = _facingRight == aimToLocalRight;
+
+            _spriteNode.Play(movingTowardAim ? _walkFacingDirAnimation : _walkNonFacingDirAnimation);
+        }
         else
+        {
             _spriteNode.Play(_idleAnimation);
+        }
     }
 
     private void StartInvincibility()
