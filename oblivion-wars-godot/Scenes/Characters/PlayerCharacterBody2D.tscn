@@ -116,7 +116,7 @@ position = Vector2(-2, -15.000002)
 scale = Vector2(0.09127149, 0.08331295)
 sprite_frames = SubResource("SpriteFrames_qwv0h")
 animation = &"walk-facingdir"
-frame_progress = 0.3307087
+frame_progress = 0.30843744
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=276482619 node_paths=PackedStringArray("_weaponPosition")]
 script = ExtResource("2_ddu1s")
