@@ -16,7 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://bog08cdbdhtfx" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-8.png" id="12_u6gc1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
-size = Vector2(30, 129)
+size = Vector2(28, 64)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_qwv0h"]
 animations = [{
@@ -100,7 +100,7 @@ _wallSlideDustScene = ExtResource("6_dust")
 _definition = ExtResource("2_ffrop")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
-position = Vector2(6, -36.5)
+position = Vector2(1.5, -6.5)
 shape = SubResource("RectangleShape2D_rlx2o")
 
 [node name="FlipRoot" type="Node2D" parent="." unique_id=1856702997]
@@ -112,11 +112,11 @@ position = Vector2(-12, 28)
 position = Vector2(45, -69)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="FlipRoot" unique_id=1866636675]
-position = Vector2(-5.000001, -56)
-scale = Vector2(0.18508594, 0.16894713)
+position = Vector2(-2, -15.000002)
+scale = Vector2(0.09127149, 0.08331295)
 sprite_frames = SubResource("SpriteFrames_qwv0h")
 animation = &"walk-facingdir"
-frame_progress = 0.9387955
+frame_progress = 0.3307087
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=276482619 node_paths=PackedStringArray("_weaponPosition")]
 script = ExtResource("2_ddu1s")
