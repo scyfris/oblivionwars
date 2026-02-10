@@ -5,8 +5,9 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_bullet"]
 radius = 4.0
 
-[node name="StandardBullet" type="Area2D"]
+[node name="StandardBullet" type="Area2D" node_paths=PackedStringArray("_trail")]
 script = ExtResource("1_standard_bullet")
+_trail = NodePath("Trail")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_bullet")
@@ -14,3 +15,8 @@ shape = SubResource("CircleShape2D_bullet")
 [node name="Visual" type="Polygon2D" parent="."]
 color = Color(1, 0.8, 0.2, 1)
 polygon = PackedVector2Array(-4, -2, 6, 0, -4, 2)
+
+[node name="Trail" type="Line2D" parent="."]
+visible = false
+width = 2.0
+default_color = Color(1, 1, 0.5, 1)

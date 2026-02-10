@@ -1,69 +1,125 @@
 using Godot;
-using System;
 
 public abstract partial class Projectile : Area2D
 {
-	/// <summary>
-	/// Movement speed of the projectile in pixels per second
-	/// </summary>
-	[Export] protected float _speed = 800.0f;
+    [Export] protected Line2D _trail;
 
-	/// <summary>
-	/// Maximum time in seconds the projectile exists before self-destructing
-	/// </summary>
-	[Export] protected float _lifetime = 3.0f;
+    protected ProjectileDefinition _projectileDefinition;
+    protected float _damage;
+    protected Vector2 _direction;
+    protected float _timeAlive = 0f;
+    protected Node2D _shooter;
 
-	protected float _damage = 10.0f;
+    private bool _isHitscanTrail = false;
+    private float _hitscanTrailTimer = 0f;
 
-	protected Vector2 _direction;
-	protected float _timeAlive = 0f;
-	protected Node2D _shooter; // The entity that fired this projectile
+    public override void _Ready()
+    {
+        BodyEntered += _OnBodyEntered;
 
-	public override void _Ready()
-	{
-		BodyEntered += _OnBodyEntered;
-	}
+        if (_trail != null)
+            _trail.TopLevel = true;
+    }
 
-	public virtual void Initialize(Vector2 direction, float damage, Node2D shooter = null)
-	{
-		_direction = direction.Normalized();
-		_damage = damage;
-		_shooter = shooter;
-		Rotation = direction.Angle();
-	}
+    public virtual void Initialize(Vector2 direction, float damage,
+        ProjectileDefinition definition, Node2D shooter = null)
+    {
+        _direction = direction.Normalized();
+        _damage = damage;
+        _projectileDefinition = definition;
+        _shooter = shooter;
+        Rotation = direction.Angle();
+    }
 
-	public override void _PhysicsProcess(double delta)
-	{
-		UpdateMovement(delta);
-		UpdateLifetime(delta);
-	}
+    public void InitializeAsHitscanTrail(Vector2 from, Vector2 to)
+    {
+        _isHitscanTrail = true;
+        _hitscanTrailTimer = _projectileDefinition?.TrailDuration ?? 0.1f;
 
-	protected abstract void UpdateMovement(double delta);
+        // Disable collision for trail-only projectiles
+        SetDeferred("monitoring", false);
+        SetDeferred("monitorable", false);
 
-	protected virtual void UpdateLifetime(double delta)
-	{
-		_timeAlive += (float)delta;
-		if (_timeAlive >= _lifetime)
-		{
-			QueueFree();
-		}
-	}
+        // Hide the projectile visual, only show trail
+        var visual = GetNodeOrNull<Node2D>("Visual");
+        if (visual != null)
+            visual.Visible = false;
 
-	protected virtual void _OnBodyEntered(Node2D body)
-	{
-		// Ignore collision with the shooter
-		if (body == _shooter)
-		{
-			return;
-		}
+        if (_trail != null)
+        {
+            _trail.ClearPoints();
+            _trail.AddPoint(from);
+            _trail.AddPoint(to);
+            _trail.Visible = true;
+        }
+    }
 
-		// Future: Apply damage to body if it has health component
-		OnHit(body);
-		QueueFree();
-	}
+    public override void _PhysicsProcess(double delta)
+    {
+        if (_isHitscanTrail)
+        {
+            UpdateHitscanTrail(delta);
+            return;
+        }
 
-	protected virtual void OnHit(Node2D body)
-	{
-		// Override in subclasses for hit effects, damage application, etc.
-	}
+        UpdateMovement(delta);
+        UpdateTrail();
+        UpdateLifetime(delta);
+    }
+
+    protected abstract void UpdateMovement(double delta);
+
+    private void UpdateTrail()
+    {
+        if (_trail == null || _isHitscanTrail) return;
+
+        int maxPoints = _projectileDefinition?.TrailLength ?? 10;
+        _trail.AddPoint(GlobalPosition);
+
+        while (_trail.GetPointCount() > maxPoints)
+            _trail.RemovePoint(0);
+
+        _trail.Visible = _trail.GetPointCount() > 1;
+    }
+
+    private void UpdateHitscanTrail(double delta)
+    {
+        _hitscanTrailTimer -= (float)delta;
+        if (_hitscanTrailTimer <= 0)
+            QueueFree();
+    }
+
+    protected virtual void UpdateLifetime(double delta)
+    {
+        _timeAlive += (float)delta;
+        float lifetime = _projectileDefinition?.Lifetime ?? 3.0f;
+        if (_timeAlive >= lifetime)
+        {
+            QueueFree();
+        }
+    }
+
+    protected virtual void _OnBodyEntered(Node2D body)
+    {
+        if (body == _shooter)
+            return;
+
+        OnHit(body);
+        SpawnHitEffect();
+        QueueFree();
+    }
+
+    protected void SpawnHitEffect()
+    {
+        if (_projectileDefinition?.HitEffect == null) return;
+
+        var effect = _projectileDefinition.HitEffect.Instantiate<Node2D>();
+        effect.GlobalPosition = GlobalPosition;
+        effect.Rotation = _direction.Angle() + Mathf.Pi;
+        GetTree().Root.AddChild(effect);
+    }
+
+    protected virtual void OnHit(Node2D body)
+    {
+    }
 }

@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://bkdeav6v5wgew"]
+
+[ext_resource type="Script" uid="uid://sa85cv1suao6" path="res://Scripts/Effects/AutoFreeParticle.cs" id="1_script"]
+
+[sub_resource type="Curve" id="Curve_scale"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_color"]
+colors = PackedColorArray(1, 0.9, 0.3, 1, 1, 0.4, 0.1, 0)
+
+[node name="BulletImpact" type="CPUParticles2D" unique_id=464037050]
+emitting = false
+lifetime = 0.25
+one_shot = true
+explosiveness = 1.0
+emission_shape = 1
+emission_sphere_radius = 2.0
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 40.0
+initial_velocity_max = 120.0
+scale_amount_min = 3.0
+scale_amount_max = 6.0
+scale_amount_curve = SubResource("Curve_scale")
+color_ramp = SubResource("Gradient_color")
+script = ExtResource("1_script")

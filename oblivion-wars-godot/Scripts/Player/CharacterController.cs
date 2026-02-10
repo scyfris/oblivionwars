@@ -1,98 +1,76 @@
 using Godot;
-using System;
 
 public partial class CharacterController : Node
 {
-    /// <summary>
-    /// Reference to the player character that this controller will send input commands to
-    /// </summary>
     [Export] PlayerCharacterBody2D _playerCharacter;
 
-    /// <summary>
-    /// Input action name for moving left (configured in Project Settings > Input Map)
-    /// </summary>
     [Export] string _moveInputLeftAction = "move_left";
-
-    /// <summary>
-    /// Input action name for moving right (configured in Project Settings > Input Map)
-    /// </summary>
     [Export] string _moveInputRightAction = "move_right";
-
-    /// <summary>
-    /// Input action name for jumping (configured in Project Settings > Input Map)
-    /// </summary>
     [Export] string _jumpAction = "jump";
-
     [Export] string _useLeftAction = "shoot";
     [Export] string _useRightAction = "shoot_right";
-
-    /// <summary>
-    /// Input action name for rotating gravity clockwise 90° (configured in Project Settings > Input Map)
-    /// </summary>
     [Export] string _rotateGravityClockwiseAction = "rotate_gravity_cw";
-
-    /// <summary>
-    /// Input action name for rotating gravity counter-clockwise 90° (configured in Project Settings > Input Map)
-    /// </summary>
     [Export] string _rotateGravityCounterClockwiseAction = "rotate_gravity_ccw";
 
     public override void _UnhandledInput(InputEvent @event)
     {
-//        base._UnhandledInput(@event);
-
         // Jump
         if (@event.IsActionPressed(_jumpAction))
-        {
             _playerCharacter.Jump();
-        }
         else if (@event.IsActionReleased(_jumpAction))
-        {
             _playerCharacter.CancelJump();
-        }
 
         // Move left/right
         if (@event.IsActionPressed(_moveInputLeftAction))
-        {
             _playerCharacter.MoveLeft();
-        }
         else if (@event.IsActionPressed(_moveInputRightAction))
-        {
             _playerCharacter.MoveRight();
-        }
-        
-        // Cancel movement if needed
-        if (@event.IsActionReleased(_moveInputLeftAction) && !Input.IsActionPressed(_moveInputRightAction))
-        {
-            _playerCharacter.Stop();
-        }
-        else if (@event.IsActionReleased(_moveInputRightAction) && !Input.IsActionPressed(_moveInputLeftAction))
-        {
-            _playerCharacter.Stop();
-        }
 
-        // Use left holdable (left mouse)
+        // Cancel movement
+        if (@event.IsActionReleased(_moveInputLeftAction) && !Input.IsActionPressed(_moveInputRightAction))
+            _playerCharacter.Stop();
+        else if (@event.IsActionReleased(_moveInputRightAction) && !Input.IsActionPressed(_moveInputLeftAction))
+            _playerCharacter.Stop();
+
+        // Holdable press/release (detected on input event, not polled)
         if (@event.IsActionPressed(_useLeftAction))
         {
             var targetPos = _playerCharacter.GetGlobalMousePosition();
-            _playerCharacter.UseHoldableLeft(targetPos);
+            _playerCharacter.UseHoldablePressed(targetPos, true);
         }
-
-        // Use right holdable (right mouse)
+        if (@event.IsActionReleased(_useLeftAction))
+        {
+            var targetPos = _playerCharacter.GetGlobalMousePosition();
+            _playerCharacter.UseHoldableReleased(targetPos, true);
+        }
         if (@event.IsActionPressed(_useRightAction))
         {
             var targetPos = _playerCharacter.GetGlobalMousePosition();
-            _playerCharacter.UseHoldableRight(targetPos);
+            _playerCharacter.UseHoldablePressed(targetPos, false);
+        }
+        if (@event.IsActionReleased(_useRightAction))
+        {
+            var targetPos = _playerCharacter.GetGlobalMousePosition();
+            _playerCharacter.UseHoldableReleased(targetPos, false);
         }
 
-        // Gravity rotation inputs
+        // Gravity rotation
         if (@event.IsActionPressed(_rotateGravityClockwiseAction))
-        {
             _playerCharacter.RotateGravityClockwise();
-        }
         else if (@event.IsActionPressed(_rotateGravityCounterClockwiseAction))
-        {
             _playerCharacter.RotateGravityCounterClockwise();
-        }
     }
 
+    public override void _PhysicsProcess(double delta)
+    {
+        var targetPos = _playerCharacter.GetGlobalMousePosition();
+
+        _playerCharacter.UpdateAim(targetPos);
+
+        // Call held every frame while button is pressed (for automatic weapons, charged items, etc.)
+        if (Input.IsActionPressed(_useLeftAction))
+            _playerCharacter.UseHoldableHeld(targetPos, true);
+        if (Input.IsActionPressed(_useRightAction))
+            _playerCharacter.UseHoldableHeld(targetPos, false);
+    }
 }

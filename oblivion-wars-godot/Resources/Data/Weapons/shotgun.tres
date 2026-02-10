@@ -1,20 +1,17 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://bkksyfiyb5e3y"]
 
 [ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="2_projectile"]
+[ext_resource type="Resource" uid="uid://d17y8xwqekvkh" path="res://Resources/Data/Projectiles/bullet.tres" id="2_projectile"]
 
 [resource]
 script = ExtResource("1_script")
-metadata/_custom_type_script = "uid://i6xsa0mr56ur"
 WeaponId = "shotgun"
-Damage = 5.0
-FireRate = 0.6
-Knockback = 150.0
-ScreenShake = 3.0
-ProjectileScene = ExtResource("2_projectile")
-HitscanRange = 1000.0
 UseCooldown = 0.6
-ProjectileSpawnOffset = Vector2(20, 0)
-TrailDuration = 0.1
+IsAutomatic = false
+DamageScale = 0.5
+Knockback = 150.0
+ScreenShakeScale = 2.0
+Projectile = ExtResource("2_projectile")
 SpreadCount = 5
 SpreadAngle = 30.0
+metadata/_custom_type_script = "uid://i6xsa0mr56ur"

@@ -1,142 +1,166 @@
 using Godot;
-using System;
 
-/// <summary>
-/// Data-driven weapon class. Handles both projectile and hitscan weapons
-/// based on WeaponDefinition data. No per-weapon subclasses needed.
-/// </summary>
 public partial class Weapon : Holdable
 {
-	[Export] protected WeaponDefinition _weaponDefinition;
-	[Export] private Line2D _bulletTrail;
-	[Export] private AnimationPlayer _animationPlayer;
+    [Export] private WeaponDefinition _weaponDefinition;
+    [Export] private Node2D _projectileSpawn;
+    [Export] private AnimationPlayer _animationPlayer;
 
-	private float _trailTimer = 0f;
+    private bool _hasFiredThisPress = false;
 
-	public override void _Ready()
-	{
-		if (_weaponDefinition != null)
-		{
-			_useCooldown = _weaponDefinition.UseCooldown;
-		}
-	}
+    public override void UpdateAim(Vector2 targetPosition)
+    {
+        LookAt(targetPosition);
 
-	public override void Update(double delta)
-	{
-		base.Update(delta);
+        // When under a parent with negative X scale (FlipRoot facing left),
+        // the sprite appears flipped vertically. Correct by checking the
+        // parent's transform determinant.
+        var pt = GetParent<Node2D>().GlobalTransform;
+        bool parentFlipped = (pt.X.X * pt.Y.Y - pt.X.Y * pt.Y.X) < 0;
+        Scale = new Vector2(1, parentFlipped ? -1 : 1);
+    }
 
-		// Fade out bullet trail
-		if (_bulletTrail != null && _trailTimer > 0)
-		{
-			_trailTimer -= (float)delta;
-			if (_trailTimer <= 0)
-			{
-				_bulletTrail.Visible = false;
-			}
-		}
-	}
+    public override void _Ready()
+    {
+        if (_weaponDefinition != null)
+            _useCooldown = _weaponDefinition.UseCooldown;
+    }
 
-	public override void Use(Vector2 targetPosition)
-	{
-		if (!CanUse()) return;
+    public override void OnUsePressed(Vector2 targetPosition)
+    {
+        _hasFiredThisPress = false;
+        TryFire(targetPosition);
+    }
 
-		if (_weaponDefinition.ProjectileScene != null)
-			FireProjectile(targetPosition);
-		else
-			FireHitscan(targetPosition);
+    public override void OnUseHeld(Vector2 targetPosition)
+    {
+        if (!_weaponDefinition.IsAutomatic && _hasFiredThisPress) return;
+        TryFire(targetPosition);
+    }
 
-		ResetCooldown();
+    public override void OnUseReleased(Vector2 targetPosition)
+    {
+        _hasFiredThisPress = false;
+    }
 
-		// Trigger animation if present
-		_animationPlayer?.Play("shoot");
+    private void TryFire(Vector2 targetPosition)
+    {
+        if (!CanUse() || _weaponDefinition?.Projectile == null) return;
+        _hasFiredThisPress = true;
 
-		// Apply screen shake
-		if (CameraController.Instance != null && _weaponDefinition.ScreenShake > 0)
-		{
-			CameraController.Instance.Shake(_weaponDefinition.ScreenShake);
-		}
-	}
+        var projDef = _weaponDefinition.Projectile;
+        float damage = projDef.Damage * _weaponDefinition.DamageScale;
 
-	private void FireProjectile(Vector2 targetPosition)
-	{
-		Vector2 baseDirection = (targetPosition - _owner.GlobalPosition).Normalized();
+        if (projDef.Speed == 0)
+            FireInstant(targetPosition, damage, projDef);
+        else
+            FireProjectile(targetPosition, damage, projDef);
 
-		if (_weaponDefinition.SpreadCount <= 1)
-		{
-			SpawnProjectile(baseDirection);
-		}
-		else
-		{
-			// Spread pattern: distribute projectiles evenly across the spread angle
-			float totalAngle = Mathf.DegToRad(_weaponDefinition.SpreadAngle);
-			float startAngle = -totalAngle / 2f;
-			float step = _weaponDefinition.SpreadCount > 1
-				? totalAngle / (_weaponDefinition.SpreadCount - 1)
-				: 0f;
+        ResetCooldown();
 
-			for (int i = 0; i < _weaponDefinition.SpreadCount; i++)
-			{
-				float angle = startAngle + step * i;
-				Vector2 spreadDir = baseDirection.Rotated(angle);
-				SpawnProjectile(spreadDir);
-			}
-		}
+        _animationPlayer?.Play("shoot");
 
-		GD.Print($"Weapon fired {_weaponDefinition.SpreadCount} projectile(s)!");
-	}
+        if (CameraController.Instance != null && _weaponDefinition.ScreenShakeScale > 0)
+            CameraController.Instance.Shake(_weaponDefinition.ScreenShakeScale, _weaponDefinition.ScreenShakeDurationScale);
+    }
 
-	private void SpawnProjectile(Vector2 direction)
-	{
-		var projectile = _weaponDefinition.ProjectileScene.Instantiate<Projectile>();
-		projectile.GlobalPosition = _owner.GlobalPosition + _weaponDefinition.ProjectileSpawnOffset;
-		projectile.Initialize(direction, _weaponDefinition.Damage, _owner);
+    private void FireProjectile(Vector2 targetPosition, float damage, ProjectileDefinition projDef)
+    {
+        Vector2 baseDirection = (targetPosition - GetSpawnPosition()).Normalized();
 
-		// Add to scene tree (as sibling of owner, not child)
-		_owner.GetParent().AddChild(projectile);
-	}
+        if (_weaponDefinition.SpreadCount <= 1)
+        {
+            SpawnProjectile(baseDirection, damage, projDef);
+        }
+        else
+        {
+            float totalAngle = Mathf.DegToRad(_weaponDefinition.SpreadAngle);
+            float startAngle = -totalAngle / 2f;
+            float step = _weaponDefinition.SpreadCount > 1
+                ? totalAngle / (_weaponDefinition.SpreadCount - 1)
+                : 0f;
 
-	private void FireHitscan(Vector2 targetPosition)
-	{
-		Vector2 direction = (targetPosition - _owner.GlobalPosition).Normalized();
+            for (int i = 0; i < _weaponDefinition.SpreadCount; i++)
+            {
+                float angle = startAngle + step * i;
+                Vector2 spreadDir = baseDirection.Rotated(angle);
+                SpawnProjectile(spreadDir, damage, projDef);
+            }
+        }
+    }
 
-		var spaceState = _owner.GetWorld2D().DirectSpaceState;
-		var query = PhysicsRayQueryParameters2D.Create(
-			_owner.GlobalPosition,
-			_owner.GlobalPosition + direction * _weaponDefinition.HitscanRange
-		);
+    private Vector2 GetSpawnPosition()
+    {
+        return _projectileSpawn != null ? _projectileSpawn.GlobalPosition : _owner.GlobalPosition;
+    }
 
-		// Exclude the shooter from the raycast
-		if (_owner is CollisionObject2D collisionOwner)
-		{
-			query.Exclude = new Godot.Collections.Array<Rid> { collisionOwner.GetRid() };
-		}
+    private void SpawnProjectile(Vector2 direction, float damage, ProjectileDefinition projDef)
+    {
+        if (projDef.ProjectileScene == null) return;
 
-		var result = spaceState.IntersectRay(query);
+        var projectile = projDef.ProjectileScene.Instantiate<Projectile>();
+        projectile.GlobalPosition = GetSpawnPosition();
+        projectile.Initialize(direction, damage, projDef, _owner);
 
-		if (result.Count > 0)
-		{
-			var hitPosition = (Vector2)result["position"];
-			var hitBody = (Node2D)result["collider"];
+        _owner.GetParent().AddChild(projectile);
+    }
 
-			GD.Print($"Weapon hitscan hit: {hitBody.Name} at {hitPosition}");
-			ShowBulletTrail(_owner.GlobalPosition, hitPosition);
-		}
-		else
-		{
-			ShowBulletTrail(_owner.GlobalPosition, _owner.GlobalPosition + direction * _weaponDefinition.HitscanRange);
-		}
+    private void FireInstant(Vector2 targetPosition, float damage, ProjectileDefinition projDef)
+    {
+        Vector2 spawnPos = GetSpawnPosition();
+        Vector2 direction = (targetPosition - spawnPos).Normalized();
 
-		GD.Print("Weapon fired hitscan!");
-	}
+        var spaceState = _owner.GetWorld2D().DirectSpaceState;
+        var query = PhysicsRayQueryParameters2D.Create(
+            spawnPos,
+            spawnPos + direction * projDef.HitscanRange
+        );
 
-	private void ShowBulletTrail(Vector2 from, Vector2 to)
-	{
-		if (_bulletTrail == null) return;
+        if (_owner is CollisionObject2D collisionOwner)
+        {
+            query.Exclude = new Godot.Collections.Array<Rid> { collisionOwner.GetRid() };
+        }
 
-		_bulletTrail.ClearPoints();
-		_bulletTrail.AddPoint(from);
-		_bulletTrail.AddPoint(to);
-		_bulletTrail.Visible = true;
-		_trailTimer = _weaponDefinition.TrailDuration;
-	}
+        var result = spaceState.IntersectRay(query);
+
+        Vector2 hitPosition;
+        if (result.Count > 0)
+        {
+            hitPosition = (Vector2)result["position"];
+            var hitBody = (Node2D)result["collider"];
+
+            EventBus.Instance.Raise(new HitEvent
+            {
+                TargetInstanceId = hitBody.GetInstanceId(),
+                SourceInstanceId = _owner.GetInstanceId(),
+                BaseDamage = damage,
+                HitDirection = direction,
+                HitPosition = hitPosition,
+                Projectile = projDef
+            });
+        }
+        else
+        {
+            hitPosition = spawnPos + direction * projDef.HitscanRange;
+        }
+
+        // Spawn hit effect at impact point
+        if (result.Count > 0 && projDef.HitEffect != null)
+        {
+            var effect = projDef.HitEffect.Instantiate<Node2D>();
+            effect.GlobalPosition = hitPosition;
+            effect.Rotation = direction.Angle() + Mathf.Pi;
+            _owner.GetTree().Root.AddChild(effect);
+        }
+
+        // Spawn projectile scene for trail VFX — AddChild first so _trail export resolves
+        if (projDef.ProjectileScene != null)
+        {
+            var trailProjectile = projDef.ProjectileScene.Instantiate<Projectile>();
+            trailProjectile.GlobalPosition = spawnPos;
+            trailProjectile.Initialize(direction, 0, projDef, _owner);
+            _owner.GetParent().AddChild(trailProjectile);
+            trailProjectile.InitializeAsHitscanTrail(spawnPos, hitPosition);
+        }
+    }
 }

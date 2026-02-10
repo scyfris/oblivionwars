@@ -1,44 +1,127 @@
 [gd_scene format=3 uid="uid://cb4iahq5chr65"]
 
 [ext_resource type="Script" uid="uid://cv3wphvrguved" path="res://Scripts/Player/PlayerCharacterBody2D.cs" id="1_iyb5a"]
-[ext_resource type="Texture2D" uid="uid://baewbtbmg2mh2" path="res://Resources/Tilemaps/kenney_abstract-platformer/knight.png" id="2_54mch"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="2_ddu1s"]
 [ext_resource type="Resource" uid="uid://dj7t8h8cwg5cv" path="res://Resources/Data/Characters/Player/player.tres" id="2_ffrop"]
-[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="3_pistol"]
-[ext_resource type="PackedScene" path="res://Scenes/Weapons/Shotgun.tscn" id="4_shotgun"]
+[ext_resource type="Texture2D" uid="uid://caax0vcfj4jtl" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-1.png" id="5_q6urw"]
+[ext_resource type="Texture2D" uid="uid://0i4da5uqjki1" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-2.png" id="6_333b5"]
 [ext_resource type="PackedScene" uid="uid://bngampa7uejn8" path="res://Scenes/Effects/WallSlideDust.tscn" id="6_dust"]
-[ext_resource type="Resource" path="res://Resources/Data/Hazards/hazards.tres" id="7_hazard"]
+[ext_resource type="Texture2D" uid="uid://dhv6a14fp8b2j" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-3.png" id="7_by3oo"]
+[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="7_pistol"]
+[ext_resource type="Texture2D" uid="uid://be8w3ich74iwl" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-4.png" id="8_mskjj"]
+[ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Scenes/Weapons/Shotgun.tscn" id="8_shotgun"]
+[ext_resource type="Texture2D" uid="uid://v05a7unxavtp" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-5.png" id="9_na4th"]
+[ext_resource type="Texture2D" uid="uid://b4auwh75wn17l" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-6.png" id="10_22sty"]
+[ext_resource type="Texture2D" uid="uid://bnik78bvq0tjp" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-7.png" id="11_cnfvw"]
+[ext_resource type="Texture2D" uid="uid://bog08cdbdhtfx" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-8.png" id="12_u6gc1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
-size = Vector2(24, 80)
+size = Vector2(28, 64)
 
-[node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem", "_spriteNode", "_wallSlideDustPosition")]
+[sub_resource type="SpriteFrames" id="SpriteFrames_qwv0h"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_q6urw")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_q6urw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_333b5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_by3oo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_mskjj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_na4th")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_22sty")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_cnfvw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_u6gc1")
+}],
+"loop": true,
+"name": &"walk-facingdir",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_q6urw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_333b5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_by3oo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_mskjj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_na4th")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_22sty")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_cnfvw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_u6gc1")
+}],
+"loop": true,
+"name": &"walk-nonfacingdir",
+"speed": 5.0
+}]
+
+[node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem", "_flipRoot", "_spriteNode", "_wallSlideDustPosition")]
 floor_constant_speed = true
 floor_snap_length = 32.0
 script = ExtResource("1_iyb5a")
 _definition = ExtResource("2_ffrop")
 _holdableSystem = NodePath("HoldableSystem")
-_hazardDefinition = ExtResource("7_hazard")
-_spriteNode = NodePath("SpriteTest")
-_wallSlideDustPosition = NodePath("WallSlideDustPosition")
+_flipRoot = NodePath("FlipRoot")
+_spriteNode = NodePath("FlipRoot/AnimatedSprite2D")
+_wallSlideDustPosition = NodePath("FlipRoot/WallSlideDustPosition")
 _wallSlideDustScene = ExtResource("6_dust")
+_definition = ExtResource("2_ffrop")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1221874125]
-position = Vector2(2, -12)
+position = Vector2(1.5, -6.5)
 shape = SubResource("RectangleShape2D_rlx2o")
 
-[node name="SpriteTest" type="Sprite2D" parent="." unique_id=1104705581]
-texture_filter = 1
-position = Vector2(1.0000007, -17.749996)
-scale = Vector2(2.4666667, 5.078948)
-texture = ExtResource("2_54mch")
-region_enabled = true
-region_rect = Rect2(8, 9, 15, 19)
+[node name="FlipRoot" type="Node2D" parent="." unique_id=1856702997]
 
-[node name="WallSlideDustPosition" type="Node2D" parent="." unique_id=681449788]
+[node name="WallSlideDustPosition" type="Node2D" parent="FlipRoot" unique_id=681449788]
 position = Vector2(-12, 28)
 
-[node name="HoldableSystem" type="Node" parent="." unique_id=276482619]
+[node name="WeaponPosition" type="Node2D" parent="FlipRoot" unique_id=667883452]
+position = Vector2(45, -69)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="FlipRoot" unique_id=1866636675]
+position = Vector2(-2, -15.000002)
+scale = Vector2(0.09127149, 0.08331295)
+sprite_frames = SubResource("SpriteFrames_qwv0h")
+animation = &"walk-facingdir"
+frame_progress = 0.30843744
+
+[node name="HoldableSystem" type="Node" parent="." unique_id=276482619 node_paths=PackedStringArray("_weaponPosition")]
 script = ExtResource("2_ddu1s")
-_leftHoldableScene = ExtResource("3_pistol")
-_rightHoldableScene = ExtResource("4_shotgun")
+_leftHoldableScene = ExtResource("7_pistol")
+_rightHoldableScene = ExtResource("8_shotgun")
+_weaponPosition = NodePath("../FlipRoot/WeaponPosition")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=230254695]

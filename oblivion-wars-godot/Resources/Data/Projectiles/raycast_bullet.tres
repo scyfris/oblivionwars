@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ProjectileDefinition" format=3 uid="uid://d4mosgvbycq4v"]
+
+[ext_resource type="Script" uid="uid://ccc31phpdd2at" path="res://Scripts/Data/Definitions/ProjectileDefinition.cs" id="1_dodc7"]
+[ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="2_scene"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BulletImpact.tscn" id="3_impact"]
+
+[resource]
+script = ExtResource("1_dodc7")
+ProjectileId = "raycast_bullet"
+Speed = 0.0
+ProjectileScene = ExtResource("2_scene")
+HitEffect = ExtResource("3_impact")
+metadata/_custom_type_script = "uid://ccc31phpdd2at"
