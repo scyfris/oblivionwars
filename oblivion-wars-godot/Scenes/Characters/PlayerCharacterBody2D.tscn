@@ -84,7 +84,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"walk-nonfacingdir",
-"speed": 5.0
+"speed": 12.0
 }]
 
 [node name="PlayerCharacterBody2D" type="CharacterBody2D" unique_id=52823142 node_paths=PackedStringArray("_holdableSystem", "_flipRoot", "_spriteNode", "_wallSlideDustPosition")]
@@ -109,14 +109,13 @@ shape = SubResource("RectangleShape2D_rlx2o")
 position = Vector2(-12, 28)
 
 [node name="WeaponPosition" type="Node2D" parent="FlipRoot" unique_id=667883452]
-position = Vector2(45, -69)
+position = Vector2(18, -22)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="FlipRoot" unique_id=1866636675]
 position = Vector2(-2, -15.000002)
 scale = Vector2(0.09127149, 0.08331295)
 sprite_frames = SubResource("SpriteFrames_qwv0h")
-animation = &"walk-facingdir"
-frame_progress = 0.30843744
+frame_progress = 0.23829632
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=276482619 node_paths=PackedStringArray("_weaponPosition")]
 script = ExtResource("2_ddu1s")

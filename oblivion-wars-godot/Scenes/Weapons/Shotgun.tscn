@@ -2,13 +2,31 @@
 
 [ext_resource type="Script" uid="uid://els0tjl7ehxn" path="res://Scripts/Combat/Weapons/Weapon.cs" id="1_weapon"]
 [ext_resource type="Resource" uid="uid://bkksyfiyb5e3y" path="res://Resources/Data/Weapons/shotgun.tres" id="2_definition"]
+[ext_resource type="Texture2D" uid="uid://bbd7j2lrncto7" path="res://Resources/Data/Weapons/ShotgunSawed.png" id="3_bic6o"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_lq77y"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_bic6o")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
 
 [node name="Shotgun" type="Node2D" unique_id=951896950 node_paths=PackedStringArray("_projectileSpawn")]
 script = ExtResource("1_weapon")
 _weaponDefinition = ExtResource("2_definition")
 _projectileSpawn = NodePath("ProjectileSpawn")
 
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=417890824]
+position = Vector2(12, -2)
+scale = Vector2(0.08, 0.08)
+sprite_frames = SubResource("SpriteFrames_lq77y")
+
 [node name="ColorRect" type="ColorRect" parent="." unique_id=2078399736]
+visible = false
 offset_left = -6.0
 offset_top = -4.0
 offset_right = 20.0
