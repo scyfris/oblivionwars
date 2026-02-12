@@ -243,6 +243,23 @@ Non-Goals (for now)
   * Enemies and ai (shooting bullets, etc)
     * UI for raycast guns to show shooting, think of style similar to Arc Raiders
   * An event system (switches, end of level, etc).
+  * Fix camera to use a shared Resource for properties.  Camera and camera
+    trigger ares just reference the resource instead of having shared
+    parameters.
+
+=== Testworld checklist ===
+
+  * Main menu
+  * Checkpoint which player can use to save progress
+  * Interaction mechanics with checkpoint as well as on-screen GUI (ex. Press "E" to interact)
+  * Saving state (need to work through the requirements here)
+  * 1 Enemy NPC that walks for now.  Can be extended later with flying NPCs, wall crawlers, etc, but right now I want to get basic AI movement and shooting down.
+  * A little gui icon that shows in bottom right when saving for player feedback that it's been saved (even if it saves fast, gui icon should play some little animation for 1 sec or something).
+  * Collectable coins to get from npc.  
+  * GUI to indicate colelctable coins
+  * Death - when player's health is 0, loads from last checkpoint save data,
+    include position.
+
 
 ==== Features ====
 

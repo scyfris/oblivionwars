@@ -1,4 +1,5 @@
 using Godot;
+using System.Linq;
 
 public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 {
@@ -28,6 +29,11 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     private Vector2 _aimTarget;
     private bool _facingRight = true;
 
+    // Interaction
+    private Interactable _nearestInteractable;
+
+    public Interactable NearestInteractable => _nearestInteractable;
+
     public override void _Ready()
     {
         // Set the base class _definition so base code works
@@ -45,6 +51,26 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
+
+        // Initialize from PlayerState if respawning
+        if (SaveManager.Instance?.IsRespawning == true)
+        {
+            var checkpoint = FindCheckpointById(PlayerState.Instance.LastCheckpointId);
+            if (checkpoint != null)
+                GlobalPosition = checkpoint.RespawnPosition.GlobalPosition;
+
+            _runtimeData.CurrentHealth = _runtimeData.MaxHealth;
+            if (PlayerState.Instance != null)
+                PlayerState.Instance.CurrentHealth = _runtimeData.MaxHealth;
+
+            SaveManager.Instance.IsRespawning = false;
+            GD.Print($"Player respawned at checkpoint {PlayerState.Instance?.LastCheckpointId}");
+        }
+        else if (PlayerState.Instance != null)
+        {
+            // Normal load — sync health from PlayerState
+            _runtimeData.CurrentHealth = PlayerState.Instance.CurrentHealth;
+        }
     }
 
     public override void _ExitTree()
@@ -66,7 +92,25 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     {
         if (evt.EntityInstanceId != GetInstanceId()) return;
 
-        GD.Print("Player died! Reloading scene...");
+        GD.Print("Player died! Respawning from checkpoint...");
+
+        if (SaveManager.Instance != null && SaveManager.Instance.ActiveSlotIndex >= 0)
+        {
+            SaveManager.Instance.ReloadLastSave();
+            SaveManager.Instance.IsRespawning = true;
+
+            string levelScene = SaveManager.Instance.GetLevelScenePath(
+                PlayerState.Instance?.LastCheckpointLevelId ?? ""
+            );
+
+            if (!string.IsNullOrEmpty(levelScene))
+            {
+                GetTree().ChangeSceneToFile(levelScene);
+                return;
+            }
+        }
+
+        // Fallback: no save system active, just reload
         GetTree().ReloadCurrentScene();
     }
 
@@ -75,6 +119,10 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
         if (evt.TargetInstanceId != GetInstanceId()) return;
 
         StartInvincibility();
+
+        // Sync health to PlayerState
+        if (PlayerState.Instance != null)
+            PlayerState.Instance.CurrentHealth = _runtimeData.CurrentHealth;
     }
 
     // Override hazard check to skip while invincible
@@ -181,5 +229,33 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
             if (_spriteNode != null)
                 _spriteNode.Visible = true;
         }
+    }
+
+    // ── Interaction ────────────────────────────────────────
+
+    public void SetNearestInteractable(Interactable interactable)
+    {
+        _nearestInteractable = interactable;
+    }
+
+    public void ClearInteractable(Interactable interactable)
+    {
+        if (_nearestInteractable == interactable)
+            _nearestInteractable = null;
+    }
+
+    public void TryInteract()
+    {
+        _nearestInteractable?.Interact(this);
+    }
+
+    // ── Checkpoint Lookup ──────────────────────────────────
+
+    private Checkpoint FindCheckpointById(uint checkpointId)
+    {
+        var checkpoints = GetTree().GetNodesInGroup("checkpoints");
+        return checkpoints
+            .OfType<Checkpoint>()
+            .FirstOrDefault(cp => cp.CheckpointId == checkpointId);
     }
 }

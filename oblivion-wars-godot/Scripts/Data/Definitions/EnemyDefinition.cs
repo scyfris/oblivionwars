@@ -11,5 +11,5 @@ public partial class EnemyDefinition : CharacterDefinition
     [Export] public bool IsBoss = false;
 
     [ExportGroup("Drops")]
-    [Export] public Godot.Collections.Array<Resource> DropTable;
+    [Export] public Godot.Collections.Array<DropTableEntry> DropTable = new();
 }

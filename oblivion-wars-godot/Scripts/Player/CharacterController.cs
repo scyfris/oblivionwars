@@ -11,6 +11,7 @@ public partial class CharacterController : Node
     [Export] string _useRightAction = "shoot_right";
     [Export] string _rotateGravityClockwiseAction = "rotate_gravity_cw";
     [Export] string _rotateGravityCounterClockwiseAction = "rotate_gravity_ccw";
+    [Export] string _interactAction = "interact";
 
     public override void _UnhandledInput(InputEvent @event)
     {
@@ -59,6 +60,10 @@ public partial class CharacterController : Node
             _playerCharacter.RotateGravityClockwise();
         else if (@event.IsActionPressed(_rotateGravityCounterClockwiseAction))
             _playerCharacter.RotateGravityCounterClockwise();
+
+        // Interact
+        if (@event.IsActionPressed(_interactAction))
+            _playerCharacter.TryInteract();
     }
 
     public override void _PhysicsProcess(double delta)
