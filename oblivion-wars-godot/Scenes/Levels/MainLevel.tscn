@@ -8,10 +8,12 @@
 [ext_resource type="PackedScene" uid="uid://ceq74t0uxq1ed" path="res://Scenes/UI/crosshair.tscn" id="3_jxtak"]
 [ext_resource type="Script" uid="uid://b2dl33mekocnv" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
 [ext_resource type="TileSet" uid="uid://bcshhvut4q14s" path="res://Resources/Tilemaps/kenney_abstract-platformer/Godot/KenneyAbstract-Half.tres" id="4_sx5r3"]
+[ext_resource type="Resource" uid="uid://dmos2n3cg3lsa" path="res://Resources/Data/Camera/default_camera.tres" id="7_am6fp"]
 [ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Scenes/Characters/TargetDummy.tscn" id="7_sx5r3"]
 [ext_resource type="Script" uid="uid://chfm8yp5xogig" path="res://Scripts/Camera/CameraZone.cs" id="8_rkygg"]
 [ext_resource type="Script" uid="uid://dk1c314isfc8c" path="res://Scripts/UI/GameHUD.cs" id="10_7woyo"]
 [ext_resource type="Script" uid="uid://nkvcatgkdcfr" path="res://Scripts/UI/SaveIndicator.cs" id="13_yce48"]
+[ext_resource type="Resource" uid="uid://cmq8e4k64txg7" path="res://Resources/Data/Camera/zone_constraint.tres" id="15_cam02"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_8236u"]
 radius = 74.87
@@ -61,9 +63,7 @@ _bodyFlipDelay = 0.3
 script = ExtResource("4_camera")
 _target = NodePath("../CharacterController/PlayerCharacterBody2D")
 _camera = NodePath("Camera2D")
-_rotationSpeed = 7.0
-_minRotationSpeed = 2.0
-_rotationDelay = 0.0
+_defaultSettings = ExtResource("7_am6fp")
 
 [node name="Camera2D" type="Camera2D" parent="Node2D/Control/CameraController" unique_id=210406581]
 ignore_rotation = false
@@ -72,10 +72,7 @@ ignore_rotation = false
 position = Vector2(1802, 41)
 script = ExtResource("8_rkygg")
 LockAxisYWorld = true
-OverrideFollowOffset = true
-FollowOffset = Vector2(0, 1000)
-OverrideZoom = true
-Zoom = Vector2(1.5, 1.5)
+_settingsResource = ExtResource("15_cam02")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Node2D/Control/CameraConstraint" unique_id=894499173]
 position = Vector2(-267, 81)

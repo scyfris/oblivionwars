@@ -60,7 +60,7 @@ public partial class Weapon : Holdable
 
         _animationPlayer?.Play("shoot");
 
-        if (CameraController.Instance != null && _weaponDefinition.ScreenShakeScale > 0)
+        if (_owner is PlayerCharacterBody2D && CameraController.Instance != null && _weaponDefinition.ScreenShakeScale > 0)
             CameraController.Instance.Shake(_weaponDefinition.ScreenShakeScale, _weaponDefinition.ScreenShakeDurationScale);
     }
 

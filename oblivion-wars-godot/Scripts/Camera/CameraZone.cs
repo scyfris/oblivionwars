@@ -82,24 +82,20 @@ public partial class CameraZone : Area2D
 	[Export] public bool ConstrainDistanceRight = false;
 	[Export] public float MaxDistanceRightPixels = 200f;
 
-	// ── Camera Parameter Overrides ──────────────────────────
-	//    Each override: bool flag + value. If flag is false, CameraController uses its default.
-	[ExportGroup("Camera Overrides")]
+	// ── Camera Settings Override ────────────────────────────
+	//    Optional CameraSettings resource. UseDefault flags in the resource
+	//    control which values fall back to the CameraController's defaults.
+	//    Exported as base Resource to avoid InvalidCastException in [Tool] scripts
+	//    (Godot 4 C# limitation with custom resource exports in tool scripts).
+	[ExportGroup("Camera Settings")]
 
-	[Export] public bool OverrideFollowSpeed = false;
-	[Export] public float FollowSpeed = 5.0f;
+	[Export] public Resource _settingsResource;
 
-	[Export] public bool OverrideFollowOffset = false;
-	[Export] public Vector2 FollowOffset = Vector2.Zero;
-
-	[Export] public bool OverrideDeadzone = false;
-	[Export] public Vector2 DeadzonePixels = new Vector2(40, 30);
-
-	[Export] public bool OverrideLookAheadDistance = false;
-	[Export] public float LookAheadDistancePixels = 50.0f;
-
-	[Export] public bool OverrideZoom = false;
-	[Export] public Vector2 Zoom = new Vector2(1, 1);
+	/// <summary>
+	/// Typed accessor for the camera settings resource. Returns null if not assigned
+	/// or if the resource is not a CameraSettings.
+	/// </summary>
+	public CameraSettings Settings => _settingsResource as CameraSettings;
 
 	// ── Internal ────────────────────────────────────────────
 	private Rect2 _worldBounds;
@@ -212,14 +208,14 @@ public partial class CameraZone : Area2D
 
 	private void OnBodyEntered(Node2D body)
 	{
-		if (body is not CharacterBody2D) return;
+		if (body is not PlayerCharacterBody2D) return;
 		GD.Print($"CameraZone '{Name}': Player entered. Bounds={_worldBounds}");
 		CameraController.Instance?.EnterZone(this);
 	}
 
 	private void OnBodyExited(Node2D body)
 	{
-		if (body is not CharacterBody2D) return;
+		if (body is not PlayerCharacterBody2D) return;
 		GD.Print($"CameraZone '{Name}': Player exited.");
 		CameraController.Instance?.ExitZone(this);
 	}

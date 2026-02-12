@@ -1,10 +1,11 @@
 [gd_resource type="Resource" script_class="EnemyDefinition" format=3 uid="uid://ccy1qxn7wx5au"]
 
+[ext_resource type="Script" uid="uid://ckc6l3wdh00w8" path="res://Scripts/Data/Definitions/DropTableEntry.cs" id="1_i4fh1"]
 [ext_resource type="Script" uid="uid://dbdtd1ea68ii6" path="res://Scripts/Data/Definitions/EnemyDefinition.cs" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
-DropTable = null
+IsBoss = true
 EntityId = "target_dummy"
 MaxHealth = 50.0
 MoveSpeed = 120.0

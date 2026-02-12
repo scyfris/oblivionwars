@@ -29,83 +29,12 @@ public partial class CameraController : Node
 	/// </summary>
 	[Export] private Camera2D _camera;
 
-	[ExportGroup("Follow Settings")]
+	[ExportGroup("Settings")]
 
 	/// <summary>
-	/// How quickly the camera catches up to the target (higher = tighter following, lower = more lag)
+	/// Default camera settings resource. Zone overrides resolve against these.
 	/// </summary>
-	[Export] private float _followSpeed = 5.0f;
-
-	/// <summary>
-	/// Minimum speed in pixels/second the camera moves when returning to player (prevents slow falloff)
-	/// </summary>
-	[Export] private float _minFollowSpeed = 200.0f;
-
-	/// <summary>
-	/// Static offset from the target's position (useful for framing the character)
-	/// </summary>
-	[Export] private Vector2 _followOffset = Vector2.Zero;
-
-	/// <summary>
-	/// Deadzone size - player can move this far from camera center before camera starts following (X = horizontal, Y = vertical)
-	/// </summary>
-	[Export] private Vector2 _deadzone = new Vector2(40.0f, 30.0f);
-
-	/// <summary>
-	/// How far ahead of the target to look based on movement direction (creates anticipation)
-	/// </summary>
-	[Export] private float _lookAheadDistance = 50.0f;
-
-	/// <summary>
-	/// How quickly the look-ahead offset adjusts to velocity changes
-	/// </summary>
-	[Export] private float _lookAheadSpeed = 2.0f;
-
-	[ExportGroup("Boundaries")]
-
-	/// <summary>
-	/// Whether to constrain camera movement within defined bounds
-	/// </summary>
-	[Export] private bool _useBoundaries = false;
-
-	/// <summary>
-	/// Rectangle defining the area the camera can move within (only active if UseBoundaries is true)
-	/// </summary>
-	[Export] private Rect2 _cameraBounds = new Rect2(-10000, -10000, 20000, 20000);
-
-	[ExportGroup("Rotation (Gravity Flip)")]
-
-	/// <summary>
-	/// Whether camera should rotate to match player's gravity orientation
-	/// </summary>
-	[Export] private bool _rotateWithPlayer = true;
-
-	/// <summary>
-	/// How quickly the camera rotates to match player orientation (higher = faster rotation)
-	/// </summary>
-	[Export] private float _rotationSpeed = 5.0f;
-
-	/// <summary>
-	/// Minimum rotation speed in radians/second (prevents slow falloff at end of rotation)
-	/// </summary>
-	[Export] private float _minRotationSpeed = 3.0f;
-
-	/// <summary>
-	/// Delay in seconds before camera starts rotating after gravity change (creates dramatic effect)
-	/// </summary>
-	[Export] private float _rotationDelay = 0.3f;
-
-	[ExportGroup("Screen Shake")]
-
-	/// <summary>
-	/// Base screen shake intensity in pixels
-	/// </summary>
-	[Export] private float _baseShakeStrength = 5.0f;
-
-	/// <summary>
-	/// Base duration in seconds for the shake to decay to zero
-	/// </summary>
-	[Export] private float _baseShakeDuration = 0.3f;
+	[Export] private CameraSettings _defaultSettings;
 
 	private Vector2 _velocity = Vector2.Zero;
 	private Vector2 _lookAheadOffset = Vector2.Zero;
@@ -145,6 +74,11 @@ public partial class CameraController : Node
 		Directed     // Temporarily offset to show something
 	}
 
+	/// <summary>
+	/// Returns the zone's CameraSettings if an active zone has one, otherwise the default settings.
+	/// </summary>
+	private CameraSettings EffectiveSettings => _activeZone?.Settings ?? _defaultSettings;
+
 	public override void _Ready()
 	{
 		if (Instance != null)
@@ -161,6 +95,12 @@ public partial class CameraController : Node
 			return;
 		}
 
+		if (_defaultSettings == null)
+		{
+			GD.PrintErr("CameraController: DefaultSettings not assigned!");
+			return;
+		}
+
 		// Ensure camera is centered on its position (not top-left anchored) - set BEFORE making current
 		_camera.AnchorMode = Camera2D.AnchorModeEnum.DragCenter;
 		_camera.PositionSmoothingEnabled = false; // Disable smoothing for immediate positioning
@@ -171,13 +111,13 @@ public partial class CameraController : Node
 		// Position camera on target immediately
 		if (_target != null)
 		{
-			_camera.GlobalPosition = _target.GlobalPosition + _followOffset;
+			_camera.GlobalPosition = _target.GlobalPosition + _defaultSettings.FollowOffset;
 			_camera.ResetSmoothing(); // Force camera to snap to position
 			GD.Print($"CameraController: Camera GlobalPos={_camera.GlobalPosition}, Target={_target.GlobalPosition}");
 		}
 
 		// Initialize zone follow offset to default so there's no lerp on startup
-		_zoneFollowOffset = _followOffset;
+		_zoneFollowOffset = _defaultSettings.FollowOffset;
 
 		GD.Print("CameraController: Camera2D ready, enabled, and made current");
 	}
@@ -190,7 +130,7 @@ public partial class CameraController : Node
 
 	public override void _PhysicsProcess(double delta)
 	{
-		if (_camera == null || _target == null) return;
+		if (_camera == null || _target == null || _defaultSettings == null) return;
 
 		// Update based on camera mode
 		switch (_mode)
@@ -210,9 +150,10 @@ public partial class CameraController : Node
 		}
 
 		// Apply camera rotation (for gravity flip)
-		if (_rotateWithPlayer)
+		var s = EffectiveSettings;
+		if (s.GetRotateWithPlayer(_defaultSettings))
 		{
-			UpdateRotation(delta);
+			UpdateRotation(delta, s);
 		}
 
 		// Apply screen shake
@@ -224,22 +165,19 @@ public partial class CameraController : Node
 		// Re-evaluate active zone each frame (gravity may have changed)
 		ResolveActiveZone();
 
-		// Compute effective parameters (zone overrides or defaults)
-		float effectiveFollowSpeed = (_activeZone?.OverrideFollowSpeed == true)
-			? _activeZone.FollowSpeed : _followSpeed;
-		Vector2 effectiveDeadzone = (_activeZone?.OverrideDeadzone == true)
-			? _activeZone.DeadzonePixels : _deadzone;
-		float effectiveLookAhead = (_activeZone?.OverrideLookAheadDistance == true)
-			? _activeZone.LookAheadDistancePixels : _lookAheadDistance;
+		var s = EffectiveSettings;
+
+		// Compute effective parameters from settings
+		float effectiveFollowSpeed = s.GetFollowSpeed(_defaultSettings);
+		Vector2 effectiveDeadzone = s.GetDeadzone(_defaultSettings);
+		float effectiveLookAhead = s.GetLookAheadDistance(_defaultSettings);
 
 		// Lerp follow offset toward zone value (smooth transition, no position jump)
-		Vector2 targetFollowOffset = (_activeZone?.OverrideFollowOffset == true)
-			? _activeZone.FollowOffset : _followOffset;
+		Vector2 targetFollowOffset = s.GetFollowOffset(_defaultSettings);
 		_zoneFollowOffset = _zoneFollowOffset.Lerp(targetFollowOffset, effectiveFollowSpeed * (float)delta);
 
 		// Lerp zoom toward zone value
-		_targetZoom = (_activeZone?.OverrideZoom == true)
-			? _activeZone.Zoom : new Vector2(1, 1);
+		_targetZoom = s.GetZoom(_defaultSettings);
 		_currentZoom = _currentZoom.Lerp(_targetZoom, effectiveFollowSpeed * (float)delta);
 		_camera.Zoom = _currentZoom;
 
@@ -251,7 +189,7 @@ public partial class CameraController : Node
 		}
 
 		Vector2 desiredLookAhead = targetVelocity.Normalized() * effectiveLookAhead;
-		_lookAheadOffset = _lookAheadOffset.Lerp(desiredLookAhead, _lookAheadSpeed * (float)delta);
+		_lookAheadOffset = _lookAheadOffset.Lerp(desiredLookAhead, s.GetLookAheadSpeed(_defaultSettings) * (float)delta);
 
 		// Calculate ideal target position with offsets
 		Vector2 idealTargetPosition = _target.GlobalPosition + _zoneFollowOffset + _lookAheadOffset + _directorOffset;
@@ -278,10 +216,11 @@ public partial class CameraController : Node
 		Vector2 targetPosition = _camera.GlobalPosition + deadzoneOffset;
 
 		// Apply boundaries if enabled
-		if (_useBoundaries)
+		if (s.GetUseBoundaries(_defaultSettings))
 		{
-			targetPosition.X = Mathf.Clamp(targetPosition.X, _cameraBounds.Position.X, _cameraBounds.End.X);
-			targetPosition.Y = Mathf.Clamp(targetPosition.Y, _cameraBounds.Position.Y, _cameraBounds.End.Y);
+			var bounds = s.GetCameraBounds(_defaultSettings);
+			targetPosition.X = Mathf.Clamp(targetPosition.X, bounds.Position.X, bounds.End.X);
+			targetPosition.Y = Mathf.Clamp(targetPosition.Y, bounds.Position.Y, bounds.End.Y);
 		}
 
 		// Apply zone constraints (world-space clamping)
@@ -356,7 +295,7 @@ public partial class CameraController : Node
 			float lerpDistance = distanceToTarget * lerpAmount;
 
 			// Ensure we move at least the minimum speed
-			float minDistance = _minFollowSpeed * (float)delta;
+			float minDistance = s.GetMinFollowSpeed(_defaultSettings) * (float)delta;
 
 			if (lerpDistance < minDistance && distanceToTarget > minDistance)
 			{
@@ -395,10 +334,10 @@ public partial class CameraController : Node
 	private void UpdateFixedMode(double delta)
 	{
 		// Smoothly move to fixed position
-		_camera.GlobalPosition = _camera.GlobalPosition.Lerp(_fixedPosition, _followSpeed * (float)delta);
+		_camera.GlobalPosition = _camera.GlobalPosition.Lerp(_fixedPosition, _defaultSettings.FollowSpeed * (float)delta);
 	}
 
-	private void UpdateRotation(double delta)
+	private void UpdateRotation(double delta, CameraSettings settings)
 	{
 		if (_target is not CharacterBody2D character) return;
 
@@ -429,14 +368,16 @@ public partial class CameraController : Node
 			newTargetRotation = targetUp.Angle() + Mathf.Pi / 2;
 		}
 
+		float rotationDelay = settings.GetRotationDelay(_defaultSettings);
+
 		// Detect rotation change
 		float angleDiff = Mathf.Abs(Mathf.AngleDifference(_targetRotation, newTargetRotation));
 		if (angleDiff > 0.1f)
 		{
 			_targetRotation = newTargetRotation;
 			_isDelayingRotation = true;
-			_rotationDelayTimer = _rotationDelay;
-			GD.Print($"CameraController: Rotation change detected, starting delay ({_rotationDelay}s)");
+			_rotationDelayTimer = rotationDelay;
+			GD.Print($"CameraController: Rotation change detected, starting delay ({rotationDelay}s)");
 		}
 
 		// Handle delay countdown
@@ -460,13 +401,13 @@ public partial class CameraController : Node
 		if (angularDistance > 0.01f) // Only rotate if not already at target
 		{
 			// Calculate lerp amount
-			float lerpAmount = _rotationSpeed * (float)delta;
+			float lerpAmount = settings.GetRotationSpeed(_defaultSettings) * (float)delta;
 
 			// Calculate what the lerp would rotate us this frame
 			float lerpRotation = angularDistance * lerpAmount;
 
 			// Ensure we rotate at least the minimum speed
-			float minRotation = _minRotationSpeed * (float)delta;
+			float minRotation = settings.GetMinRotationSpeed(_defaultSettings) * (float)delta;
 
 			float direction = Mathf.Sign(Mathf.AngleDifference(_camera.GlobalRotation, _targetRotation));
 
@@ -554,8 +495,10 @@ public partial class CameraController : Node
 	/// </summary>
 	public void Shake(float strengthScale = 1.0f, float durationScale = 1.0f)
 	{
-		float strength = _baseShakeStrength * strengthScale;
-		float duration = _baseShakeDuration * durationScale;
+		if (_defaultSettings == null) return;
+		var s = EffectiveSettings;
+		float strength = s.GetBaseShakeStrength(_defaultSettings) * strengthScale;
+		float duration = s.GetBaseShakeDuration(_defaultSettings) * durationScale;
 
 		_shakeStrength = Mathf.Max(_shakeStrength, strength);
 		_shakeDecayRate = duration > 0 ? strength / duration : strength / 0.01f;
@@ -618,8 +561,9 @@ public partial class CameraController : Node
 	/// </summary>
 	public void SetBoundaries(Rect2 bounds, bool enabled = true)
 	{
-		_cameraBounds = bounds;
-		_useBoundaries = enabled;
+		if (_defaultSettings == null) return;
+		_defaultSettings.CameraBounds = bounds;
+		_defaultSettings.UseBoundaries = enabled;
 	}
 
 	/// <summary>

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CameraSettings" format=3 uid="uid://dmos2n3cg3lsa"]
+
+[ext_resource type="Script" uid="uid://bphwn0lhjpi8p" path="res://Scripts/Data/Definitions/CameraSettings.cs" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+UseDefaultFollowSpeed = false
+UseDefaultMinFollowSpeed = false
+UseDefaultFollowOffset = false
+UseDefaultDeadzone = false
+UseDefaultLookAheadDistance = false
+UseDefaultLookAheadSpeed = false
+UseDefaultZoom = false
+UseDefaultBoundaries = false
+UseDefaultRotation = false
+RotationSpeed = 7.0
+MinRotationSpeed = 2.0
+RotationDelay = 0.0
+UseDefaultShake = false
+metadata/_custom_type_script = "uid://bphwn0lhjpi8p"
