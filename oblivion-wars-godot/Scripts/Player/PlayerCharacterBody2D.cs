@@ -36,6 +36,8 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 
     public override void _Ready()
     {
+        AddToGroup("Player");
+
         // Set the base class _definition so base code works
         base._definition = _definition;
         base._Ready();

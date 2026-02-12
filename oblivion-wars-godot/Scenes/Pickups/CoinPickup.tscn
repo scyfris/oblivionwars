@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://bjcbsg2001eff"]
+
+[ext_resource type="Script" uid="uid://6yf8r7h55vvc" path="res://Scripts/Collectibles/CoinPickup.cs" id="1_coin"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_phys"]
+size = Vector2(12, 12)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 20.0
+
+[node name="CoinPickup" type="RigidBody2D" unique_id=1935142781]
+collision_layer = 4
+gravity_scale = 1.5
+script = ExtResource("1_coin")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=253105260]
+offset_left = -6.0
+offset_top = -6.0
+offset_right = 6.0
+offset_bottom = 6.0
+color = Color(1, 0.84, 0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1799923456]
+shape = SubResource("RectangleShape2D_phys")
+
+[node name="PickupArea" type="Area2D" parent="." unique_id=1047886708]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PickupArea" unique_id=679711734]
+shape = SubResource("CircleShape2D_area")

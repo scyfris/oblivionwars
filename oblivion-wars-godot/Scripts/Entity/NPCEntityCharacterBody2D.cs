@@ -156,12 +156,11 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
                 var pickup = entry.DropScene.Instantiate<Node2D>();
                 pickup.GlobalPosition = GlobalPosition;
 
-                // Apply random upward impulse for pop-out effect
+                // Apply random impulse for explosive pop-out effect
                 if (pickup is RigidBody2D rb)
                 {
-                    float impulseX = (float)GD.RandRange(-100.0, 100.0);
-                    float impulseY = (float)GD.RandRange(-200.0, -100.0);
-                    // Defer impulse to after it's in the tree
+                    float impulseX = (float)GD.RandRange(-200.0, 200.0);
+                    float impulseY = (float)GD.RandRange(-800.0, -400.0);
                     rb.CallDeferred("apply_impulse", new Vector2(impulseX, impulseY));
                 }
 

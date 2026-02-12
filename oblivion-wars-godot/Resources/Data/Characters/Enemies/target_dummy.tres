@@ -2,10 +2,18 @@
 
 [ext_resource type="Script" uid="uid://ckc6l3wdh00w8" path="res://Scripts/Data/Definitions/DropTableEntry.cs" id="1_i4fh1"]
 [ext_resource type="Script" uid="uid://dbdtd1ea68ii6" path="res://Scripts/Data/Definitions/EnemyDefinition.cs" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://bjcbsg2001eff" path="res://Scenes/Pickups/CoinPickup.tscn" id="2_xccjo"]
+
+[sub_resource type="Resource" id="Resource_i4fh1"]
+script = ExtResource("1_i4fh1")
+DropScene = ExtResource("2_xccjo")
+MaxCount = 10
+metadata/_custom_type_script = "uid://ckc6l3wdh00w8"
 
 [resource]
 script = ExtResource("1_script")
 IsBoss = true
+DropTable = Array[ExtResource("1_i4fh1")]([SubResource("Resource_i4fh1")])
 EntityId = "target_dummy"
 MaxHealth = 50.0
 MoveSpeed = 120.0

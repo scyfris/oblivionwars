@@ -21,6 +21,18 @@ public abstract partial class Pickup : RigidBody2D
                 break;
             }
         }
+
+        // Exclude player from physical collision so pickups don't push the player
+        CallDeferred(nameof(ExcludePlayerCollision));
+    }
+
+    private void ExcludePlayerCollision()
+    {
+        foreach (var node in GetTree().GetNodesInGroup("Player"))
+        {
+            if (node is PhysicsBody2D pb)
+                AddCollisionExceptionWith(pb);
+        }
     }
 
     public override void _PhysicsProcess(double delta)
