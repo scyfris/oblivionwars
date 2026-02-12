@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://0i4da5uqjki1" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-2.png" id="6_333b5"]
 [ext_resource type="PackedScene" uid="uid://bngampa7uejn8" path="res://Scenes/Effects/WallSlideDust.tscn" id="6_dust"]
 [ext_resource type="Texture2D" uid="uid://dhv6a14fp8b2j" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-3.png" id="7_by3oo"]
-[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="7_pistol"]
 [ext_resource type="Texture2D" uid="uid://be8w3ich74iwl" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-4.png" id="8_mskjj"]
 [ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Scenes/Weapons/Shotgun.tscn" id="8_shotgun"]
 [ext_resource type="Texture2D" uid="uid://v05a7unxavtp" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-5.png" id="9_na4th"]
@@ -119,8 +118,8 @@ frame_progress = 0.23829632
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=276482619 node_paths=PackedStringArray("_weaponPosition")]
 script = ExtResource("2_ddu1s")
-_leftHoldableScene = ExtResource("7_pistol")
 _rightHoldableScene = ExtResource("8_shotgun")
 _weaponPosition = NodePath("../FlipRoot/WeaponPosition")
+UseDefinitionWeapons = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=230254695]

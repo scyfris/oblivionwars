@@ -8,7 +8,7 @@ public partial class PlayerState : Node
     public float CurrentHealth = 100f;
     public float MaxHealth = 100f;
     public int Coins;
-    public uint LastCheckpointId;
+    public string LastCheckpointId = "";
     public string LastCheckpointLevelId = "";
     // Future: equipped weapons, unlocked abilities, inventory, etc.
 
@@ -52,7 +52,7 @@ public partial class PlayerState : Node
         Coins = data.Coins;
     }
 
-    public void ResetToDefaults(PlayerDefinition definition, string startingLevelId, uint startingCheckpointId)
+    public void ResetToDefaults(PlayerDefinition definition, string startingLevelId, string startingCheckpointId)
     {
         CurrentHealth = definition?.MaxHealth ?? 100f;
         MaxHealth = definition?.MaxHealth ?? 100f;

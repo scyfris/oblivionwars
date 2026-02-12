@@ -1035,3 +1035,289 @@ Scenes/
 
 ### Checkpoint
 Same as save. Normal enemies in the area reset. Boss defeated flags persist.
+
+---
+
+## 12. Level Design & Modularity (Planned)
+
+### Vision
+Level designers should be able to:
+- Drag and drop pre-built components (enemies, traps, doors, spawners)
+- Position and configure components in the editor
+- Not worry about cross-dependencies or initialization order
+- Have auto-generated unique IDs for saveable objects
+- Build rooms from data-driven definitions
+
+### Drag-and-Drop Prefabs (Planned)
+
+#### Core Prefabs Needed
+- **Door/Gate** — Level transitions between rooms
+- **Trap** — Generic trap base (spikes, flame jets, crushing walls)
+- **Lever/Switch** — Activatable objects that trigger events
+- **Destructible Wall** — Breakable barriers (ability-gated progression)
+- **Enemy Spawner** — Spawn waves when player enters area
+- **Checkpoint** — Save point (already exists, needs template)
+- **Camera Zone** — Camera behavior zones (code exists, needs prefab)
+
+#### Prefab Requirements
+Each prefab should:
+- Be fully self-contained (no manual wiring required)
+- Have `[Export] string UniqueId` for save/load
+- Raise events instead of direct coupling
+- Support editor gizmos for visualization (future)
+
+### Unique ID System
+
+#### Problem
+Level designers need to place saveable objects (checkpoints, doors, destructibles) without manually tracking IDs.
+
+#### Solution
+- All saveable objects have `[Export] public string UniqueId = ""`
+- Use `UniqueIdGenerator` [Tool] script to auto-generate IDs
+- ID format: `"checkpoint_MainLevel_A3F2"` (type + level + hash)
+- IDs are stored in .tscn file (visible in inspector, debuggable in save files)
+- Hash is stable (based on node path) but not random
+
+#### Workflow
+1. Drag checkpoint/trap into level, position it
+2. Add UniqueIdGenerator node to scene temporarily
+3. Click "Generate IDs" in inspector
+4. Save scene (Ctrl+S) to persist IDs
+5. Remove UniqueIdGenerator node
+
+### Room System (Planned)
+
+#### RoomDefinition Resource
+```csharp
+[GlobalClass]
+public partial class RoomDefinition : Resource
+{
+    [ExportGroup("Identity")]
+    [Export] public string RoomId = "";
+    [Export] public string DisplayName = "";
+
+    [ExportGroup("Geometry")]
+    [Export] public PackedScene TileMapPrefab;
+    [Export] public Vector2 PlayerSpawnPosition;
+    [Export] public Rect2 Bounds;  // Camera bounds
+
+    [ExportGroup("Camera")]
+    [Export] public CameraSettings CameraSettings;
+
+    [ExportGroup("Entities")]
+    [Export] public Godot.Collections.Array<EnemySpawnerDefinition> EnemySpawners;
+    [Export] public Godot.Collections.Array<TrapDefinition> Traps;
+    [Export] public Godot.Collections.Array<CheckpointData> Checkpoints;
+
+    [ExportGroup("Transitions")]
+    [Export] public Godot.Collections.Array<DoorDefinition> Doors;
+}
+```
+
+#### DoorDefinition Resource
+```csharp
+[GlobalClass]
+public partial class DoorDefinition : Resource
+{
+    [Export] public string DoorId = "";
+    [Export] public string DestinationRoomId = "";
+    [Export] public Vector2 DoorPosition;
+    [Export] public Vector2 PlayerExitPosition;
+    [Export] public bool Locked = false;
+    [Export] public string RequiredKeyId = "";  // For ability-gated doors
+}
+```
+
+#### Door Prefab (Planned)
+```
+Door.tscn (Area2D)
+  ├─ CollisionShape2D (trigger zone)
+  ├─ Visual (Sprite2D or AnimatedSprite2D)
+  └─ DoorDefinition export
+```
+
+Door script:
+- Listens for player entering Area2D
+- Checks if door is locked (requires key/ability)
+- Raises `LevelTransitionEvent` with destination room ID
+- LevelManager handles room transition
+
+### Enemy Spawner (Planned)
+
+#### EnemySpawnerDefinition Resource
+```csharp
+[GlobalClass]
+public partial class EnemySpawnerDefinition : Resource
+{
+    [Export] public PackedScene EnemyPrefab;
+    [Export] public int SpawnCount = 1;
+    [Export] public float SpawnInterval = 2.0f;  // seconds between spawns
+    [Export] public Vector2 SpawnPosition;
+    [Export] public float SpawnRadius = 50.0f;   // randomize within radius
+    [Export] public SpawnTriggerType TriggerType = SpawnTriggerType.OnEnter;
+    [Export] public Area2D TriggerArea;  // For OnEnter triggers
+}
+
+public enum SpawnTriggerType
+{
+    OnEnter,      // Player enters trigger area
+    OnLoad,       // Room loads (persistent enemies)
+    Manual        // Scripted event
+}
+```
+
+#### Spawner Prefab (Planned)
+```
+EnemySpawner.tscn (Node2D)
+  ├─ TriggerArea (Area2D, optional)
+  │   └─ CollisionShape2D
+  └─ SpawnMarker (Sprite2D, editor-only)
+```
+
+Spawner script:
+- Waits for trigger (player enters area, room loads, etc.)
+- Instantiates enemy prefabs at spawn position
+- Applies random offset within SpawnRadius
+- Handles spawn intervals (delay between enemies)
+- Can be one-time or respawning based on PersistenceMode
+
+### Trap System (Planned)
+
+#### TrapDefinition Resource
+```csharp
+[GlobalClass]
+public partial class TrapDefinition : Resource
+{
+    [Export] public string TrapId = "";
+    [Export] public TrapType Type = TrapType.Spikes;
+    [Export] public float Damage = 10.0f;
+    [Export] public float TriggerDelay = 0.0f;      // Time before trap activates
+    [Export] public float ActiveDuration = 1.0f;     // How long trap is active
+    [Export] public float CooldownDuration = 2.0f;   // Time before can trigger again
+    [Export] public bool StartsActive = false;
+}
+
+public enum TrapType
+{
+    Spikes,       // Retracting spikes
+    FlameJet,     // Periodic flame burst
+    Crushing,     // Crushing walls/ceiling
+    Projectile    // Fires projectiles
+}
+```
+
+#### Trap Prefab Base
+```
+Trap.tscn (Area2D)
+  ├─ CollisionShape2D (damage zone)
+  ├─ Visual (AnimatedSprite2D or Node2D with children)
+  ├─ TriggerArea (Area2D, for proximity activation)
+  │   └─ CollisionShape2D
+  └─ TrapDefinition export
+```
+
+Trap script:
+- StateMachine: Idle → Triggered → Active → Cooldown
+- Raises HitEvent when player is in damage zone while Active
+- Visual feedback for each state (retracted, warning, active)
+
+### Weapon Loadout System (Implemented)
+
+#### CharacterDefinition Weapons
+Weapons are now defined in CharacterDefinition resources:
+```csharp
+[GlobalClass]
+public partial class CharacterDefinition : Resource
+{
+    // ... existing fields ...
+
+    [ExportGroup("Loadout")]
+    [Export] public PackedScene LeftHoldable;
+    [Export] public PackedScene RightHoldable;
+}
+```
+
+#### HoldableSystem Modes
+HoldableSystem supports two modes:
+1. **Scene Weapons** (`UseDefinitionWeapons = false`)
+   - Weapons are children of the entity scene
+   - Used for visual testing and positioning in editor
+   - Drag weapon nodes to position them, adjust rotation
+   - Good for prototyping and "this enemy has a specific weapon"
+
+2. **Definition Weapons** (`UseDefinitionWeapons = true`)
+   - Weapons are spawned from CharacterDefinition at runtime
+   - Used for production (data-driven enemy variants)
+   - Create `archer_enemy.tres`, `shotgun_enemy.tres` without editing scenes
+   - Good for spawning enemies with different loadouts
+
+#### Workflow
+1. Edit enemy scene, add weapons as children under WeaponPosition
+2. Position weapons visually in editor
+3. When done, flip `UseDefinitionWeapons = true` in HoldableSystem
+4. Create enemy Definition .tres files with weapon references
+5. Spawn enemies dynamically with different loadouts
+
+### Level Design Checklist (Guidelines)
+
+When creating a new level:
+- [ ] Place TileMapLayer for terrain
+- [ ] Add Camera2D and CameraController
+- [ ] Create CameraZone for room boundaries
+- [ ] Add PlayerCharacterBody2D at spawn point
+- [ ] Place checkpoints with unique IDs (use UniqueIdGenerator)
+- [ ] Add enemy spawners with trigger areas
+- [ ] Place doors with destination room IDs
+- [ ] Add traps with proper collision layers
+- [ ] Test: Can player reach all areas?
+- [ ] Test: Do all checkpoints save correctly?
+- [ ] Test: Do doors transition to correct rooms?
+- [ ] Save scene to persist generated IDs
+
+### Future: Tiled Integration (Planned)
+
+For large levels, integrate Tiled map editor:
+- Export Tiled .tmx as JSON
+- Import script reads JSON and generates:
+  - TileMapLayer for terrain
+  - Enemy spawner nodes from object layer
+  - Checkpoint nodes from object layer
+  - Door nodes from object layer
+- Level designer works in Tiled, re-imports to Godot
+- No manual scene editing for large maps
+
+### Future: Editor Tools (Planned)
+
+Custom editor plugins:
+- **Scene Validator** — Checks for common errors:
+  - All checkpoints have unique IDs
+  - All doors have valid destination rooms
+  - All enemies have valid definitions
+  - Player exists in scene
+- **Room Builder** — Drag-and-drop room templates
+- **Enemy Spawner Tool** — Visual placement of spawn points with gizmos
+- **Camera Zone Gizmo** — Visual representation of camera bounds
+
+---
+
+## Summary of Architectural Patterns
+
+### ✅ Consistent Patterns
+- EventBus for cross-system communication
+- Definition (read-only .tres) / RuntimeData (mutable) split
+- Systems as autoload singletons with static Instance pattern
+- No GetNode for singletons (use MySystem.Instance)
+- FlipRoot pattern for character visuals
+- Events for cross-system, direct calls for internal mechanics
+
+### 🚧 Work In Progress
+- Weapon loadout system (scene vs. definition modes)
+- Unique ID generation for saveable objects
+- Room/level data-driven definitions
+
+### 📋 Planned Improvements
+- Door/transition system
+- Enemy spawner system
+- Trap system with state machine
+- Tiled map editor integration
+- Editor validation tools

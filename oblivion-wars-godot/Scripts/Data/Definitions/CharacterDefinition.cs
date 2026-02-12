@@ -32,4 +32,8 @@ public partial class CharacterDefinition : Resource
 
     [ExportGroup("Persistence")]
     [Export] public PersistenceMode Persistence = PersistenceMode.None;
+
+    [ExportGroup("Loadout")]
+    [Export] public PackedScene LeftHoldableScene;
+    [Export] public PackedScene RightHoldableScene;
 }

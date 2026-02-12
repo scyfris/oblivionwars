@@ -25,7 +25,14 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
         base._definition = _definition;
         base._Ready();
 
-        _holdableSystem?.Initialize(this);
+        // Initialize weapons from Definition or scene based on flag
+        if (_holdableSystem != null)
+        {
+            if (_holdableSystem.UseDefinitionWeapons)
+                _holdableSystem.InitializeWithDefinition(this, _definition);
+            else
+                _holdableSystem.Initialize(this);
+        }
 
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);

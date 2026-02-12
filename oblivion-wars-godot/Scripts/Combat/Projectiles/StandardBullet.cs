@@ -10,6 +10,12 @@ public partial class StandardBullet : Projectile
 
     protected override void OnHit(Node2D body)
     {
+        // Check if body is still valid (not disposed/freed)
+        if (body == null || !GodotObject.IsInstanceValid(body))
+        {
+            return;
+        }
+
         EventBus.Instance.Raise(new HitEvent
         {
             TargetInstanceId = body.GetInstanceId(),

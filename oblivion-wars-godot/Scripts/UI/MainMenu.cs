@@ -3,7 +3,7 @@ using Godot;
 public partial class MainMenu : Control
 {
     [Export] private string _startingLevelId = "test";
-    [Export] private uint _startingCheckpointId = 0;
+    [Export] private string _startingCheckpointId = "";
     [Export] private string _startingLevelScenePath = "res://Scenes/Levels/MainLevel.tscn";
 
     [Export] private Control _mainPanel;
@@ -78,8 +78,10 @@ public partial class MainMenu : Control
 
     private void OnDeleteSlotPressed(int slot)
     {
+        GD.Print($"━━━ DELETE BUTTON PRESSED FOR SLOT {slot} ━━━");
         SaveManager.Instance?.DeleteSlot(slot);
         RefreshSlotDisplay();
+        GD.Print($"━━━ REFRESH DISPLAY COMPLETE ━━━");
     }
 
     private void ShowMainPanel()

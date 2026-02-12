@@ -49,7 +49,14 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
             _wallSlideDustPosition.AddChild(_wallSlideDust);
         }
 
-        _holdableSystem?.Initialize(this);
+        // Initialize weapons from Definition or scene based on flag
+        if (_holdableSystem != null)
+        {
+            if (_holdableSystem.UseDefinitionWeapons)
+                _holdableSystem.InitializeWithDefinition(this, _definition);
+            else
+                _holdableSystem.Initialize(this);
+        }
 
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
@@ -253,11 +260,11 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 
     // ── Checkpoint Lookup ──────────────────────────────────
 
-    private Checkpoint FindCheckpointById(uint checkpointId)
+    private Checkpoint FindCheckpointById(string checkpointId)
     {
         var checkpoints = GetTree().GetNodesInGroup("checkpoints");
         return checkpoints
             .OfType<Checkpoint>()
-            .FirstOrDefault(cp => cp.CheckpointId == checkpointId);
+            .FirstOrDefault(cp => cp.UniqueId == checkpointId);
     }
 }

@@ -82,7 +82,7 @@ public partial class SaveManager : Node
         GD.Print($"SaveManager: Loaded slot {slot}");
     }
 
-    public void CreateNewGame(int slot, string startingLevelId, uint startingCheckpointId)
+    public void CreateNewGame(int slot, string startingLevelId, string startingCheckpointId)
     {
         // Delete any existing save in this slot
         DeleteSlot(slot);
@@ -102,18 +102,28 @@ public partial class SaveManager : Node
 
     public void DeleteSlot(int slot)
     {
+        GD.PrintErr($"SaveManager: DeleteSlot called for slot {slot}");
         string slotDir = GetSlotDirectory(slot);
-        if (!DirAccess.DirExistsAbsolute(slotDir)) return;
+        GD.PrintErr($"SaveManager: Slot directory: {slotDir}");
+        GD.PrintErr($"SaveManager: Directory exists? {DirAccess.DirExistsAbsolute(slotDir)}");
+
+        if (!DirAccess.DirExistsAbsolute(slotDir))
+        {
+            GD.PrintErr($"SaveManager: Slot directory does not exist, nothing to delete");
+            return;
+        }
 
         // Delete all files in the slot recursively
+        GD.PrintErr($"SaveManager: Deleting directory: {slotDir}");
         DeleteDirectoryRecursive(slotDir);
-        GD.Print($"SaveManager: Deleted slot {slot}");
+        GD.PrintErr($"SaveManager: Deleted slot {slot} successfully");
     }
 
     public bool SlotExists(int slot)
     {
         string playerPath = GetSlotDirectory(slot) + "player.tres";
-        return ResourceLoader.Exists(playerPath);
+        // Use FileAccess instead of ResourceLoader to avoid cache issues
+        return FileAccess.FileExists(playerPath);
     }
 
     public PlayerSaveData GetSlotPreview(int slot)

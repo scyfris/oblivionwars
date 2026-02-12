@@ -34,8 +34,9 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Checkpoint_0" type="Area2D" parent="Node2D/Control" unique_id=757024367 node_paths=PackedStringArray("RespawnPosition")]
-position = Vector2(1696, 322)
+position = Vector2(1701, 322)
 script = ExtResource("3_gkceq")
+UniqueId = "checkpoint_TestLevel_CE6F"
 RespawnPosition = NodePath("RespawnPos")
 PromptText = "Save"
 
