@@ -344,16 +344,145 @@ When an enemy spawns:
    - Adjust RespawnPosition child node (where player spawns)
 
 3. **Generate unique ID**
-   - Add `UniqueIdGenerator` node to scene (temporarily)
-   - Check "Generate Ids" in inspector
+   - In the checkpoint's inspector, find "Generate Unique Id" checkbox
+   - Check it once — it will auto-generate a unique ID and uncheck itself
+   - The UniqueId field will be populated (e.g., "checkpoint_MainLevel_A3F2")
    - Save scene (Ctrl+S)
-   - Remove UniqueIdGenerator node
 
 4. **Test**
-   - Run level, interact with checkpoint
+   - Run level, interact with checkpoint (press E when near)
+   - Check console for confirmation message
    - Die and verify respawn at correct position
 
-**Important:** Don't manually set CheckpointId anymore. Use UniqueId and the generator tool. This prevents duplicate IDs.
+**Important:** Each checkpoint MUST have a unique UniqueId. Never duplicate checkpoints without regenerating IDs.
+
+### How to Create a New Saveable Object
+
+The save system is **data-driven** — each object defines its own custom save data without modifying core systems.
+
+**Step 1: Add object type to enum**
+
+Edit `Scripts/Data/SaveData/SaveableLevelObjectType.cs`:
+```csharp
+public enum SaveableLevelObjectType
+{
+    Unknown = 0,
+    Checkpoint = 1,
+    Door = 2,
+    YourNewObject = 9,  // Add here
+}
+```
+
+**Step 2: Create custom save data class**
+
+Create `Scripts/Data/SaveData/YourObjectSaveData.cs`:
+```csharp
+using Godot;
+
+[GlobalClass]
+public partial class YourObjectSaveData : LevelObjectSaveDataEntry
+{
+    [Export] public bool IsActivated = false;
+    [Export] public float CustomValue = 0f;
+
+    public YourObjectSaveData()
+    {
+        ObjectType = SaveableLevelObjectType.YourNewObject;
+    }
+}
+```
+
+**Step 3: Implement ISaveableObject on your node**
+
+```csharp
+using Godot;
+
+#if TOOLS
+[Tool]
+#endif
+public partial class YourObject : Area2D, ISaveableObject
+{
+    [ExportGroup("Identification")]
+    [Export] public string UniqueId { get; set; } = "";
+
+    [ExportGroup("Editor Tools")]
+    [Export]
+    private bool GenerateUniqueId
+    {
+        get => false;
+        set
+        {
+            if (value)
+            {
+#if TOOLS
+                if (Engine.IsEditorHint())
+                {
+                    SaveableObjectHelper.GenerateUniqueId(this, this);
+                }
+#endif
+            }
+        }
+    }
+
+    private bool _isActivated = false;
+
+    public SaveableLevelObjectType GetObjectType() =>
+        SaveableLevelObjectType.YourNewObject;
+
+    public LevelObjectSaveDataEntry SaveState()
+    {
+        return new YourObjectSaveData
+        {
+            IsActivated = _isActivated
+        };
+    }
+
+    public void LoadState(LevelObjectSaveDataEntry data)
+    {
+        if (data is YourObjectSaveData objData)
+        {
+            _isActivated = objData.IsActivated;
+        }
+    }
+
+    public override void _Ready()
+    {
+        if (Engine.IsEditorHint()) return;
+
+        // Load saved state if it exists
+        var savedData = LevelState.Instance?.LoadObjectState(UniqueId);
+        if (savedData != null)
+        {
+            LoadState(savedData);
+        }
+    }
+
+    private void DoSomething()
+    {
+        _isActivated = true;
+
+        // Save state
+        var state = SaveState();
+        LevelState.Instance?.SaveObjectState(UniqueId, state);
+        SaveManager.Instance?.Save();
+    }
+}
+```
+
+**Step 4: Use in editor**
+
+1. Add your object to level
+2. Click "Generate Unique Id" checkbox in inspector
+3. UniqueId is auto-generated and displayed
+4. Save scene
+
+**Key points:**
+- Object type enum must be unique
+- SaveData inherits from `LevelObjectSaveDataEntry`
+- Constructor sets `ObjectType` enum
+- `SaveState()` returns your custom data
+- `LoadState()` restores from your custom data
+- Call `LevelState.SaveObjectState()` when state changes
 
 ### How to Add a Camera Zone
 
@@ -471,8 +600,9 @@ When an enemy spawns:
 - Manual save from menu (future)
 
 **What gets saved:**
-- Player health, position, inventory
-- Checkpoint activation states
+- Player health, position, inventory (PlayerSaveData)
+- Checkpoint activation states (LevelSaveData)
+- Generic object states (LevelSaveData.ObjectStates)
 - Boss defeated flags (future)
 - Ability unlocks (future)
 
@@ -483,15 +613,34 @@ When an enemy spawns:
 **Save files:**
 - Stored in user:// directory (AppData on Windows)
 - Format: .tres resources (human-readable text)
+- Location: `user://saves/slot_0/`, `slot_1/`, `slot_2/`
+
+**Important fixes:**
+- Use `FileAccess.FileExists()` to check if saves exist, NOT `ResourceLoader.Exists()` (cache issues)
+- Delete refreshes UI automatically via `RefreshSlotDisplay()`
 
 ### LevelState
 
-**What it does:** Tracks level-specific state (checkpoints, flags).
+**What it does:** Tracks level-specific state (checkpoints, flags, object states).
 
-**Methods:**
-- ActivateCheckpoint(checkpointId): Mark checkpoint as activated
-- IsCheckpointActivated(checkpointId): Check if activated
-- SetFlag(flagId, value): Set arbitrary flag (door opened, boss defeated)
+**Legacy Methods (still supported):**
+- `ActivateCheckpoint(checkpointId)`: Mark checkpoint as activated
+- `IsCheckpointActivated(checkpointId)`: Check if activated
+- `UnlockDoor(doorId)`: Mark door as unlocked
+- `IsDoorUnlocked(doorId)`: Check if door unlocked
+
+**New Generic Methods (preferred):**
+- `SaveObjectState(uniqueId, saveData)`: Save any object's custom state
+- `LoadObjectState(uniqueId)`: Load object state (returns LevelObjectSaveDataEntry)
+- `QueryObjectsByType(objectType)`: Find all saved objects of a type
+- `HasObjectState(uniqueId)`: Check if object has saved state
+- `RemoveObjectState(uniqueId)`: Delete saved state (e.g., object destroyed)
+
+**Architecture:**
+- `LevelSaveData.ObjectStates` is a dictionary: UniqueId → LevelObjectSaveDataEntry
+- Each object type defines its own subclass (DoorSaveData, CheckpointSaveData, etc.)
+- Objects call `SaveObjectState()` when their state changes
+- Objects call `LoadObjectState()` in `_Ready()` to restore state
 
 **Lifetime:** Cleared on level load, restored from save file.
 
@@ -656,6 +805,90 @@ Entities can get weapons two ways:
 4. Set UseDefinitionWeapons = true
 5. Assign weapons in Definition .tres
 
+### The Inspector Button Pattern
+
+For one-time actions in the editor (generating IDs, baking data):
+
+```csharp
+#if TOOLS
+[Tool]
+#endif
+public partial class MyObject : Node2D
+{
+    [ExportGroup("Editor Tools")]
+    [Export]
+    private bool GenerateUniqueId
+    {
+        get => false;  // Always returns false so checkbox resets
+        set
+        {
+            if (value)
+            {
+#if TOOLS
+                if (Engine.IsEditorHint())
+                {
+                    // Do the action
+                    UniqueId = GenerateId();
+                    GD.Print($"Generated ID: {UniqueId}");
+                }
+#endif
+            }
+        }
+    }
+}
+```
+
+**How it works:**
+- Property setter fires immediately when checkbox is clicked
+- `get` returns false, so checkbox auto-unchecks after click
+- `set` executes the action when value is true
+- Requires `[Tool]` attribute and `Engine.IsEditorHint()` check
+
+**Why not _Process?**
+- `_Process` doesn't run reliably in editor without explicit `SetProcess(true)`
+- Property setters fire instantly, more responsive
+- Cleaner UX: checkbox resets automatically
+
+**Use cases:**
+- Generate unique IDs
+- Bake navigation mesh
+- Pre-calculate data
+- Validate configuration
+
+### The Editor vs Runtime Check Pattern
+
+**Wrong way (doesn't work in editor play mode):**
+```csharp
+public override void _Ready()
+{
+#if !TOOLS
+    // This code won't run when playing from editor!
+    ConnectSignals();
+#endif
+}
+```
+
+**Right way (works everywhere except actual editor editing):**
+```csharp
+public override void _Ready()
+{
+    // Skip setup when editing in inspector
+    if (Engine.IsEditorHint()) return;
+
+    // This runs in play mode (F5) AND exported game
+    ConnectSignals();
+}
+```
+
+**Key difference:**
+- `#if !TOOLS`: Compile-time check, excludes code from editor builds entirely
+- `Engine.IsEditorHint()`: Runtime check, only skips when actively editing in inspector
+- Play mode (F5) has `IsEditorHint() == false`, so runtime checks work correctly
+
+**When to use each:**
+- `#if TOOLS`: For editor-only utilities that should NEVER run in game
+- `Engine.IsEditorHint()`: For game code that should skip during inspector editing but run in play mode
+
 ---
 
 ## Troubleshooting
@@ -690,10 +923,54 @@ Entities can get weapons two ways:
 
 **Check:**
 1. Is checkpoint in "checkpoints" group? (should auto-add in _Ready)
-2. Does checkpoint have a CheckpointId? (or UniqueId)
+2. Does checkpoint have a UniqueId? (not CheckpointId anymore)
 3. Is SaveManager autoload registered?
 4. Check user:// directory for save files
 5. Is PlayerState singleton initialized?
+
+### "Checkpoint interaction prompt doesn't show"
+
+**Check:**
+1. Is checkpoint's `Monitoring` enabled on Area2D? (should be true)
+2. Are `CollisionLayer` and `CollisionMask` set correctly?
+   - Checkpoint collision_mask should include player layer (layer 1)
+3. Is `_Ready()` being called? Add debug prints to verify
+4. Are you using `Engine.IsEditorHint()` check, NOT `#if !TOOLS`?
+   - `#if !TOOLS` can block code when running from editor
+   - Use runtime check instead: `if (Engine.IsEditorHint()) return;`
+5. Check console for "CHECKPOINT READY" debug messages
+6. Verify player is `PlayerCharacterBody2D` type (not just CharacterBody2D)
+
+### "Delete save slot doesn't work / slot still shows as full"
+
+**Check:**
+1. Is `FileAccess.FileExists()` being used, NOT `ResourceLoader.Exists()`?
+   - ResourceLoader caches resources and returns true even after deletion
+   - FileAccess checks actual filesystem
+2. Is `RefreshSlotDisplay()` being called after delete?
+3. Check console for "Directory exists? False" message
+4. Verify slot directory path is correct (user://saves/slot_X/)
+
+### "Bullet crashes when hitting dead enemy"
+
+**Error:** `ObjectDisposedException: Cannot access a disposed object`
+
+**Fix:** Check if object is valid before accessing:
+```csharp
+protected override void OnHit(Node2D body)
+{
+    // Check if body is still valid (not disposed/freed)
+    if (body == null || !GodotObject.IsInstanceValid(body))
+    {
+        return;
+    }
+
+    // Safe to access body now
+    var instanceId = body.GetInstanceId();
+}
+```
+
+**Why this happens:** Enemy dies and calls `QueueFree()`, but bullet's `OnHit` callback fires after the enemy is already disposed. Always check validity before accessing.
 
 ### "Event isn't firing"
 
