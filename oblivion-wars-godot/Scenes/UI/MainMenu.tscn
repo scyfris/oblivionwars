@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://d21yfnfwoutc0"]
 
 [ext_resource type="Script" uid="uid://5g5fl7jm4ov1" path="res://Scripts/UI/MainMenu.cs" id="1_menu"]
+[ext_resource type="Script" uid="uid://df3se7cxhw6ml" path="res://Scripts/UI/FluidSimulation.cs" id="2_fluid"]
 
 [node name="MainMenu" type="Control" unique_id=1880511648 node_paths=PackedStringArray("_mainPanel", "_slotPanel", "_playButton", "_quitButton", "_slot0Button", "_slot1Button", "_slot2Button", "_deleteSlot0Button", "_deleteSlot1Button", "_deleteSlot2Button", "_backButton")]
 layout_mode = 3
@@ -30,6 +31,19 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.08, 0.08, 0.12, 1)
+
+[node name="FluidSim" type="TextureRect" parent="Background" unique_id=521289108]
+texture_filter = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_fluid")
+ForceScale = 50.0
+DensityRate = 1000.0
 
 [node name="MainPanel" type="VBoxContainer" parent="Background" unique_id=245652359]
 layout_mode = 1
