@@ -23,6 +23,6 @@ public partial class AIBehaviorDefinition : Resource
     [Export] public AimMode AimMode = AimMode.TrackPlayer;
 
     [ExportGroup("Combat")]
-    [Export] public float AttackRange = 50f;
+    [Export] public float AttackRange = 200f;
     [Export] public float AttackCooldown = 1.0f;
 }

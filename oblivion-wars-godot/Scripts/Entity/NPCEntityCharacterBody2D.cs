@@ -15,6 +15,8 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
 
     private Vector2 _aimTarget;
     private bool _facingRight = true;
+    private float _contactDamageCooldown = 0f;
+    private const float ContactDamageCooldownTime = 0.5f;
 
     public new EnemyDefinition Definition => _definition;
 
@@ -43,6 +45,7 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
 
         UpdateFacing();
         _holdableSystem?.Update(delta);
+        CheckContactDamage(delta);
     }
 
     // ── Aim / Holdable API (mirrors PlayerCharacterBody2D) ──
@@ -75,6 +78,34 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
             _holdableSystem?.HeldLeft(targetPosition);
         else
             _holdableSystem?.HeldRight(targetPosition);
+    }
+
+    // ── Contact Damage ──────────────────────────────────────
+
+    private void CheckContactDamage(double delta)
+    {
+        _contactDamageCooldown -= (float)delta;
+        if (_contactDamageCooldown > 0 || _definition == null || _definition.ContactDamage <= 0) return;
+
+        for (int i = 0; i < GetSlideCollisionCount(); i++)
+        {
+            var collision = GetSlideCollision(i);
+            if (collision.GetCollider() is PlayerCharacterBody2D player)
+            {
+                Vector2 hitDir = (player.GlobalPosition - GlobalPosition).Normalized();
+                EventBus.Instance.Raise(new HitEvent
+                {
+                    TargetInstanceId = player.GetInstanceId(),
+                    SourceInstanceId = GetInstanceId(),
+                    BaseDamage = _definition.ContactDamage,
+                    HitDirection = hitDir,
+                    HitPosition = collision.GetPosition(),
+                    Projectile = null
+                });
+                _contactDamageCooldown = ContactDamageCooldownTime;
+                break;
+            }
+        }
     }
 
     // ── Visuals ────────────────────────────────────────────

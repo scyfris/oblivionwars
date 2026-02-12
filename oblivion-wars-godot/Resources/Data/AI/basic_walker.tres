@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="AIBehaviorDefinition" format=3 uid="uid://chv3j6f420nkj"]
+
+[ext_resource type="Script" uid="uid://din66r6aywcws" path="res://Scripts/Data/Definitions/AIBehaviorDefinition.cs" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+DetectionRadius = 250.0
+metadata/_custom_type_script = "uid://din66r6aywcws"

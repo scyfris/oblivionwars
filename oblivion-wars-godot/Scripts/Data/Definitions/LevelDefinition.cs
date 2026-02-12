@@ -6,6 +6,6 @@ public partial class LevelDefinition : Resource
     [Export] public string LevelId = "";
     [Export] public string LevelDisplayName = "";
     [Export] public uint DefaultCheckpointId = 0;
-    [Export] public string ScenePath = "";  // res:// path to the level scene
+    [Export(PropertyHint.File, "*.tscn")] public string ScenePath = "";
     // Future: music, environment settings, loading screen, etc.
 }

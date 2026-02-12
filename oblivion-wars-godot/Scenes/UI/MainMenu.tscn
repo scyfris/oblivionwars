@@ -1,0 +1,165 @@
+[gd_scene format=3 uid="uid://d21yfnfwoutc0"]
+
+[ext_resource type="Script" uid="uid://5g5fl7jm4ov1" path="res://Scripts/UI/MainMenu.cs" id="1_menu"]
+
+[node name="MainMenu" type="Control" unique_id=1880511648 node_paths=PackedStringArray("_mainPanel", "_slotPanel", "_playButton", "_quitButton", "_slot0Button", "_slot1Button", "_slot2Button", "_deleteSlot0Button", "_deleteSlot1Button", "_deleteSlot2Button", "_backButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+_mainPanel = NodePath("Background/MainPanel")
+_slotPanel = NodePath("Background/SlotPanel")
+_playButton = NodePath("Background/MainPanel/VBox/PlayButton")
+_quitButton = NodePath("Background/MainPanel/VBox/QuitButton")
+_slot0Button = NodePath("Background/SlotPanel/VBox/Slot0Row/Slot0Button")
+_slot1Button = NodePath("Background/SlotPanel/VBox/Slot1Row/Slot1Button")
+_slot2Button = NodePath("Background/SlotPanel/VBox/Slot2Row/Slot2Button")
+_deleteSlot0Button = NodePath("Background/SlotPanel/VBox/Slot0Row/DeleteSlot0Button")
+_deleteSlot1Button = NodePath("Background/SlotPanel/VBox/Slot1Row/DeleteSlot1Button")
+_deleteSlot2Button = NodePath("Background/SlotPanel/VBox/Slot2Row/DeleteSlot2Button")
+_backButton = NodePath("Background/SlotPanel/VBox/BackButton")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1309689817]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.12, 1)
+
+[node name="MainPanel" type="VBoxContainer" parent="Background" unique_id=245652359]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Background/MainPanel" unique_id=1736246231]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Background/MainPanel/VBox" unique_id=2143413843]
+layout_mode = 2
+text = "OBLIVION WARS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Background/MainPanel/VBox" unique_id=995905790]
+layout_mode = 2
+text = "[ Test World ]"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Background/MainPanel/VBox" unique_id=1046068550]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="Background/MainPanel/VBox" unique_id=1904665516]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Play"
+
+[node name="QuitButton" type="Button" parent="Background/MainPanel/VBox" unique_id=1040745405]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Quit"
+
+[node name="SlotPanel" type="VBoxContainer" parent="Background" unique_id=1804716264]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Background/SlotPanel" unique_id=1286046353]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 15
+
+[node name="SlotTitle" type="Label" parent="Background/SlotPanel/VBox" unique_id=588308140]
+layout_mode = 2
+text = "Select Save Slot"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Background/SlotPanel/VBox" unique_id=420234534]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="Slot0Row" type="HBoxContainer" parent="Background/SlotPanel/VBox" unique_id=705106858]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 10
+
+[node name="Slot0Button" type="Button" parent="Background/SlotPanel/VBox/Slot0Row" unique_id=94380818]
+custom_minimum_size = Vector2(300, 45)
+layout_mode = 2
+text = "Slot 1 - Empty"
+
+[node name="DeleteSlot0Button" type="Button" parent="Background/SlotPanel/VBox/Slot0Row" unique_id=2052601392]
+visible = false
+custom_minimum_size = Vector2(80, 45)
+layout_mode = 2
+text = "Delete"
+
+[node name="Slot1Row" type="HBoxContainer" parent="Background/SlotPanel/VBox" unique_id=837312304]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 10
+
+[node name="Slot1Button" type="Button" parent="Background/SlotPanel/VBox/Slot1Row" unique_id=229566355]
+custom_minimum_size = Vector2(300, 45)
+layout_mode = 2
+text = "Slot 2 - Empty"
+
+[node name="DeleteSlot1Button" type="Button" parent="Background/SlotPanel/VBox/Slot1Row" unique_id=277921324]
+visible = false
+custom_minimum_size = Vector2(80, 45)
+layout_mode = 2
+text = "Delete"
+
+[node name="Slot2Row" type="HBoxContainer" parent="Background/SlotPanel/VBox" unique_id=2018197222]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 10
+
+[node name="Slot2Button" type="Button" parent="Background/SlotPanel/VBox/Slot2Row" unique_id=328076646]
+custom_minimum_size = Vector2(300, 45)
+layout_mode = 2
+text = "Slot 3 - Empty"
+
+[node name="DeleteSlot2Button" type="Button" parent="Background/SlotPanel/VBox/Slot2Row" unique_id=1827571238]
+visible = false
+custom_minimum_size = Vector2(80, 45)
+layout_mode = 2
+text = "Delete"
+
+[node name="Spacer2" type="Control" parent="Background/SlotPanel/VBox" unique_id=1999139074]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="Background/SlotPanel/VBox" unique_id=1934441135]
+custom_minimum_size = Vector2(200, 45)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Back"

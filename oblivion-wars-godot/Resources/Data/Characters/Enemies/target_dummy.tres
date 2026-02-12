@@ -6,6 +6,6 @@
 script = ExtResource("1_script")
 DropTable = null
 EntityId = "target_dummy"
-MoveSpeed = 0.0
-Gravity = 0.0
+MaxHealth = 50.0
+MoveSpeed = 120.0
 metadata/_custom_type_script = "uid://dbdtd1ea68ii6"

@@ -1,14 +1,23 @@
 [gd_scene format=3 uid="uid://cygwcj2tkmvgn"]
 
 [ext_resource type="Script" uid="uid://bwpnrn34w5mva" path="res://Scripts/Entity/NPCEntityCharacterBody2D.cs" id="1_npc"]
-[ext_resource type="Resource" path="res://Resources/Data/Characters/Enemies/target_dummy.tres" id="2_def"]
+[ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/target_dummy.tres" id="2_def"]
+[ext_resource type="Script" uid="uid://bb8aryxliebfh" path="res://Scripts/AI/AIController.cs" id="3_ai"]
+[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="4_5tmo4"]
+[ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/AI/basic_walker.tres" id="4_behavior"]
+[ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
 size = Vector2(32, 64)
 
-[node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_healthLabel")]
+[sub_resource type="CircleShape2D" id="CircleShape2D_detect"]
+radius = 250.0
+
+[node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_flipRoot", "_holdableSystem", "_healthLabel")]
 script = ExtResource("1_npc")
 _definition = ExtResource("2_def")
+_flipRoot = NodePath("FlipRoot")
+_holdableSystem = NodePath("HoldableSystem")
 _healthLabel = NodePath("HealthLabel")
 _definition = ExtResource("2_def")
 
@@ -16,16 +25,38 @@ _definition = ExtResource("2_def")
 position = Vector2(0, -32)
 shape = SubResource("RectangleShape2D_dummy")
 
-[node name="Visual" type="ColorRect" parent="." unique_id=1062645683]
+[node name="FlipRoot" type="Node2D" parent="." unique_id=1454104269]
+
+[node name="Visual" type="ColorRect" parent="FlipRoot" unique_id=1062645683]
 offset_left = -16.0
 offset_top = -64.0
 offset_right = 16.0
 color = Color(0.8, 0.2, 0.2, 1)
+
+[node name="WeaponPosition" type="Node2D" parent="FlipRoot" unique_id=1053823199]
+position = Vector2(14, -40)
 
 [node name="HealthLabel" type="Label" parent="." unique_id=1674419487]
 offset_left = -30.0
 offset_top = -80.0
 offset_right = 30.0
 offset_bottom = -65.0
-text = "100/100"
+text = "50/50"
 horizontal_alignment = 1
+
+[node name="HoldableSystem" type="Node" parent="." unique_id=752884601 node_paths=PackedStringArray("_weaponPosition")]
+script = ExtResource("5_holdable")
+_leftHoldableScene = ExtResource("4_5tmo4")
+_weaponPosition = NodePath("../FlipRoot/WeaponPosition")
+
+[node name="DetectionArea" type="Area2D" parent="." unique_id=2040213087]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea" unique_id=216436319]
+shape = SubResource("CircleShape2D_detect")
+
+[node name="AIController" type="Node" parent="." unique_id=555903100 node_paths=PackedStringArray("_npc", "_detectionArea")]
+script = ExtResource("3_ai")
+_npc = NodePath("..")
+_behavior = ExtResource("4_behavior")
+_detectionArea = NodePath("../DetectionArea")
