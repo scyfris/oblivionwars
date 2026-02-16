@@ -1,10 +1,11 @@
 using Godot;
 
+// All the physics stuff
 public partial class EntityCharacterBody2D : CharacterBody2D
 {
     [Export] protected CharacterDefinition _definition;
 
-    // Runtime data (replaces IGameEntity)
+    // Runtime data
     protected EntityRuntimeData _runtimeData;
     public EntityRuntimeData RuntimeData => _runtimeData;
     public CharacterDefinition Definition => _definition;

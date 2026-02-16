@@ -1,6 +1,7 @@
 using Godot;
 using System.Linq;
 
+// Player stuff built on top of physics stuff
 public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 {
     [Export] private new PlayerDefinition _definition;
@@ -36,7 +37,7 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 
     public override void _Ready()
     {
-        AddToGroup("Player");
+        AddToGroup(Groups.Entities.Player);
 
         // Set the base class _definition so base code works
         base._definition = _definition;
@@ -262,7 +263,7 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 
     private Checkpoint FindCheckpointById(string checkpointId)
     {
-        var checkpoints = GetTree().GetNodesInGroup("checkpoints");
+        var checkpoints = GetTree().GetNodesInGroup(Groups.Level.Checkpoint);
         return checkpoints
             .OfType<Checkpoint>()
             .FirstOrDefault(cp => cp.UniqueId == checkpointId);

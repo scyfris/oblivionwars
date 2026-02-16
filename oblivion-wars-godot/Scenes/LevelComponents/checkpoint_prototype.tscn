@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://dtv6m744e7pgh"]
+
+[ext_resource type="Script" uid="uid://c48xrdqe5s1qc" path="res://Scripts/Interaction/Checkpoint.cs" id="1_nub28"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_8236u"]
+radius = 59.03389
+
+[node name="Checkpoint_Prototype" type="Area2D" unique_id=1067059194 node_paths=PackedStringArray("RespawnPosition")]
+script = ExtResource("1_nub28")
+UniqueId = "checkpoint_TestLevel_CE6F"
+RespawnPosition = NodePath("RespawnPos")
+PromptText = "Save"
+
+[node name="RespawnPos" type="Node2D" parent="." unique_id=2019893110]
+position = Vector2(1, 9)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1215804024]
+position = Vector2(1, 7)
+shape = SubResource("CircleShape2D_8236u")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=771011881]
+offset_left = -28.0
+offset_top = -33.0
+offset_right = 31.0
+offset_bottom = 62.0
+color = Color(1, 0.5281222, 1, 1)

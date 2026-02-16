@@ -62,7 +62,7 @@ public partial class Checkpoint : Interactable, ISaveableObject
         GD.Print($"Checkpoint UniqueId: '{UniqueId}'");
         GD.Print($"Checkpoint Name: '{Name}'");
         PromptText = "Save";
-        AddToGroup("checkpoints");
+        AddToGroup(Groups.Level.Checkpoint);
 
         // Connect body signals for interaction tracking
         BodyEntered += OnBodyEntered;
