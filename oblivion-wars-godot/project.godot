@@ -20,9 +20,9 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-EventBus="res://Scripts/Core/EventBus.cs"
-PlayerState="res://Scripts/Core/PlayerState.cs"
-LevelState="res://Scripts/Core/LevelState.cs"
+EventBus="res://Scripts/Core/Events/EventBus.cs"
+PlayerState="res://Scripts/GlobalState/PlayerState.cs"
+LevelState="res://Scripts/GlobalState/LevelState.cs"
 SaveManager="res://Scripts/Core/SaveManager.cs"
 
 [display]
