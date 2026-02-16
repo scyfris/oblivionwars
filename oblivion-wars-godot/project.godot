@@ -21,9 +21,9 @@ config/icon="res://icon.svg"
 [autoload]
 
 EventBus="res://Scripts/Core/Events/EventBus.cs"
-GlobalStateManager="*res://Scenes/GlobalStateManager.tscn"
-GlobalDefinitions="*res://Scripts/Core/GlobalDefinitions.cs"
 SaveManager="res://Scripts/Core/SaveManager.cs"
+GlobalDefinitions="*res://Scripts/Data/GlobalDefinitions.cs"
+GlobalStateManager="*res://Scenes/GlobalStateManager.tscn"
 
 [display]
 

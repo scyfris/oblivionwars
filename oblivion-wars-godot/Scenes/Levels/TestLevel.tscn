@@ -1,12 +1,13 @@
 [gd_scene format=4 uid="uid://lw5w6fa7v7yc"]
 
-[ext_resource type="Script" uid="uid://c1cu0sgl231ao" path="res://Scripts/Player/CharacterController.cs" id="1_o3cl4"]
+[ext_resource type="Script" uid="uid://tdn8m2aj6q7" path="res://Scripts/Player/PlayerInputController.cs" id="1_o3cl4"]
 [ext_resource type="PackedScene" uid="uid://cb4iahq5chr65" path="res://Scenes/Characters/PlayerCharacterBody2D.tscn" id="2_jxtak"]
 [ext_resource type="PackedScene" uid="uid://ceq74t0uxq1ed" path="res://Scenes/UI/crosshair.tscn" id="3_jxtak"]
 [ext_resource type="Script" uid="uid://b2dl33mekocnv" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
 [ext_resource type="TileSet" uid="uid://cifh4slrp6lmq" path="res://Resources/Tilemaps/kenney_abstract-platformer/Godot/KenneyAbstractPlatformer-TileSet.tres" id="5_rqyoi"]
 [ext_resource type="Script" uid="uid://b3dp1tcocrav0" path="res://Scripts/UI/DebugHUD.cs" id="6_debughud"]
-[ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Scenes/Characters/TargetDummy.tscn" id="7_dummy"]
+[ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Scenes/Characters/NPC.tscn" id="7_dummy"]
+[ext_resource type="Script" uid="uid://wj4nbkyxmcrq" path="res://Scripts/Player/PlayerController.cs" id="8_plctrl"]
 
 [node name="TestLevel" type="Node2D" unique_id=461833474]
 
@@ -16,17 +17,21 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="CharacterController" type="Node" parent="Control" unique_id=1921904482 node_paths=PackedStringArray("_playerCharacter")]
+[node name="PlayerInputController" type="Node" parent="Control" unique_id=1921904482 node_paths=PackedStringArray("_controller")]
 script = ExtResource("1_o3cl4")
-_playerCharacter = NodePath("PlayerCharacterBody2D")
+_controller = NodePath("../PlayerController")
 
-[node name="PlayerCharacterBody2D" parent="Control/CharacterController" unique_id=1245998898 instance=ExtResource("2_jxtak")]
+[node name="PlayerController" type="Node" parent="Control" node_paths=PackedStringArray("_characterBody")]
+script = ExtResource("8_plctrl")
+_characterBody = NodePath("../PlayerCharacterBody2D")
+
+[node name="PlayerCharacterBody2D" parent="Control" unique_id=1245998898 instance=ExtResource("2_jxtak")]
 position = Vector2(128, 960)
 _bodyFlipDelay = 0.3
 
 [node name="CameraController" type="Node" parent="Control" unique_id=1208854263 node_paths=PackedStringArray("_target", "_camera")]
 script = ExtResource("4_camera")
-_target = NodePath("../CharacterController/PlayerCharacterBody2D")
+_target = NodePath("../PlayerCharacterBody2D")
 _camera = NodePath("Camera2D")
 _rotationSpeed = 7.0
 _minRotationSpeed = 2.0
@@ -51,6 +56,6 @@ offset_right = 250.0
 offset_bottom = 40.0
 text = "Health: --"
 script = ExtResource("6_debughud")
-_playerPath = NodePath("../../Control/CharacterController/PlayerCharacterBody2D")
+_playerPath = NodePath("../../Control/PlayerCharacterBody2D")
 
 [node name="Crosshair" parent="UI" unique_id=617101699 instance=ExtResource("3_jxtak")]

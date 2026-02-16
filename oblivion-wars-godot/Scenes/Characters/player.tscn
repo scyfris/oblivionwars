@@ -1,0 +1,134 @@
+[gd_scene format=3 uid="uid://b7nwapvytbn7"]
+
+[ext_resource type="Script" uid="uid://wj4nbkyxmcrq" path="res://Scripts/Player/PlayerController.cs" id="1_xccyk"]
+[ext_resource type="Script" uid="uid://cv3wphvrguved" path="res://Scripts/Player/PlayerCharacterBody2D.cs" id="2_h1n2f"]
+[ext_resource type="Resource" uid="uid://dj7t8h8cwg5cv" path="res://Resources/Data/Characters/Player/player.tres" id="3_dxpk4"]
+[ext_resource type="PackedScene" uid="uid://bngampa7uejn8" path="res://Scenes/Effects/WallSlideDust.tscn" id="4_15c3i"]
+[ext_resource type="Texture2D" uid="uid://caax0vcfj4jtl" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-1.png" id="5_yt1oc"]
+[ext_resource type="Texture2D" uid="uid://0i4da5uqjki1" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-2.png" id="6_jnx77"]
+[ext_resource type="Texture2D" uid="uid://dhv6a14fp8b2j" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-3.png" id="7_hy8lp"]
+[ext_resource type="Texture2D" uid="uid://be8w3ich74iwl" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-4.png" id="8_uxymp"]
+[ext_resource type="Texture2D" uid="uid://v05a7unxavtp" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-5.png" id="9_fepmq"]
+[ext_resource type="Texture2D" uid="uid://b4auwh75wn17l" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-6.png" id="10_ddhxa"]
+[ext_resource type="Texture2D" uid="uid://bnik78bvq0tjp" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-7.png" id="11_3k74t"]
+[ext_resource type="Texture2D" uid="uid://bog08cdbdhtfx" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-8.png" id="12_v8iml"]
+[ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="13_ojpki"]
+[ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Scenes/Weapons/Shotgun.tscn" id="14_rv8bj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
+size = Vector2(28, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qwv0h"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_yt1oc")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_yt1oc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_jnx77")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_hy8lp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_uxymp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_fepmq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_ddhxa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_3k74t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_v8iml")
+}],
+"loop": true,
+"name": &"walk-facingdir",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_yt1oc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_jnx77")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_hy8lp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_uxymp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_fepmq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_ddhxa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_3k74t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_v8iml")
+}],
+"loop": true,
+"name": &"walk-nonfacingdir",
+"speed": 12.0
+}]
+
+[node name="Player" type="Node2D" unique_id=216897371]
+
+[node name="PlayerController" type="Node" parent="." unique_id=1355700859 node_paths=PackedStringArray("_characterBody")]
+script = ExtResource("1_xccyk")
+_characterBody = NodePath("../PlayerCharacterBody2D")
+
+[node name="PlayerCharacterBody2D" type="CharacterBody2D" parent="." unique_id=1704717355 node_paths=PackedStringArray("_holdableSystem", "_flipRoot", "_spriteNode", "_wallSlideDustPosition")]
+position = Vector2(610, 352)
+floor_constant_speed = true
+floor_snap_length = 32.0
+script = ExtResource("2_h1n2f")
+_definition = ExtResource("3_dxpk4")
+_holdableSystem = NodePath("HoldableSystem")
+_flipRoot = NodePath("FlipRoot")
+_spriteNode = NodePath("FlipRoot/AnimatedSprite2D")
+_wallSlideDustPosition = NodePath("FlipRoot/WallSlideDustPosition")
+_wallSlideDustScene = ExtResource("4_15c3i")
+_definition = ExtResource("3_dxpk4")
+_bodyFlipDelay = 0.3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerCharacterBody2D" unique_id=190119416]
+position = Vector2(1.5, -6.5)
+shape = SubResource("RectangleShape2D_rlx2o")
+
+[node name="FlipRoot" type="Node2D" parent="PlayerCharacterBody2D" unique_id=1561710568]
+
+[node name="WallSlideDustPosition" type="Node2D" parent="PlayerCharacterBody2D/FlipRoot" unique_id=440462085]
+position = Vector2(-12, 28)
+
+[node name="WeaponPosition" type="Node2D" parent="PlayerCharacterBody2D/FlipRoot" unique_id=36962653]
+position = Vector2(18, -22)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="PlayerCharacterBody2D/FlipRoot" unique_id=1837269660]
+position = Vector2(-2, -15.000002)
+scale = Vector2(0.09127149, 0.08331295)
+sprite_frames = SubResource("SpriteFrames_qwv0h")
+frame_progress = 0.23829632
+
+[node name="HoldableSystem" type="Node" parent="PlayerCharacterBody2D" unique_id=1767063964 node_paths=PackedStringArray("_weaponPosition")]
+script = ExtResource("13_ojpki")
+_rightHoldableScene = ExtResource("14_rv8bj")
+_weaponPosition = NodePath("../FlipRoot/WeaponPosition")
+UseDefinitionWeapons = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="PlayerCharacterBody2D" unique_id=317220997]

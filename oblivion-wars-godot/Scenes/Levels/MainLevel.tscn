@@ -1,20 +1,105 @@
 [gd_scene format=4 uid="uid://btfs5ho75a210"]
 
 [ext_resource type="Script" uid="uid://cwlykqiqaim33" path="res://Scripts/Level/LevelRoot.cs" id="1_8236u"]
-[ext_resource type="Script" uid="uid://c1cu0sgl231ao" path="res://Scripts/Player/CharacterController.cs" id="1_o3cl4"]
+[ext_resource type="Script" uid="uid://tdn8m2aj6q7" path="res://Scripts/Player/PlayerInputController.cs" id="1_o3cl4"]
 [ext_resource type="Resource" uid="uid://baf1aaw72tsob" path="res://Resources/Data/Levels/TestLevel.tres" id="2_gkceq"]
-[ext_resource type="PackedScene" uid="uid://cb4iahq5chr65" path="res://Scenes/Characters/PlayerCharacterBody2D.tscn" id="2_jxtak"]
 [ext_resource type="PackedScene" uid="uid://dtv6m744e7pgh" path="res://Scenes/LevelComponents/checkpoint_prototype.tscn" id="3_am6fp"]
 [ext_resource type="PackedScene" uid="uid://ceq74t0uxq1ed" path="res://Scenes/UI/crosshair.tscn" id="3_jxtak"]
 [ext_resource type="Script" uid="uid://b2dl33mekocnv" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
 [ext_resource type="TileSet" uid="uid://bcshhvut4q14s" path="res://Resources/Tilemaps/kenney_abstract-platformer/Godot/KenneyAbstract-Half.tres" id="4_sx5r3"]
 [ext_resource type="PackedScene" uid="uid://ft0smiupa8ld" path="res://Scenes/Globals/HazardsSystem.tscn" id="5_am6fp"]
 [ext_resource type="Resource" uid="uid://dmos2n3cg3lsa" path="res://Resources/Data/Camera/default_camera.tres" id="7_am6fp"]
-[ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Scenes/Characters/TargetDummy.tscn" id="7_sx5r3"]
+[ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Scenes/Characters/NPC.tscn" id="7_sx5r3"]
 [ext_resource type="Script" uid="uid://bpglna242crrv" path="res://Scripts/Systems/HealthSystem.cs" id="8_1sdst"]
+[ext_resource type="Script" uid="uid://cv3wphvrguved" path="res://Scripts/Player/PlayerCharacterBody2D.cs" id="8_dry3g"]
 [ext_resource type="Script" uid="uid://dufdog4oui5yq" path="res://Scripts/Systems/CombatSystem.cs" id="9_1sdst"]
+[ext_resource type="Resource" uid="uid://dj7t8h8cwg5cv" path="res://Resources/Data/Characters/Player/player.tres" id="9_ul1mu"]
 [ext_resource type="Script" uid="uid://dk1c314isfc8c" path="res://Scripts/UI/GameHUD.cs" id="10_7woyo"]
+[ext_resource type="PackedScene" uid="uid://bngampa7uejn8" path="res://Scenes/Effects/WallSlideDust.tscn" id="10_oe441"]
+[ext_resource type="Texture2D" uid="uid://caax0vcfj4jtl" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-1.png" id="11_2bx8e"]
+[ext_resource type="Texture2D" uid="uid://0i4da5uqjki1" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-2.png" id="12_jjn7f"]
+[ext_resource type="Texture2D" uid="uid://dhv6a14fp8b2j" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-3.png" id="13_okxad"]
 [ext_resource type="Script" uid="uid://nkvcatgkdcfr" path="res://Scripts/UI/SaveIndicator.cs" id="13_yce48"]
+[ext_resource type="Texture2D" uid="uid://be8w3ich74iwl" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-4.png" id="14_gvrw6"]
+[ext_resource type="Texture2D" uid="uid://v05a7unxavtp" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-5.png" id="15_pj0kk"]
+[ext_resource type="Script" uid="uid://wj4nbkyxmcrq" path="res://Scripts/Player/PlayerController.cs" id="15_plctrl"]
+[ext_resource type="Texture2D" uid="uid://b4auwh75wn17l" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-6.png" id="16_bwpqy"]
+[ext_resource type="Texture2D" uid="uid://bnik78bvq0tjp" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-7.png" id="17_2plqb"]
+[ext_resource type="Texture2D" uid="uid://bog08cdbdhtfx" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-8.png" id="18_mqlab"]
+[ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="19_epcmy"]
+[ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Scenes/Weapons/Shotgun.tscn" id="20_m6lt4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
+size = Vector2(28, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qwv0h"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_2bx8e")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_2bx8e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_jjn7f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_okxad")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_gvrw6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_pj0kk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_bwpqy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_2plqb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_mqlab")
+}],
+"loop": true,
+"name": &"walk-facingdir",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_2bx8e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_jjn7f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_okxad")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_gvrw6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_pj0kk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_bwpqy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_2plqb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_mqlab")
+}],
+"loop": true,
+"name": &"walk-nonfacingdir",
+"speed": 12.0
+}]
 
 [node name="WorldRoot" type="Node" unique_id=1782204942]
 script = ExtResource("1_8236u")
@@ -30,17 +115,59 @@ script = ExtResource("9_1sdst")
 
 [node name="HazardsSystem" parent="Systems" unique_id=2047797779 instance=ExtResource("5_am6fp")]
 
-[node name="CharacterController" type="Node" parent="." unique_id=424296670 node_paths=PackedStringArray("_playerCharacter")]
-script = ExtResource("1_o3cl4")
-_playerCharacter = NodePath("PlayerCharacterBody2D")
+[node name="Player" type="Node" parent="." unique_id=585589969]
 
-[node name="PlayerCharacterBody2D" parent="CharacterController" unique_id=52823142 instance=ExtResource("2_jxtak")]
+[node name="PlayerInputController" type="Node" parent="Player" unique_id=424296670 node_paths=PackedStringArray("_controller")]
+script = ExtResource("1_o3cl4")
+_controller = NodePath("../PlayerController")
+
+[node name="PlayerController" type="Node" parent="Player" unique_id=1355700859 node_paths=PackedStringArray("_characterBody")]
+script = ExtResource("15_plctrl")
+_characterBody = NodePath("../PlayerBody2D")
+
+[node name="PlayerBody2D" type="CharacterBody2D" parent="Player" unique_id=1704717355 node_paths=PackedStringArray("_holdableSystem", "_flipRoot", "_spriteNode", "_wallSlideDustPosition")]
 position = Vector2(610, 352)
+floor_constant_speed = true
+floor_snap_length = 32.0
+script = ExtResource("8_dry3g")
+_definition = ExtResource("9_ul1mu")
+_holdableSystem = NodePath("HoldableSystem")
+_flipRoot = NodePath("FlipRoot")
+_spriteNode = NodePath("FlipRoot/AnimatedSprite2D")
+_wallSlideDustPosition = NodePath("FlipRoot/WallSlideDustPosition")
+_wallSlideDustScene = ExtResource("10_oe441")
+_definition = ExtResource("9_ul1mu")
 _bodyFlipDelay = 0.3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player/PlayerBody2D" unique_id=190119416]
+position = Vector2(1.5, -6.5)
+shape = SubResource("RectangleShape2D_rlx2o")
+
+[node name="FlipRoot" type="Node2D" parent="Player/PlayerBody2D" unique_id=1561710568]
+
+[node name="WallSlideDustPosition" type="Node2D" parent="Player/PlayerBody2D/FlipRoot" unique_id=440462085]
+position = Vector2(-12, 28)
+
+[node name="WeaponPosition" type="Node2D" parent="Player/PlayerBody2D/FlipRoot" unique_id=36962653]
+position = Vector2(18, -22)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player/PlayerBody2D/FlipRoot" unique_id=1837269660]
+position = Vector2(-2, -15.000002)
+scale = Vector2(0.09127149, 0.08331295)
+sprite_frames = SubResource("SpriteFrames_qwv0h")
+frame_progress = 0.23829632
+
+[node name="HoldableSystem" type="Node" parent="Player/PlayerBody2D" unique_id=1767063964 node_paths=PackedStringArray("_weaponPosition")]
+script = ExtResource("19_epcmy")
+_rightHoldableScene = ExtResource("20_m6lt4")
+_weaponPosition = NodePath("../FlipRoot/WeaponPosition")
+UseDefinitionWeapons = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Player/PlayerBody2D" unique_id=317220997]
 
 [node name="CameraController" type="Node" parent="." unique_id=745475055 node_paths=PackedStringArray("_target", "_camera")]
 script = ExtResource("4_camera")
-_target = NodePath("../CharacterController/PlayerCharacterBody2D")
+_target = NodePath("../Player/PlayerBody2D")
 _camera = NodePath("Camera2D")
 _defaultSettings = ExtResource("7_am6fp")
 
@@ -53,7 +180,7 @@ _healthLabel = NodePath("DebugHealthLabel")
 _coinLabel = NodePath("CoinLabel")
 _interactionPrompt = NodePath("InteractionPrompt")
 _saveIndicator = NodePath("SaveIndicator/DebugHealthLabel2")
-_playerPath = NodePath("../CharacterController/PlayerCharacterBody2D")
+_playerPath = NodePath("../Player/PlayerBody2D")
 
 [node name="DebugHealthLabel" type="Label" parent="HUD" unique_id=1647896880]
 offset_left = 10.0

@@ -10,9 +10,6 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
     [ExportGroup("Combat")]
     [Export] private HoldableSystem _holdableSystem;
 
-    [ExportGroup("Debug")]
-    [Export] private Label _healthLabel;
-
     private Vector2 _aimTarget;
     private bool _facingRight = true;
     private float _contactDamageCooldown = 0f;
@@ -24,26 +21,19 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
     {
         base._definition = _definition;
         base._Ready();
-
-        // Initialize weapons from Definition or scene based on flag
-        if (_holdableSystem != null)
-        {
-            if (_holdableSystem.UseDefinitionWeapons)
-                _holdableSystem.InitializeWithDefinition(this, _definition);
-            else
-                _holdableSystem.Initialize(this);
-        }
-
-        EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
-        EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
-
-        UpdateHealthLabel();
     }
 
-    public override void _ExitTree()
+    /// <summary>
+    /// Called by NPCController to initialize the holdable system.
+    /// </summary>
+    public void InitializeHoldables()
     {
-        EventBus.Instance?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
-        EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
+        if (_holdableSystem == null) return;
+
+        if (_holdableSystem.UseDefinitionWeapons)
+            _holdableSystem.InitializeWithDefinition(this, _definition);
+        else
+            _holdableSystem.Initialize(this);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -55,7 +45,7 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
         CheckContactDamage(delta);
     }
 
-    // ── Aim / Holdable API (mirrors PlayerCharacterBody2D) ──
+    // ── Holdable API (called by NPCController) ──────────
 
     public void UpdateAim(Vector2 targetPosition)
     {
@@ -87,7 +77,7 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
             _holdableSystem?.HeldRight(targetPosition);
     }
 
-    // ── Contact Damage ──────────────────────────────────────
+    // ── Contact Damage ──────────────────────────────────
 
     private void CheckContactDamage(double delta)
     {
@@ -115,73 +105,15 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
         }
     }
 
-    // ── Visuals ────────────────────────────────────────────
+    // ── Visuals ─────────────────────────────────────────
 
     private void UpdateFacing()
     {
         if (_flipRoot == null) return;
 
-        // Face based on aim target when chasing, otherwise face movement direction
         if (_moveDirection != 0)
             _facingRight = _moveDirection > 0;
 
         _flipRoot.Scale = new Vector2(_facingRight ? 1 : -1, 1);
-    }
-
-    // ── Events ─────────────────────────────────────────────
-
-    private void OnDamageApplied(DamageAppliedEvent evt)
-    {
-        if (evt.TargetInstanceId != GetInstanceId()) return;
-        UpdateHealthLabel();
-    }
-
-    private void OnEntityDied(EntityDiedEvent evt)
-    {
-        if (evt.EntityInstanceId != GetInstanceId()) return;
-
-        GD.Print($"NPC {_definition?.EntityId ?? "unknown"} died!");
-        SpawnDrops();
-        QueueFree();
-    }
-
-    private void SpawnDrops()
-    {
-        if (_definition?.DropTable == null) return;
-
-        foreach (var entry in _definition.DropTable)
-        {
-            if (entry?.DropScene == null) continue;
-            if (entry.DropChance < 1.0f && GD.Randf() > entry.DropChance) continue;
-            if (!string.IsNullOrEmpty(entry.RequiredUnlockId))
-            {
-                // TODO: Map RequiredUnlockId to AbilityType or ItemType enum and check HasAbility/HasItem
-                GD.PrintErr("NPC: RequiredUnlockId needs to be mapped to enum-based system");
-                continue;
-            }
-
-            int count = (int)GD.RandRange(entry.MinCount, entry.MaxCount + 1);
-            for (int i = 0; i < count; i++)
-            {
-                var pickup = entry.DropScene.Instantiate<Node2D>();
-                pickup.GlobalPosition = GlobalPosition;
-
-                // Apply random impulse for explosive pop-out effect
-                if (pickup is RigidBody2D rb)
-                {
-                    float impulseX = (float)GD.RandRange(-200.0, 200.0);
-                    float impulseY = (float)GD.RandRange(-800.0, -400.0);
-                    rb.CallDeferred("apply_impulse", new Vector2(impulseX, impulseY));
-                }
-
-                GetParent().CallDeferred("add_child", pickup);
-            }
-        }
-    }
-
-    private void UpdateHealthLabel()
-    {
-        if (_healthLabel == null || _runtimeData == null) return;
-        _healthLabel.Text = $"{_runtimeData.CurrentHealth:F0}/{_runtimeData.MaxHealth:F0}";
     }
 }

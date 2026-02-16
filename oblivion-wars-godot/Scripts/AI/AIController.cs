@@ -2,7 +2,7 @@ using Godot;
 
 public partial class AIController : Node
 {
-    [Export] private NPCEntityCharacterBody2D _npc;
+    [Export] private NPCController _controller;
     [Export] private AIBehaviorDefinition _behavior;
     [Export] private Area2D _detectionArea;
 
@@ -17,13 +17,13 @@ public partial class AIController : Node
 
     public override void _Ready()
     {
-        if (_npc == null || _behavior == null)
+        if (_controller == null || _behavior == null)
         {
-            GD.PrintErr("AIController: Missing NPC or behavior definition!");
+            GD.PrintErr("AIController: Missing NPCController or behavior definition!");
             return;
         }
 
-        _spawnPosition = _npc.GlobalPosition;
+        _spawnPosition = _controller.CharacterBody.GlobalPosition;
 
         // Set detection area radius from behavior definition
         if (_detectionArea != null)
@@ -46,7 +46,7 @@ public partial class AIController : Node
 
     public override void _PhysicsProcess(double delta)
     {
-        if (_npc == null || _behavior == null) return;
+        if (_controller == null || _behavior == null) return;
 
         _attackCooldownTimer -= (float)delta;
 
@@ -69,13 +69,12 @@ public partial class AIController : Node
                 break;
         }
 
-        // Update aim every frame based on AimMode
         UpdateAiming();
     }
 
     private void ProcessIdle(double delta)
     {
-        _npc.Stop();
+        _controller.Stop();
         _idleTimer -= (float)delta;
 
         if (_idleTimer <= 0)
@@ -87,22 +86,19 @@ public partial class AIController : Node
 
     private void ProcessPatrol(double delta)
     {
-        float distToTarget = _npc.GlobalPosition.DistanceTo(_patrolTarget);
+        float distToTarget = _controller.CharacterBody.GlobalPosition.DistanceTo(_patrolTarget);
 
         if (distToTarget < 10f)
         {
-            // Arrived at patrol target
-            _npc.Stop();
+            _controller.Stop();
             _idleTimer = (float)GD.RandRange(_behavior.IdlePauseMin, _behavior.IdlePauseMax);
             _state = AIState.Idle;
             return;
         }
 
-        // Walk toward patrol target
         MoveToward(_patrolTarget);
 
-        // If stuck on wall, pick a new target
-        if (_npc.IsOnWall())
+        if (_controller.CharacterBody.IsOnWall())
         {
             PickPatrolTarget();
         }
@@ -116,7 +112,7 @@ public partial class AIController : Node
             return;
         }
 
-        float distToPlayer = _npc.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
+        float distToPlayer = _controller.CharacterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
         float disengageDist = _behavior.DisengageDistance > 0
             ? _behavior.DisengageDistance
             : _behavior.DetectionRadius * 1.5f;
@@ -130,7 +126,6 @@ public partial class AIController : Node
 
         if (_behavior.Aggressive)
         {
-            // Chase player
             if (distToPlayer <= _behavior.AttackRange && _attackCooldownTimer <= 0)
             {
                 _state = AIState.Attack;
@@ -140,9 +135,8 @@ public partial class AIController : Node
         }
         else
         {
-            // Flee from player
-            Vector2 fleeDir = (_npc.GlobalPosition - _targetPlayer.GlobalPosition).Normalized();
-            Vector2 fleeTarget = _npc.GlobalPosition + fleeDir * 200f;
+            Vector2 fleeDir = (_controller.CharacterBody.GlobalPosition - _targetPlayer.GlobalPosition).Normalized();
+            Vector2 fleeTarget = _controller.CharacterBody.GlobalPosition + fleeDir * 200f;
             MoveToward(fleeTarget);
         }
     }
@@ -155,11 +149,10 @@ public partial class AIController : Node
             return;
         }
 
-        _npc.Stop();
+        _controller.Stop();
 
-        // Fire weapon
         Vector2 aimTarget = _targetPlayer.GlobalPosition;
-        _npc.UseHoldablePressed(aimTarget, true);
+        _controller.UseHoldablePressed(aimTarget, true);
 
         _attackCooldownTimer = _behavior.AttackCooldown;
         _state = AIState.Chase;
@@ -167,11 +160,11 @@ public partial class AIController : Node
 
     private void ProcessReturning(double delta)
     {
-        float distToSpawn = _npc.GlobalPosition.DistanceTo(_spawnPosition);
+        float distToSpawn = _controller.CharacterBody.GlobalPosition.DistanceTo(_spawnPosition);
 
         if (distToSpawn < 10f)
         {
-            _npc.Stop();
+            _controller.Stop();
             _idleTimer = (float)GD.RandRange(_behavior.IdlePauseMin, _behavior.IdlePauseMax);
             _state = AIState.Idle;
             return;
@@ -182,14 +175,14 @@ public partial class AIController : Node
 
     private void MoveToward(Vector2 target)
     {
-        float dir = target.X - _npc.GlobalPosition.X;
+        float dir = target.X - _controller.CharacterBody.GlobalPosition.X;
 
         if (dir > 5f)
-            _npc.MoveRight();
+            _controller.MoveRight();
         else if (dir < -5f)
-            _npc.MoveLeft();
+            _controller.MoveLeft();
         else
-            _npc.Stop();
+            _controller.Stop();
     }
 
     private void PickPatrolTarget()
@@ -212,18 +205,17 @@ public partial class AIController : Node
                     break;
                 case AimMode.FacingDirection:
                 default:
-                    float facing = _npc.GlobalPosition.X < _targetPlayer.GlobalPosition.X ? 1f : -1f;
-                    aimTarget = _npc.GlobalPosition + new Vector2(facing * 1000f, 0);
+                    float facing = _controller.CharacterBody.GlobalPosition.X < _targetPlayer.GlobalPosition.X ? 1f : -1f;
+                    aimTarget = _controller.CharacterBody.GlobalPosition + new Vector2(facing * 1000f, 0);
                     break;
             }
         }
         else
         {
-            // Default: aim in current facing direction
-            aimTarget = _npc.GlobalPosition + new Vector2(100f, 0);
+            aimTarget = _controller.CharacterBody.GlobalPosition + new Vector2(100f, 0);
         }
 
-        _npc.UpdateAim(aimTarget);
+        _controller.UpdateAim(aimTarget);
     }
 
     private void OnDetectionBodyEntered(Node2D body)

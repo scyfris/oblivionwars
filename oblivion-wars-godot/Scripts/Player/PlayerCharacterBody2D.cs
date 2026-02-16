@@ -1,7 +1,5 @@
 using Godot;
-using System.Linq;
 
-// Player stuff built on top of physics stuff
 public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 {
     [Export] private new PlayerDefinition _definition;
@@ -30,16 +28,14 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     private Vector2 _aimTarget;
     private bool _facingRight = true;
 
-    // Interaction
+    // Interaction (body stores reference since it's the physical object that overlaps)
     private Interactable _nearestInteractable;
-
     public Interactable NearestInteractable => _nearestInteractable;
 
     public override void _Ready()
     {
         AddToGroup(Groups.Entities.Player);
 
-        // Set the base class _definition so base code works
         base._definition = _definition;
         base._Ready();
 
@@ -49,44 +45,19 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
             _wallSlideDust.Emitting = false;
             _wallSlideDustPosition.AddChild(_wallSlideDust);
         }
-
-        // Initialize weapons from Definition or scene based on flag
-        if (_holdableSystem != null)
-        {
-            if (_holdableSystem.UseDefinitionWeapons)
-                _holdableSystem.InitializeWithDefinition(this, _definition);
-            else
-                _holdableSystem.Initialize(this);
-        }
-
-        EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
-        EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
-
-        // Initialize from PlayerState if respawning
-        if (SaveManager.Instance?.IsRespawning == true)
-        {
-            var checkpoint = FindCheckpointById(GlobalStateManager.Instance.Player.LastCheckpointId);
-            if (checkpoint != null)
-                GlobalPosition = checkpoint.RespawnPosition.GlobalPosition;
-
-            _runtimeData.CurrentHealth = _runtimeData.MaxHealth;
-            if (GlobalStateManager.Instance.Player != null)
-                GlobalStateManager.Instance.Player.CurrentHealth = _runtimeData.MaxHealth;
-
-            SaveManager.Instance.IsRespawning = false;
-            GD.Print($"Player respawned at checkpoint {GlobalStateManager.Instance.Player?.LastCheckpointId}");
-        }
-        else if (GlobalStateManager.Instance.Player != null)
-        {
-            // Normal load — sync health from PlayerState
-            _runtimeData.CurrentHealth = GlobalStateManager.Instance.Player.CurrentHealth;
-        }
     }
 
-    public override void _ExitTree()
+    /// <summary>
+    /// Called by PlayerController to initialize the holdable system.
+    /// </summary>
+    public void InitializeHoldables()
     {
-        EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
-        EventBus.Instance?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
+        if (_holdableSystem == null) return;
+
+        if (_holdableSystem.UseDefinitionWeapons)
+            _holdableSystem.InitializeWithDefinition(this, _definition);
+        else
+            _holdableSystem.Initialize(this);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -96,43 +67,6 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
         UpdateAnimation();
         UpdateInvincibility(delta);
         _holdableSystem?.Update(delta);
-    }
-
-    private void OnEntityDied(EntityDiedEvent evt)
-    {
-        if (evt.EntityInstanceId != GetInstanceId()) return;
-
-        GD.Print("Player died! Respawning from checkpoint...");
-
-        if (SaveManager.Instance != null && SaveManager.Instance.ActiveSlotIndex >= 0)
-        {
-            SaveManager.Instance.ReloadLastSave();
-            SaveManager.Instance.IsRespawning = true;
-
-            string levelScene = SaveManager.Instance.GetLevelScenePath(
-                GlobalStateManager.Instance.Player?.LastCheckpointLevelId ?? ""
-            );
-
-            if (!string.IsNullOrEmpty(levelScene))
-            {
-                GetTree().ChangeSceneToFile(levelScene);
-                return;
-            }
-        }
-
-        // Fallback: no save system active, just reload
-        GetTree().ReloadCurrentScene();
-    }
-
-    private void OnDamageApplied(DamageAppliedEvent evt)
-    {
-        if (evt.TargetInstanceId != GetInstanceId()) return;
-
-        StartInvincibility();
-
-        // Sync health to PlayerState
-        if (GlobalStateManager.Instance.Player != null)
-            GlobalStateManager.Instance.Player.CurrentHealth = _runtimeData.CurrentHealth;
     }
 
     // Override hazard check to skip while invincible
@@ -153,6 +87,8 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
                 _wallSlideDust.Direction = _wallNormal;
         }
     }
+
+    // ── Holdable API ──────────────────────────────────────
 
     public void UpdateAim(Vector2 targetPosition)
     {
@@ -184,35 +120,9 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
             _holdableSystem?.HeldRight(targetPosition);
     }
 
-    private void UpdateAnimation()
-    {
-        if (_spriteNode == null) return;
+    // ── Invincibility ─────────────────────────────────────
 
-        // Update facing direction only when moving — persists when idle
-        if (_moveDirection != 0)
-            _facingRight = _moveDirection > 0;
-
-        if (_flipRoot != null)
-            _flipRoot.Scale = new Vector2(_facingRight ? 1 : -1, 1);
-
-        if (_moveDirection != 0 && IsOnFloor())
-        {
-            // Project aim direction onto the entity's local horizontal axis
-            // so the comparison works regardless of gravity rotation
-            Vector2 horizontalDir = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
-            float aimDot = (_aimTarget - GlobalPosition).Dot(horizontalDir);
-            bool aimToLocalRight = aimDot > 0;
-            bool movingTowardAim = _facingRight == aimToLocalRight;
-
-            _spriteNode.Play(movingTowardAim ? _walkFacingDirAnimation : _walkNonFacingDirAnimation);
-        }
-        else
-        {
-            _spriteNode.Play(_idleAnimation);
-        }
-    }
-
-    private void StartInvincibility()
+    public void StartInvincibility()
     {
         _isInvincible = true;
         _invincibilityTimer = _definition.InvincibilityDuration;
@@ -241,7 +151,34 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
         }
     }
 
-    // ── Interaction ────────────────────────────────────────
+    // ── Animation ─────────────────────────────────────────
+
+    private void UpdateAnimation()
+    {
+        if (_spriteNode == null) return;
+
+        if (_moveDirection != 0)
+            _facingRight = _moveDirection > 0;
+
+        if (_flipRoot != null)
+            _flipRoot.Scale = new Vector2(_facingRight ? 1 : -1, 1);
+
+        if (_moveDirection != 0 && IsOnFloor())
+        {
+            Vector2 horizontalDir = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
+            float aimDot = (_aimTarget - GlobalPosition).Dot(horizontalDir);
+            bool aimToLocalRight = aimDot > 0;
+            bool movingTowardAim = _facingRight == aimToLocalRight;
+
+            _spriteNode.Play(movingTowardAim ? _walkFacingDirAnimation : _walkNonFacingDirAnimation);
+        }
+        else
+        {
+            _spriteNode.Play(_idleAnimation);
+        }
+    }
+
+    // ── Interaction (thin storage only) ───────────────────
 
     public void SetNearestInteractable(Interactable interactable)
     {
@@ -252,20 +189,5 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     {
         if (_nearestInteractable == interactable)
             _nearestInteractable = null;
-    }
-
-    public void TryInteract()
-    {
-        _nearestInteractable?.Interact(this);
-    }
-
-    // ── Checkpoint Lookup ──────────────────────────────────
-
-    private Checkpoint FindCheckpointById(string checkpointId)
-    {
-        var checkpoints = GetTree().GetNodesInGroup(Groups.Level.Checkpoint);
-        return checkpoints
-            .OfType<Checkpoint>()
-            .FirstOrDefault(cp => cp.UniqueId == checkpointId);
     }
 }
