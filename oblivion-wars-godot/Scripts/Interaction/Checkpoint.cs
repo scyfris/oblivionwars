@@ -122,24 +122,24 @@ public partial class Checkpoint : Interactable, ISaveableObject
 
     private void OnBodyEntered(Node2D body)
     {
-        GD.PrintErr($"▶▶▶ CHECKPOINT BODY ENTERED: {body?.Name ?? "null"} (Type: {body?.GetType().Name ?? "null"})");
+        GD.Print($"▶▶▶ CHECKPOINT BODY ENTERED: {body?.Name ?? "null"} (Type: {body?.GetType().Name ?? "null"})");
         if (body is PlayerCharacterBody2D player)
         {
-            GD.PrintErr($"▶▶▶ IT'S THE PLAYER! Setting nearest interactable");
+            GD.Print($"▶▶▶ IT'S THE PLAYER! Setting nearest interactable");
             player.SetNearestInteractable(this);
         }
         else
         {
-            GD.PrintErr($"▶▶▶ Not the player, body type is: {body?.GetType().Name ?? "null"}");
+            GD.Print($"▶▶▶ Not the player, body type is: {body?.GetType().Name ?? "null"}");
         }
     }
 
     private void OnBodyExited(Node2D body)
     {
-        GD.PrintErr($"◀◀◀ CHECKPOINT BODY EXITED: {body?.Name ?? "null"}");
+        GD.Print($"◀◀◀ CHECKPOINT BODY EXITED: {body?.Name ?? "null"}");
         if (body is PlayerCharacterBody2D player)
         {
-            GD.PrintErr($"◀◀◀ Player left, clearing interactable");
+            GD.Print($"◀◀◀ Player left, clearing interactable");
             player.ClearInteractable(this);
         }
     }

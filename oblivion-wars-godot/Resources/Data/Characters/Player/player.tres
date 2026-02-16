@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dtfitj2e1hyf6" path="res://Scripts/Data/Definitions/PlayerDefinition.cs" id="1_c1nx3"]
 [ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Scenes/Weapons/Shotgun.tscn" id="1_kgqoc"]
+[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="1_ttxuc"]
 
 [resource]
 script = ExtResource("1_c1nx3")
@@ -9,5 +10,6 @@ MoveSpeed = 400.0
 WallJumpPushAwayDuration = 0.25
 WallJumpInputLockDuration = 0.1
 WallSlideSpeedFraction = 0.1
-LeftHoldableScene = ExtResource("1_kgqoc")
+LeftHoldableScene = ExtResource("1_ttxuc")
+RightHoldableScene = ExtResource("1_kgqoc")
 metadata/_custom_type_script = "uid://dtfitj2e1hyf6"

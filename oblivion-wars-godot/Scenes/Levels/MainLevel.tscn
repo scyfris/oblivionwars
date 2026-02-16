@@ -72,6 +72,7 @@ ignore_rotation = false
 [node name="CameraConstraint" type="Area2D" parent="Node2D/Control" unique_id=716379323]
 position = Vector2(1802, 41)
 script = ExtResource("8_rkygg")
+IsDefaultZone = false
 LockAxisYWorld = true
 _settingsResource = ExtResource("15_cam02")
 
