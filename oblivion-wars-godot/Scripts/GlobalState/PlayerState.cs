@@ -5,7 +5,7 @@ using System.Linq;
 /// Holds all player-specific persistent data.
 /// Accessed via GlobalStateManager.Instance.Player
 /// </summary>
-public partial class PlayerState : Node
+public class PlayerState : ISaveableState<PlayerSaveData>
 {
     // Health & Stats
     public float CurrentHealth = 100f;
@@ -179,8 +179,9 @@ public partial class PlayerState : Node
         return _inventory.ContainsKey(key) && _inventory[key] > 0;
     }
 
-    // ── Serialization ──────────────────────────────────────────
+    // ── ISaveableState Implementation ──────────────────────────
 
+    Resource ISaveableState.ToSaveData() => ToSaveData();
     public PlayerSaveData ToSaveData()
     {
         return new PlayerSaveData
@@ -198,6 +199,7 @@ public partial class PlayerState : Node
         };
     }
 
+    void ISaveableState.LoadFromSaveData(Resource data) => LoadFromSaveData((PlayerSaveData)data);
     public void LoadFromSaveData(PlayerSaveData data)
     {
         if (data == null) return;
@@ -214,16 +216,15 @@ public partial class PlayerState : Node
         _inventory = new(data.Inventory);
     }
 
-    public void ResetToDefaults(PlayerDefinition definition, string startingLevelId, string startingCheckpointId)
+    public void ResetToDefaults()
     {
-        CurrentHealth = definition?.MaxHealth ?? 100f;
-        MaxHealth = definition?.MaxHealth ?? 100f;
+        CurrentHealth = 100f;
+        MaxHealth = 100f;
         Armor = 0;
         Coins = 0;
-        LastCheckpointId = startingCheckpointId;
-        LastCheckpointLevelId = startingLevelId;
+        LastCheckpointId = "";
+        LastCheckpointLevelId = "";
 
-        // Start with pistol (infinite ammo)
         _unlockedWeapons.Clear();
         _unlockedWeapons[(int)WeaponType.Pistol] = true;
         _weaponAmmo.Clear();
@@ -232,4 +233,5 @@ public partial class PlayerState : Node
         _unlockedAbilities.Clear();
         _inventory.Clear();
     }
+
 }

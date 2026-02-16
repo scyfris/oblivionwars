@@ -9,7 +9,7 @@ public partial class GlobalStateManager : Node
 {
     public static GlobalStateManager Instance { get; private set; }
 
-    // State nodes (assigned as children in the scene)
+    // State objects (created as regular C# objects)
     public PlayerState Player { get; private set; }
     public LevelState Level { get; private set; }
     public GlobalState Global { get; private set; }
@@ -24,19 +24,12 @@ public partial class GlobalStateManager : Node
         }
         Instance = this;
 
-        // Get child state nodes
-        Player = GetNode<PlayerState>("PlayerState");
-        Level = GetNode<LevelState>("LevelState");
-        Global = GetNode<GlobalState>("GlobalState");
+        // Create state objects
+        Player = new PlayerState();
+        Level = new LevelState();
+        Global = new GlobalState();
 
-        if (Player == null || Level == null || Global == null)
-        {
-            GD.PrintErr("GlobalStateManager: Missing required child state nodes!");
-        }
-        else
-        {
-            GD.Print("GlobalStateManager: Initialized successfully");
-        }
+        GD.Print("GlobalStateManager: Initialized successfully");
     }
 
     public override void _ExitTree()
@@ -55,7 +48,7 @@ public partial class GlobalStateManager : Node
         return new CompleteSaveData
         {
             PlayerData = Player.ToSaveData(),
-            LevelData = Level.SaveData,
+            LevelData = Level.ToSaveData(),
             GlobalData = Global.ToSaveData()
         };
     }
@@ -72,7 +65,7 @@ public partial class GlobalStateManager : Node
         }
 
         Player.LoadFromSaveData(saveData.PlayerData);
-        Level.SaveData = saveData.LevelData ?? new LevelSaveData();
+        Level.LoadFromSaveData(saveData.LevelData);
         Global.LoadFromSaveData(saveData.GlobalData);
 
         GD.Print("GlobalStateManager: Save data loaded successfully");
@@ -81,10 +74,10 @@ public partial class GlobalStateManager : Node
     /// <summary>
     /// Reset all state to defaults (new game)
     /// </summary>
-    public void ResetToDefaults(PlayerDefinition playerDefinition, string startingLevelId, string startingCheckpointId)
+    public void ResetToDefaults()
     {
-        Player.ResetToDefaults(playerDefinition, startingLevelId, startingCheckpointId);
-        Level.Reset();
+        Player.ResetToDefaults();
+        Level.ResetToDefaults();
         Global.ResetToDefaults();
 
         GD.Print("GlobalStateManager: All state reset to defaults");

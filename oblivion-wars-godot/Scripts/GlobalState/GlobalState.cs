@@ -5,7 +5,7 @@ using Godot;
 /// Examples: defeated bosses, global world flags, story progression, etc.
 /// Expand this as needed for your game-specific global state.
 /// </summary>
-public partial class GlobalState : Node
+public class GlobalState : ISaveableState<GlobalSaveData>
 {
     // Global flags for world events (e.g., "bridge_destroyed", "boss_intro_seen", etc.)
     private Godot.Collections.Dictionary<string, bool> _globalFlags = new();
@@ -72,4 +72,7 @@ public partial class GlobalState : Node
         _globalFlags.Clear();
         _defeatedBossIds.Clear();
     }
+
+    Resource ISaveableState.ToSaveData() => ToSaveData();
+    void ISaveableState.LoadFromSaveData(Resource data) => LoadFromSaveData((GlobalSaveData)data);
 }

@@ -4,7 +4,7 @@ using Godot;
 /// Holds current level state and level-specific saveable data.
 /// Accessed via GlobalStateManager.Instance.Level
 /// </summary>
-public partial class LevelState : Node
+public class LevelState : ISaveableState<LevelSaveData>
 {
     public LevelDefinition CurrentLevel;
     public LevelSaveData SaveData = new();
@@ -13,12 +13,6 @@ public partial class LevelState : Node
     {
         SaveData = data ?? new LevelSaveData();
         SaveData.LevelId = levelId;
-    }
-
-    public void Reset()
-    {
-        CurrentLevel = null;
-        SaveData = new LevelSaveData();
     }
 
     // ── Query Methods ──────────────────────────────────────
@@ -136,4 +130,25 @@ public partial class LevelState : Node
     {
         SaveData.ObjectStates.Remove(uniqueId);
     }
+
+    // ── ISaveableState Implementation ──────────────────────────
+
+    public LevelSaveData ToSaveData()
+    {
+        return SaveData;
+    }
+
+    public void LoadFromSaveData(LevelSaveData data)
+    {
+        SaveData = data ?? new LevelSaveData();
+    }
+
+    public void ResetToDefaults()
+    {
+        CurrentLevel = null;
+        SaveData = new LevelSaveData();
+    }
+
+    Resource ISaveableState.ToSaveData() => ToSaveData();
+    void ISaveableState.LoadFromSaveData(Resource data) => LoadFromSaveData((LevelSaveData)data);
 }

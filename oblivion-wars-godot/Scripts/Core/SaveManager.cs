@@ -90,9 +90,12 @@ public partial class SaveManager : Node
         ActiveSlotIndex = slot;
         _globalData = new GlobalSaveData();
 
-        // Reset PlayerState to defaults
-        // Note: PlayerDefinition reference not available here — caller can set MaxHealth after if needed
-        GlobalStateManager.Instance.Player?.ResetToDefaults(null, startingLevelId, startingCheckpointId);
+        // Reset all state to defaults
+        GlobalStateManager.Instance.ResetToDefaults();
+
+        // Set starting checkpoint
+        GlobalStateManager.Instance.Player.LastCheckpointId = startingCheckpointId;
+        GlobalStateManager.Instance.Player.LastCheckpointLevelId = startingLevelId;
 
         // Create the slot directory and save initial state
         Save();
