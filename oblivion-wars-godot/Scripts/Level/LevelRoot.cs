@@ -14,13 +14,13 @@ public partial class LevelRoot : Node
 
         // Load level save data into LevelState
         var levelData = SaveManager.Instance?.LoadLevelData(_levelDefinition.LevelId);
-        LevelState.Instance?.LoadForLevel(
+        GlobalStateManager.Instance.Level?.LoadForLevel(
             _levelDefinition.LevelId,
             levelData ?? new LevelSaveData()
         );
 
-        if (LevelState.Instance != null)
-            LevelState.Instance.CurrentLevel = _levelDefinition;
+        if (GlobalStateManager.Instance.Level != null)
+            GlobalStateManager.Instance.Level.CurrentLevel = _levelDefinition;
 
         GD.Print($"LevelRoot: Initialized level '{_levelDefinition.LevelDisplayName}' (ID: {_levelDefinition.LevelId})");
     }

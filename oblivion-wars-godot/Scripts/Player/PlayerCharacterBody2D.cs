@@ -65,21 +65,21 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
         // Initialize from PlayerState if respawning
         if (SaveManager.Instance?.IsRespawning == true)
         {
-            var checkpoint = FindCheckpointById(PlayerState.Instance.LastCheckpointId);
+            var checkpoint = FindCheckpointById(GlobalStateManager.Instance.Player.LastCheckpointId);
             if (checkpoint != null)
                 GlobalPosition = checkpoint.RespawnPosition.GlobalPosition;
 
             _runtimeData.CurrentHealth = _runtimeData.MaxHealth;
-            if (PlayerState.Instance != null)
-                PlayerState.Instance.CurrentHealth = _runtimeData.MaxHealth;
+            if (GlobalStateManager.Instance.Player != null)
+                GlobalStateManager.Instance.Player.CurrentHealth = _runtimeData.MaxHealth;
 
             SaveManager.Instance.IsRespawning = false;
-            GD.Print($"Player respawned at checkpoint {PlayerState.Instance?.LastCheckpointId}");
+            GD.Print($"Player respawned at checkpoint {GlobalStateManager.Instance.Player?.LastCheckpointId}");
         }
-        else if (PlayerState.Instance != null)
+        else if (GlobalStateManager.Instance.Player != null)
         {
             // Normal load — sync health from PlayerState
-            _runtimeData.CurrentHealth = PlayerState.Instance.CurrentHealth;
+            _runtimeData.CurrentHealth = GlobalStateManager.Instance.Player.CurrentHealth;
         }
     }
 
@@ -110,7 +110,7 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
             SaveManager.Instance.IsRespawning = true;
 
             string levelScene = SaveManager.Instance.GetLevelScenePath(
-                PlayerState.Instance?.LastCheckpointLevelId ?? ""
+                GlobalStateManager.Instance.Player?.LastCheckpointLevelId ?? ""
             );
 
             if (!string.IsNullOrEmpty(levelScene))
@@ -131,8 +131,8 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
         StartInvincibility();
 
         // Sync health to PlayerState
-        if (PlayerState.Instance != null)
-            PlayerState.Instance.CurrentHealth = _runtimeData.CurrentHealth;
+        if (GlobalStateManager.Instance.Player != null)
+            GlobalStateManager.Instance.Player.CurrentHealth = _runtimeData.CurrentHealth;
     }
 
     // Override hazard check to skip while invincible

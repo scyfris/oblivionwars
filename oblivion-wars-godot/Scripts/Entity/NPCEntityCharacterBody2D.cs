@@ -153,9 +153,12 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
         {
             if (entry?.DropScene == null) continue;
             if (entry.DropChance < 1.0f && GD.Randf() > entry.DropChance) continue;
-            if (!string.IsNullOrEmpty(entry.RequiredUnlockId) &&
-                (PlayerState.Instance == null || !PlayerState.Instance.HasUnlock(entry.RequiredUnlockId)))
+            if (!string.IsNullOrEmpty(entry.RequiredUnlockId))
+            {
+                // TODO: Map RequiredUnlockId to AbilityType or ItemType enum and check HasAbility/HasItem
+                GD.PrintErr("NPC: RequiredUnlockId needs to be mapped to enum-based system");
                 continue;
+            }
 
             int count = (int)GD.RandRange(entry.MinCount, entry.MaxCount + 1);
             for (int i = 0; i < count; i++)

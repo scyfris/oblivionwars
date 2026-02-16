@@ -6,8 +6,8 @@ public partial class CoinPickup : Pickup
 
     protected override void OnCollected(PlayerCharacterBody2D player)
     {
-        if (PlayerState.Instance != null)
-            PlayerState.Instance.Coins += Value;
+        if (GlobalStateManager.Instance.Player != null)
+            GlobalStateManager.Instance.Player.Coins += Value;
 
         EventBus.Instance?.Raise(new ItemCollectedEvent
         {

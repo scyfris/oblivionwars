@@ -1,28 +1,13 @@
 using Godot;
 
+/// <summary>
+/// Holds current level state and level-specific saveable data.
+/// Accessed via GlobalStateManager.Instance.Level
+/// </summary>
 public partial class LevelState : Node
 {
-    public static LevelState Instance { get; private set; }
-
     public LevelDefinition CurrentLevel;
     public LevelSaveData SaveData = new();
-
-    public override void _Ready()
-    {
-        if (Instance != null)
-        {
-            GD.PrintErr("LevelState: Duplicate instance detected, removing this one.");
-            QueueFree();
-            return;
-        }
-        Instance = this;
-    }
-
-    public override void _ExitTree()
-    {
-        if (Instance == this)
-            Instance = null;
-    }
 
     public void LoadForLevel(string levelId, LevelSaveData data)
     {

@@ -43,17 +43,17 @@ public partial class SaveManager : Node
         EnsureDirectoryExists(slotDir + "levels/");
 
         // Save player data
-        var playerData = PlayerState.Instance?.ToSaveData() ?? new PlayerSaveData();
+        var playerData = GlobalStateManager.Instance.Player?.ToSaveData() ?? new PlayerSaveData();
         ResourceSaver.Save(playerData, slotDir + "player.tres");
 
         // Save global data
         ResourceSaver.Save(_globalData, slotDir + "global.tres");
 
         // Save current level data
-        if (LevelState.Instance?.CurrentLevel != null)
+        if (GlobalStateManager.Instance.Level?.CurrentLevel != null)
         {
-            var levelId = LevelState.Instance.CurrentLevel.LevelId;
-            SaveLevelData(levelId, LevelState.Instance.SaveData);
+            var levelId = GlobalStateManager.Instance.Level.CurrentLevel.LevelId;
+            SaveLevelData(levelId, GlobalStateManager.Instance.Level.SaveData);
         }
 
         GD.Print($"SaveManager: Saved to slot {ActiveSlotIndex}");
@@ -68,7 +68,7 @@ public partial class SaveManager : Node
         if (ResourceLoader.Exists(playerPath))
         {
             var playerData = ResourceLoader.Load<PlayerSaveData>(playerPath);
-            PlayerState.Instance?.LoadFromSaveData(playerData);
+            GlobalStateManager.Instance.Player?.LoadFromSaveData(playerData);
         }
 
         // Load global data
@@ -92,7 +92,7 @@ public partial class SaveManager : Node
 
         // Reset PlayerState to defaults
         // Note: PlayerDefinition reference not available here — caller can set MaxHealth after if needed
-        PlayerState.Instance?.ResetToDefaults(null, startingLevelId, startingCheckpointId);
+        GlobalStateManager.Instance.Player?.ResetToDefaults(null, startingLevelId, startingCheckpointId);
 
         // Create the slot directory and save initial state
         Save();

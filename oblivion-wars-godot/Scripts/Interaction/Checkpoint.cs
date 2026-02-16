@@ -71,7 +71,7 @@ public partial class Checkpoint : Interactable, ISaveableObject
         GD.Print($"CollisionLayer={CollisionLayer}, CollisionMask={CollisionMask}");
 
         // Load saved state if it exists
-        var savedData = LevelState.Instance?.LoadObjectState(UniqueId);
+        var savedData = GlobalStateManager.Instance.Level?.LoadObjectState(UniqueId);
         if (savedData != null)
         {
             LoadState(savedData);
@@ -94,18 +94,18 @@ public partial class Checkpoint : Interactable, ISaveableObject
 
         // 2. Save state using new generic system
         var state = SaveState();
-        LevelState.Instance?.SaveObjectState(UniqueId, state);
+        GlobalStateManager.Instance.Level?.SaveObjectState(UniqueId, state);
 
         // 3. Also add to legacy ActivatedCheckpointIds for backward compatibility
-        LevelState.Instance?.ActivateCheckpoint(UniqueId);
+        GlobalStateManager.Instance.Level?.ActivateCheckpoint(UniqueId);
 
         // 4. Update PlayerState with this checkpoint
-        if (PlayerState.Instance != null)
+        if (GlobalStateManager.Instance.Player != null)
         {
-            PlayerState.Instance.LastCheckpointId = UniqueId;
-            PlayerState.Instance.LastCheckpointLevelId =
-                LevelState.Instance?.CurrentLevel?.LevelId ?? "";
-            PlayerState.Instance.CurrentHealth = player.RuntimeData.CurrentHealth;
+            GlobalStateManager.Instance.Player.LastCheckpointId = UniqueId;
+            GlobalStateManager.Instance.Player.LastCheckpointLevelId =
+                GlobalStateManager.Instance.Level?.CurrentLevel?.LevelId ?? "";
+            GlobalStateManager.Instance.Player.CurrentHealth = player.RuntimeData.CurrentHealth;
         }
 
         // 5. Save everything to disk

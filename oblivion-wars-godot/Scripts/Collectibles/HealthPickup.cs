@@ -13,8 +13,8 @@ public partial class HealthPickup : Pickup
                 player.RuntimeData.MaxHealth
             );
 
-            if (PlayerState.Instance != null)
-                PlayerState.Instance.CurrentHealth = player.RuntimeData.CurrentHealth;
+            if (GlobalStateManager.Instance.Player != null)
+                GlobalStateManager.Instance.Player.CurrentHealth = player.RuntimeData.CurrentHealth;
         }
 
         EventBus.Instance?.Raise(new ItemCollectedEvent

@@ -59,7 +59,7 @@ public partial class MainMenu : Control
         {
             // Load existing save
             SaveManager.Instance.Load(slot);
-            string levelId = PlayerState.Instance?.LastCheckpointLevelId ?? _startingLevelId;
+            string levelId = GlobalStateManager.Instance.Player?.LastCheckpointLevelId ?? _startingLevelId;
             string scenePath = SaveManager.Instance.GetLevelScenePath(levelId);
 
             if (string.IsNullOrEmpty(scenePath))

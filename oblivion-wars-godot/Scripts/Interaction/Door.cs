@@ -57,7 +57,7 @@ public partial class Door : Area2D, ISaveableObject
     {
 #if !TOOLS
         // Load saved state if it exists
-        var savedData = LevelState.Instance?.LoadObjectState(UniqueId);
+        var savedData = GlobalStateManager.Instance.Level?.LoadObjectState(UniqueId);
         if (savedData != null)
         {
             LoadState(savedData);
@@ -80,9 +80,11 @@ public partial class Door : Area2D, ISaveableObject
         if (_isLocked)
         {
             // Check if player has required key/ability
-            if (!string.IsNullOrEmpty(RequiredKeyId) && !PlayerState.Instance.HasUnlock(RequiredKeyId))
+            // TODO: Map RequiredKeyId to ItemType or AbilityType enum
+            if (!string.IsNullOrEmpty(RequiredKeyId))
             {
                 GD.Print($"Door {UniqueId} is locked. Need: {RequiredKeyId}");
+                GD.PrintErr("Door: RequiredKeyId needs to be mapped to enum-based system");
                 return;
             }
 
@@ -100,10 +102,10 @@ public partial class Door : Area2D, ISaveableObject
 
         // Save state using new generic system
         var state = SaveState();
-        LevelState.Instance?.SaveObjectState(UniqueId, state);
+        GlobalStateManager.Instance.Level?.SaveObjectState(UniqueId, state);
 
         // Also add to legacy UnlockedDoorIds for backward compatibility
-        LevelState.Instance?.UnlockDoor(UniqueId);
+        GlobalStateManager.Instance.Level?.UnlockDoor(UniqueId);
 
         SaveManager.Instance?.Save();
         GD.Print($"Door {UniqueId} unlocked!");

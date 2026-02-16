@@ -65,7 +65,7 @@ public partial class GameHUD : CanvasLayer
     private void UpdateCoinDisplay()
     {
         if (_coinLabel == null) return;
-        _coinLabel.Text = $"Coins: {PlayerState.Instance?.Coins ?? 0}";
+        _coinLabel.Text = $"Coins: {GlobalStateManager.Instance.Player?.Coins ?? 0}";
     }
 
     private void UpdateInteractionPrompt()
