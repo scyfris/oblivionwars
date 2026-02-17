@@ -99,6 +99,13 @@ public class PlayerState : ISaveableState<PlayerSaveData>
         return _weaponAmmo[weaponId] == -1 || _weaponAmmo[weaponId] > 0;
     }
 
+    public void LockWeapon(string weaponId)
+    {
+        if (string.IsNullOrEmpty(weaponId)) return;
+        _unlockedWeapons.Remove(weaponId);
+        _weaponAmmo.Remove(weaponId);
+    }
+
     public string[] GetUnlockedWeapons()
     {
         return _unlockedWeapons

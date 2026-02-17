@@ -13,6 +13,7 @@ public partial class PlayerController : Node
     {
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
+        EventBus.Instance.Subscribe<ForceWeaponSelectEvent>(OnForceWeaponSelect);
 
         // Initialize holdables (right hand from definition, left hand overridden below)
         _characterBody.InitializeHoldables();
@@ -59,6 +60,7 @@ public partial class PlayerController : Node
     {
         EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
+        EventBus.Instance?.Unsubscribe<ForceWeaponSelectEvent>(OnForceWeaponSelect);
     }
 
     // ── Movement Pass-Through (called by PlayerInputController) ──
@@ -126,6 +128,12 @@ public partial class PlayerController : Node
     }
 
     // ── Event Handlers ─────────────────────────────────────
+
+    private void OnForceWeaponSelect(ForceWeaponSelectEvent evt)
+    {
+        _currentWeaponId = ""; // Clear so SelectWeapon doesn't skip same-id check
+        SelectWeapon(evt.WeaponId);
+    }
 
     private void OnEntityDied(EntityDiedEvent evt)
     {

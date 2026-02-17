@@ -28,6 +28,7 @@
 [ext_resource type="Texture2D" uid="uid://bog08cdbdhtfx" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-8.png" id="18_mqlab"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="19_epcmy"]
 [ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Scenes/Weapons/Shotgun.tscn" id="20_m6lt4"]
+[ext_resource type="Script" uid="uid://ce2ke5b3y4uqa" path="res://Scripts/UI/DebugOverlay.cs" id="26_ul1mu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
 size = Vector2(28, 64)
@@ -229,6 +230,13 @@ offset_top = 638.0
 offset_right = 305.0
 offset_bottom = 703.0
 text = "Weapon"
+
+[node name="DebugOverlay" type="Control" parent="HUD" unique_id=91387351]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("26_ul1mu")
 
 [node name="LevelManager" type="Node" parent="." unique_id=117005702]
 

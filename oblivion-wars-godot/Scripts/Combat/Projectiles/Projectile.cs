@@ -101,10 +101,18 @@ public abstract partial class Projectile : Area2D
 
     protected virtual void _OnBodyEntered(Node2D body)
     {
+        if (body == null || !GodotObject.IsInstanceValid(body) || body.IsQueuedForDeletion())
+            return;
+
         if (body == _shooter)
             return;
 
-        OnHit(body);
+        try
+        {
+            OnHit(body);
+        }
+        catch (System.ObjectDisposedException) { }
+
         SpawnHitEffect();
         QueueFree();
     }

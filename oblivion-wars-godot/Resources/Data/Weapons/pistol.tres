@@ -5,7 +5,6 @@
 
 [resource]
 script = ExtResource("1_85pdd")
-WeaponId = "pistol"
 UseCooldown = 0.2
 Projectile = ExtResource("2_projectile")
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"
