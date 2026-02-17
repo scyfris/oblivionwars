@@ -3,7 +3,6 @@ using Godot;
 [GlobalClass]
 public partial class WeaponDefinition : Resource
 {
-    [Export] public string WeaponId = "";
     [Export] public float UseCooldown = 0.2f;
     [Export] public bool IsAutomatic = true;
     [Export] public float DamageScale = 1.0f;

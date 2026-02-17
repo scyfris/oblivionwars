@@ -17,11 +17,14 @@ public class PlayerState : ISaveableState<PlayerSaveData>
     public string LastCheckpointId = "";
     public string LastCheckpointLevelId = "";
 
-    // Weapons (WeaponType -> unlocked)
-    private Godot.Collections.Dictionary<int, bool> _unlockedWeapons = new();
+    // Current equipped weapon (by registry name)
+    public string CurrentWeaponId = "";
 
-    // Ammo (WeaponType -> ammo count, -1 = infinite)
-    private Godot.Collections.Dictionary<int, int> _weaponAmmo = new();
+    // Weapons (weaponName -> unlocked)
+    private Godot.Collections.Dictionary<string, bool> _unlockedWeapons = new();
+
+    // Ammo (weaponName -> ammo count, -1 = infinite)
+    private Godot.Collections.Dictionary<string, int> _weaponAmmo = new();
 
     // Abilities (AbilityType -> unlocked)
     private Godot.Collections.Dictionary<int, bool> _unlockedAbilities = new();
@@ -31,89 +34,76 @@ public class PlayerState : ISaveableState<PlayerSaveData>
 
     // ── Weapon Management ──────────────────────────────────────
 
-    public void UnlockWeapon(WeaponType weaponType, int startingAmmo = 0)
+    public void UnlockWeapon(string weaponId, int startingAmmo = 0)
     {
-        int key = (int)weaponType;
-        if (!_unlockedWeapons.ContainsKey(key))
-        {
-            _unlockedWeapons[key] = false;
-        }
+        if (string.IsNullOrEmpty(weaponId)) return;
 
-        if (!_unlockedWeapons[key])
+        if (!_unlockedWeapons.ContainsKey(weaponId))
+            _unlockedWeapons[weaponId] = false;
+
+        if (!_unlockedWeapons[weaponId])
         {
-            _unlockedWeapons[key] = true;
-            _weaponAmmo[key] = startingAmmo;
-            GD.Print($"Weapon unlocked: {weaponType}");
+            _unlockedWeapons[weaponId] = true;
+            _weaponAmmo[weaponId] = startingAmmo;
+            GD.Print($"Weapon unlocked: {weaponId}");
         }
     }
 
-    public bool IsWeaponUnlocked(WeaponType weaponType)
+    public bool IsWeaponUnlocked(string weaponId)
     {
-        int key = (int)weaponType;
-        return _unlockedWeapons.ContainsKey(key) && _unlockedWeapons[key];
+        if (string.IsNullOrEmpty(weaponId)) return false;
+        return _unlockedWeapons.ContainsKey(weaponId) && _unlockedWeapons[weaponId];
     }
 
-    public void AddAmmo(WeaponType weaponType, int amount)
+    public void AddAmmo(string weaponId, int amount)
     {
-        if (!IsWeaponUnlocked(weaponType))
-            return;
+        if (!IsWeaponUnlocked(weaponId)) return;
 
-        int key = (int)weaponType;
-        if (!_weaponAmmo.ContainsKey(key))
-            _weaponAmmo[key] = 0;
+        if (!_weaponAmmo.ContainsKey(weaponId))
+            _weaponAmmo[weaponId] = 0;
 
         // Don't add to infinite ammo weapons (-1)
-        if (_weaponAmmo[key] == -1)
-            return;
+        if (_weaponAmmo[weaponId] == -1) return;
 
-        _weaponAmmo[key] += amount;
+        _weaponAmmo[weaponId] += amount;
     }
 
-    public bool ConsumeAmmo(WeaponType weaponType, int amount = 1)
+    public bool ConsumeAmmo(string weaponId, int amount = 1)
     {
-        if (!IsWeaponUnlocked(weaponType))
-            return false;
+        if (!IsWeaponUnlocked(weaponId)) return false;
 
-        int key = (int)weaponType;
-        if (!_weaponAmmo.ContainsKey(key))
-            return false;
+        if (!_weaponAmmo.ContainsKey(weaponId)) return false;
 
         // Infinite ammo
-        if (_weaponAmmo[key] == -1)
-            return true;
+        if (_weaponAmmo[weaponId] == -1) return true;
 
-        if (_weaponAmmo[key] < amount)
-            return false;
+        if (_weaponAmmo[weaponId] < amount) return false;
 
-        _weaponAmmo[key] -= amount;
+        _weaponAmmo[weaponId] -= amount;
         return true;
     }
 
-    public int GetAmmo(WeaponType weaponType)
+    public int GetAmmo(string weaponId)
     {
-        int key = (int)weaponType;
-        if (_weaponAmmo.ContainsKey(key))
-            return _weaponAmmo[key];
+        if (!string.IsNullOrEmpty(weaponId) && _weaponAmmo.ContainsKey(weaponId))
+            return _weaponAmmo[weaponId];
         return 0;
     }
 
-    public bool CanUseWeapon(WeaponType weaponType)
+    public bool CanUseWeapon(string weaponId)
     {
-        if (!IsWeaponUnlocked(weaponType))
-            return false;
+        if (!IsWeaponUnlocked(weaponId)) return false;
 
-        int key = (int)weaponType;
-        if (!_weaponAmmo.ContainsKey(key))
-            return false;
+        if (!_weaponAmmo.ContainsKey(weaponId)) return false;
 
-        return _weaponAmmo[key] == -1 || _weaponAmmo[key] > 0;
+        return _weaponAmmo[weaponId] == -1 || _weaponAmmo[weaponId] > 0;
     }
 
-    public WeaponType[] GetUnlockedWeapons()
+    public string[] GetUnlockedWeapons()
     {
         return _unlockedWeapons
             .Where(kvp => kvp.Value)
-            .Select(kvp => (WeaponType)kvp.Key)
+            .Select(kvp => kvp.Key)
             .ToArray();
     }
 
@@ -192,6 +182,7 @@ public class PlayerState : ISaveableState<PlayerSaveData>
             MaxHealth = MaxHealth,
             Armor = Armor,
             Coins = Coins,
+            CurrentWeaponId = CurrentWeaponId,
             UnlockedWeapons = new(_unlockedWeapons),
             WeaponAmmo = new(_weaponAmmo),
             UnlockedAbilities = new(_unlockedAbilities),
@@ -210,6 +201,7 @@ public class PlayerState : ISaveableState<PlayerSaveData>
         MaxHealth = data.MaxHealth;
         Armor = data.Armor;
         Coins = data.Coins;
+        CurrentWeaponId = data.CurrentWeaponId;
         _unlockedWeapons = new(data.UnlockedWeapons);
         _weaponAmmo = new(data.WeaponAmmo);
         _unlockedAbilities = new(data.UnlockedAbilities);
@@ -225,10 +217,17 @@ public class PlayerState : ISaveableState<PlayerSaveData>
         LastCheckpointId = "";
         LastCheckpointLevelId = "";
 
+        // Default weapon comes from registry — unlock it with infinite ammo
+        var defaultWeapon = GlobalDefinitions.Instance?.GetDefaultWeaponName() ?? "";
+        CurrentWeaponId = defaultWeapon;
+
         _unlockedWeapons.Clear();
-        _unlockedWeapons[(int)WeaponType.Pistol] = true;
         _weaponAmmo.Clear();
-        _weaponAmmo[(int)WeaponType.Pistol] = -1; // Infinite
+        if (!string.IsNullOrEmpty(defaultWeapon))
+        {
+            _unlockedWeapons[defaultWeapon] = true;
+            _weaponAmmo[defaultWeapon] = -1; // Infinite
+        }
 
         _unlockedAbilities.Clear();
         _inventory.Clear();

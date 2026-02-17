@@ -90,6 +90,11 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
 
     // ── Holdable API ──────────────────────────────────────
 
+    public void SwapLeftHoldable(PackedScene scene)
+    {
+        _holdableSystem?.SwapLeft(scene);
+    }
+
     public void UpdateAim(Vector2 targetPosition)
     {
         _aimTarget = targetPosition;

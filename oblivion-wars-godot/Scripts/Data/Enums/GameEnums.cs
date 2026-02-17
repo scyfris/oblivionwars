@@ -4,18 +4,6 @@ using Godot;
 /// Centralized enums for Oblivion Wars game systems.
 /// </summary>
 
-public enum WeaponType
-{
-    None,
-    Pistol,
-    Shotgun,
-    MachineGun,
-    RocketLauncher,
-    GrenadeLauncher,
-    Laser,
-    Railgun
-}
-
 public enum AbilityType
 {
     None,

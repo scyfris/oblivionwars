@@ -1,34 +1,24 @@
 using Godot;
+using System.Linq;
 
 /// <summary>
-/// Global singleton that holds mappings from enums to definition Resources.
-/// Configure these in the editor by assigning .tres definition files.
+/// Global singleton that holds registries for weapons, abilities, items, etc.
+/// Configure in the editor by populating arrays with registry entries.
 /// </summary>
 public partial class GlobalDefinitions : Node
 {
     public static GlobalDefinitions Instance { get; private set; }
 
-    // ── Weapon Definitions ─────────────────────────────────────
+    // ── Weapon Registry ─────────────────────────────────────
     [ExportGroup("Weapons")]
-    [Export] public WeaponDefinition PistolDefinition { get; set; }
-    [Export] public WeaponDefinition ShotgunDefinition { get; set; }
-    [Export] public WeaponDefinition MachineGunDefinition { get; set; }
-    [Export] public WeaponDefinition RocketLauncherDefinition { get; set; }
-    [Export] public WeaponDefinition GrenadeLauncherDefinition { get; set; }
-    [Export] public WeaponDefinition LaserDefinition { get; set; }
-    [Export] public WeaponDefinition RailgunDefinition { get; set; }
+    [Export] public WeaponRegistryEntry[] Weapons { get; set; } = System.Array.Empty<WeaponRegistryEntry>();
+    [Export] public int DefaultWeaponIndex { get; set; } = 0;
 
     // ── Ability Definitions ────────────────────────────────────
     // TODO: Create AbilityDefinition Resource when needed
-    // [ExportGroup("Abilities")]
-    // [Export] public AbilityDefinition DoubleJumpDefinition { get; set; }
-    // etc.
 
     // ── Item Definitions ───────────────────────────────────────
     // TODO: Create ItemDefinition Resource when needed
-    // [ExportGroup("Items")]
-    // [Export] public ItemDefinition HealthPackDefinition { get; set; }
-    // etc.
 
     public override void _Ready()
     {
@@ -49,25 +39,41 @@ public partial class GlobalDefinitions : Node
 
     // ── Weapon Lookup ──────────────────────────────────────────
 
-    public WeaponDefinition GetWeaponDefinition(WeaponType weaponType)
+    public WeaponRegistryEntry FindWeaponEntry(string weaponName)
     {
-        return weaponType switch
-        {
-            WeaponType.Pistol => PistolDefinition,
-            WeaponType.Shotgun => ShotgunDefinition,
-            WeaponType.MachineGun => MachineGunDefinition,
-            WeaponType.RocketLauncher => RocketLauncherDefinition,
-            WeaponType.GrenadeLauncher => GrenadeLauncherDefinition,
-            WeaponType.Laser => LaserDefinition,
-            WeaponType.Railgun => RailgunDefinition,
-            _ => null
-        };
+        return System.Array.Find(Weapons, e => e?.Name == weaponName);
     }
 
-    public string GetWeaponName(WeaponType weaponType)
+    public PackedScene GetWeaponScene(string weaponName)
     {
-        var def = GetWeaponDefinition(weaponType);
-        return def?.WeaponId ?? weaponType.ToString();
+        return FindWeaponEntry(weaponName)?.Scene;
+    }
+
+    public string GetDefaultWeaponName()
+    {
+        if (DefaultWeaponIndex >= 0 && DefaultWeaponIndex < Weapons.Length)
+            return Weapons[DefaultWeaponIndex]?.Name ?? "";
+        return "";
+    }
+
+    public WeaponRegistryEntry GetWeaponBySlot(int slotIndex)
+    {
+        if (slotIndex >= 0 && slotIndex < Weapons.Length)
+            return Weapons[slotIndex];
+        return null;
+    }
+
+    public string GetWeaponNameBySlot(int slotIndex)
+    {
+        return GetWeaponBySlot(slotIndex)?.Name;
+    }
+
+    public string[] GetAllWeaponNames()
+    {
+        return Weapons
+            .Where(e => e != null)
+            .Select(e => e.Name)
+            .ToArray();
     }
 
     // ── Ability Lookup ─────────────────────────────────────────

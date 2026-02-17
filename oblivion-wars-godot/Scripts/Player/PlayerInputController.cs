@@ -13,6 +13,14 @@ public partial class PlayerInputController : Node
     [Export] private string _rotateGravityCounterClockwiseAction = "rotate_gravity_ccw";
     [Export] private string _interactAction = "interact";
 
+    [ExportGroup("Weapon Switching")]
+    [Export] private string[] _weaponSlotActions = new[] {
+        "weapon_slot_1", "weapon_slot_2", "weapon_slot_3", "weapon_slot_4",
+        "weapon_slot_5", "weapon_slot_6", "weapon_slot_7"
+    };
+    [Export] private string _weaponNextAction = "weapon_next";
+    [Export] private string _weaponPrevAction = "weapon_prev";
+
     public override void _UnhandledInput(InputEvent @event)
     {
         // Jump
@@ -64,6 +72,22 @@ public partial class PlayerInputController : Node
         // Interact
         if (@event.IsActionPressed(_interactAction))
             _controller.TryInteract();
+
+        // Weapon slot selection
+        for (int i = 0; i < _weaponSlotActions.Length; i++)
+        {
+            if (@event.IsActionPressed(_weaponSlotActions[i]))
+            {
+                _controller.SelectWeaponSlot(i);
+                break;
+            }
+        }
+
+        // Weapon cycling
+        if (@event.IsActionPressed(_weaponNextAction))
+            _controller.CycleWeapon(1);
+        else if (@event.IsActionPressed(_weaponPrevAction))
+            _controller.CycleWeapon(-1);
     }
 
     public override void _PhysicsProcess(double delta)

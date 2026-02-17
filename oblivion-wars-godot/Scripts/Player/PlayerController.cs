@@ -7,13 +7,33 @@ public partial class PlayerController : Node
 
     public PlayerCharacterBody2D CharacterBody => _characterBody;
 
+    private string _currentWeaponId = "";
+
     public override void _Ready()
     {
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
 
-        // Initialize weapons from Definition or scene based on flag
+        // Initialize holdables (right hand from definition, left hand overridden below)
         _characterBody.InitializeHoldables();
+
+        // Ensure weapons are unlocked (handles testing without save system / new-game flow)
+        var playerState = GlobalStateManager.Instance?.Player;
+        if (playerState != null && playerState.GetUnlockedWeapons().Length == 0)
+        {
+            var allWeapons = GlobalDefinitions.Instance?.GetAllWeaponNames();
+            if (allWeapons != null)
+            {
+                foreach (var name in allWeapons)
+                    playerState.UnlockWeapon(name, -1);
+            }
+        }
+
+        // Equip saved weapon (or default)
+        var savedId = GlobalStateManager.Instance?.Player?.CurrentWeaponId ?? "";
+        if (string.IsNullOrEmpty(savedId))
+            savedId = GlobalDefinitions.Instance?.GetDefaultWeaponName() ?? "";
+        SelectWeapon(savedId);
 
         // Checkpoint respawn logic
         if (SaveManager.Instance?.IsRespawning == true)
@@ -63,6 +83,46 @@ public partial class PlayerController : Node
     public void TryInteract()
     {
         _characterBody.NearestInteractable?.Interact(_characterBody);
+    }
+
+    // ── Weapon Switching ─────────────────────────────────────
+
+    public void SelectWeapon(string weaponId)
+    {
+        if (string.IsNullOrEmpty(weaponId) || weaponId == _currentWeaponId) return;
+        if (!GlobalStateManager.Instance.Player.IsWeaponUnlocked(weaponId)) return;
+
+        var scene = GlobalDefinitions.Instance?.GetWeaponScene(weaponId);
+        if (scene == null) return;
+
+        var prev = _currentWeaponId;
+        _currentWeaponId = weaponId;
+        _characterBody.SwapLeftHoldable(scene);
+        GlobalStateManager.Instance.Player.CurrentWeaponId = weaponId;
+
+        EventBus.Instance?.Raise(new WeaponSwitchedEvent
+        {
+            NewWeaponId = weaponId,
+            PreviousWeaponId = prev
+        });
+    }
+
+    public void SelectWeaponSlot(int slotIndex)
+    {
+        var name = GlobalDefinitions.Instance?.GetWeaponNameBySlot(slotIndex);
+        if (name != null) SelectWeapon(name);
+    }
+
+    public void CycleWeapon(int direction)
+    {
+        var unlocked = GlobalStateManager.Instance.Player.GetUnlockedWeapons();
+        if (unlocked.Length == 0) return;
+
+        int idx = System.Array.IndexOf(unlocked, _currentWeaponId);
+        if (idx < 0) idx = 0;
+
+        int next = (idx + direction + unlocked.Length) % unlocked.Length;
+        SelectWeapon(unlocked[next]);
     }
 
     // ── Event Handlers ─────────────────────────────────────

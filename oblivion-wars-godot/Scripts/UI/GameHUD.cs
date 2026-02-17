@@ -4,6 +4,7 @@ public partial class GameHUD : CanvasLayer
 {
     [Export] private Label _healthLabel;
     [Export] private Label _coinLabel;
+    [Export] private Label _weaponLabel;
     [Export] private Label _interactionPrompt;
     [Export] private SaveIndicator _saveIndicator;
 
@@ -24,15 +25,18 @@ public partial class GameHUD : CanvasLayer
 
         EventBus.Instance?.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance?.Subscribe<ItemCollectedEvent>(OnItemCollected);
+        EventBus.Instance?.Subscribe<WeaponSwitchedEvent>(OnWeaponSwitched);
 
         UpdateHealthDisplay();
         UpdateCoinDisplay();
+        UpdateWeaponDisplay(GlobalStateManager.Instance?.Player?.CurrentWeaponId ?? "");
     }
 
     public override void _ExitTree()
     {
         EventBus.Instance?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance?.Unsubscribe<ItemCollectedEvent>(OnItemCollected);
+        EventBus.Instance?.Unsubscribe<WeaponSwitchedEvent>(OnWeaponSwitched);
     }
 
     public override void _Process(double delta)
@@ -82,6 +86,28 @@ public partial class GameHUD : CanvasLayer
         {
             _interactionPrompt.Visible = false;
         }
+    }
+
+    // ── Weapon Display ──────────────────────────────────────
+
+    private void OnWeaponSwitched(WeaponSwitchedEvent evt)
+    {
+        UpdateWeaponDisplay(evt.NewWeaponId);
+    }
+
+    private void UpdateWeaponDisplay(string weaponId)
+    {
+        if (_weaponLabel == null) return;
+
+        if (string.IsNullOrEmpty(weaponId))
+        {
+            _weaponLabel.Text = "";
+            return;
+        }
+
+        int ammo = GlobalStateManager.Instance?.Player?.GetAmmo(weaponId) ?? 0;
+        string ammoText = ammo == -1 ? "INF" : ammo.ToString();
+        _weaponLabel.Text = $"{weaponId} | {ammoText}";
     }
 
     public void ShowInteractionPrompt(string text)

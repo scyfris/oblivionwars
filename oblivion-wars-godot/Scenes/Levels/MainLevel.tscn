@@ -174,10 +174,11 @@ _defaultSettings = ExtResource("7_am6fp")
 [node name="Camera2D" type="Camera2D" parent="CameraController" unique_id=210406581]
 ignore_rotation = false
 
-[node name="HUD" type="CanvasLayer" parent="." unique_id=1326346317 node_paths=PackedStringArray("_healthLabel", "_coinLabel", "_interactionPrompt", "_saveIndicator")]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1326346317 node_paths=PackedStringArray("_healthLabel", "_coinLabel", "_weaponLabel", "_interactionPrompt", "_saveIndicator")]
 script = ExtResource("10_7woyo")
 _healthLabel = NodePath("DebugHealthLabel")
 _coinLabel = NodePath("CoinLabel")
+_weaponLabel = NodePath("WeaponLabel")
 _interactionPrompt = NodePath("InteractionPrompt")
 _saveIndicator = NodePath("SaveIndicator/DebugHealthLabel2")
 _playerPath = NodePath("../Player/PlayerBody2D")
@@ -221,6 +222,13 @@ offset_bottom = 1014.0
 text = "Saving...
 "
 script = ExtResource("13_yce48")
+
+[node name="WeaponLabel" type="Label" parent="HUD" unique_id=35380791]
+offset_left = 210.0
+offset_top = 638.0
+offset_right = 305.0
+offset_bottom = 703.0
+text = "Weapon"
 
 [node name="LevelManager" type="Node" parent="." unique_id=117005702]
 
