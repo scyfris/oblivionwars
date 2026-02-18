@@ -33,6 +33,9 @@ public partial class CombatSystem : GameSystem
         if (target is not EntityCharacterBody2D entity)
             return;
 
+        if (entity.RuntimeData.IsInvincible)
+            return;
+
         float finalDamage = evt.BaseDamage;
 
         foreach (var effect in entity.RuntimeData.StatusEffects)

@@ -4,10 +4,20 @@ using System.Linq;
 public partial class PlayerController : Node
 {
     [Export] private PlayerCharacterBody2D _characterBody;
+    [Export] private HoldableSystem _holdableSystem;
+    [Export] private AnimatedSprite2D _spriteNode;
 
     public PlayerCharacterBody2D CharacterBody => _characterBody;
 
     private string _currentWeaponId = "";
+
+    // Aim
+    private Vector2 _aimTarget;
+
+    // Invincibility (state lives on RuntimeData.IsInvincible, timers here)
+    private float _invincibilityTimer = 0f;
+    private float _flashTimer = 0f;
+    private const float FlashInterval = 0.1f;
 
     public override void _Ready()
     {
@@ -15,8 +25,14 @@ public partial class PlayerController : Node
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance.Subscribe<ForceWeaponSelectEvent>(OnForceWeaponSelect);
 
-        // Initialize holdables (right hand from definition, left hand overridden below)
-        _characterBody.InitializeHoldables();
+        // Initialize holdables
+        if (_holdableSystem != null)
+        {
+            if (_holdableSystem.UseDefinitionWeapons)
+                _holdableSystem.InitializeWithDefinition(_characterBody, _characterBody.Definition);
+            else
+                _holdableSystem.Initialize(_characterBody);
+        }
 
         // Ensure weapons are unlocked (handles testing without save system / new-game flow)
         var playerState = GlobalStateManager.Instance?.Player;
@@ -63,6 +79,12 @@ public partial class PlayerController : Node
         EventBus.Instance?.Unsubscribe<ForceWeaponSelectEvent>(OnForceWeaponSelect);
     }
 
+    public override void _PhysicsProcess(double delta)
+    {
+        _holdableSystem?.Update(delta);
+        UpdateInvincibility(delta);
+    }
+
     // ── Movement Pass-Through (called by PlayerInputController) ──
 
     public void Jump() => _characterBody.Jump();
@@ -73,12 +95,34 @@ public partial class PlayerController : Node
     public void RotateGravityClockwise() => _characterBody.RotateGravityClockwise();
     public void RotateGravityCounterClockwise() => _characterBody.RotateGravityCounterClockwise();
 
-    public void UpdateAim(Vector2 targetPosition) => _characterBody.UpdateAim(targetPosition);
-    public void UseHoldablePressed(Vector2 target, bool isLeft) => _characterBody.UseHoldablePressed(target, isLeft);
-    public void UseHoldableReleased(Vector2 target, bool isLeft) => _characterBody.UseHoldableReleased(target, isLeft);
-    public void UseHoldableHeld(Vector2 target, bool isLeft) => _characterBody.UseHoldableHeld(target, isLeft);
-
     public Vector2 GetGlobalMousePosition() => _characterBody.GetGlobalMousePosition();
+
+    // ── Aim & Holdable API ──────────────────────────────────
+
+    public void UpdateAim(Vector2 targetPosition)
+    {
+        _aimTarget = targetPosition;
+        _characterBody.AimTarget = targetPosition;
+        _holdableSystem?.UpdateAim(targetPosition);
+    }
+
+    public void UseHoldablePressed(Vector2 target, bool isLeft)
+    {
+        if (isLeft) _holdableSystem?.PressLeft(target);
+        else _holdableSystem?.PressRight(target);
+    }
+
+    public void UseHoldableReleased(Vector2 target, bool isLeft)
+    {
+        if (isLeft) _holdableSystem?.ReleaseLeft(target);
+        else _holdableSystem?.ReleaseRight(target);
+    }
+
+    public void UseHoldableHeld(Vector2 target, bool isLeft)
+    {
+        if (isLeft) _holdableSystem?.HeldLeft(target);
+        else _holdableSystem?.HeldRight(target);
+    }
 
     // ── Interaction ────────────────────────────────────────
 
@@ -99,7 +143,7 @@ public partial class PlayerController : Node
 
         var prev = _currentWeaponId;
         _currentWeaponId = weaponId;
-        _characterBody.SwapLeftHoldable(scene);
+        _holdableSystem?.SwapLeft(scene);
         GlobalStateManager.Instance.Player.CurrentWeaponId = weaponId;
 
         EventBus.Instance?.Raise(new WeaponSwitchedEvent
@@ -125,6 +169,40 @@ public partial class PlayerController : Node
 
         int next = (idx + direction + unlocked.Length) % unlocked.Length;
         SelectWeapon(unlocked[next]);
+    }
+
+    // ── Invincibility ─────────────────────────────────────
+
+    private void StartInvincibility()
+    {
+        var definition = _characterBody.Definition as PlayerDefinition;
+        if (definition == null) return;
+
+        _characterBody.RuntimeData.IsInvincible = true;
+        _invincibilityTimer = definition.InvincibilityDuration;
+        _flashTimer = 0f;
+    }
+
+    private void UpdateInvincibility(double delta)
+    {
+        if (!_characterBody.RuntimeData.IsInvincible) return;
+
+        _invincibilityTimer -= (float)delta;
+        _flashTimer += (float)delta;
+
+        if (_flashTimer >= FlashInterval)
+        {
+            _flashTimer -= FlashInterval;
+            if (_spriteNode != null)
+                _spriteNode.Visible = !_spriteNode.Visible;
+        }
+
+        if (_invincibilityTimer <= 0)
+        {
+            _characterBody.RuntimeData.IsInvincible = false;
+            if (_spriteNode != null)
+                _spriteNode.Visible = true;
+        }
     }
 
     // ── Event Handlers ─────────────────────────────────────
@@ -164,7 +242,7 @@ public partial class PlayerController : Node
     {
         if (evt.TargetInstanceId != _characterBody.GetInstanceId()) return;
 
-        _characterBody.StartInvincibility();
+        StartInvincibility();
 
         // Sync health to PlayerState
         if (GlobalStateManager.Instance.Player != null)

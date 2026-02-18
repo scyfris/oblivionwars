@@ -7,10 +7,6 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
     [ExportGroup("Visuals")]
     [Export] private Node2D _flipRoot;
 
-    [ExportGroup("Combat")]
-    [Export] private HoldableSystem _holdableSystem;
-
-    private Vector2 _aimTarget;
     private bool _facingRight = true;
     private float _contactDamageCooldown = 0f;
     private const float ContactDamageCooldownTime = 0.5f;
@@ -23,58 +19,12 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
         base._Ready();
     }
 
-    /// <summary>
-    /// Called by NPCController to initialize the holdable system.
-    /// </summary>
-    public void InitializeHoldables()
-    {
-        if (_holdableSystem == null) return;
-
-        if (_holdableSystem.UseDefinitionWeapons)
-            _holdableSystem.InitializeWithDefinition(this, _definition);
-        else
-            _holdableSystem.Initialize(this);
-    }
-
     public override void _PhysicsProcess(double delta)
     {
         base._PhysicsProcess(delta);
 
         UpdateFacing();
-        _holdableSystem?.Update(delta);
         CheckContactDamage(delta);
-    }
-
-    // ── Holdable API (called by NPCController) ──────────
-
-    public void UpdateAim(Vector2 targetPosition)
-    {
-        _aimTarget = targetPosition;
-        _holdableSystem?.UpdateAim(targetPosition);
-    }
-
-    public void UseHoldablePressed(Vector2 targetPosition, bool isLeft)
-    {
-        if (isLeft)
-            _holdableSystem?.PressLeft(targetPosition);
-        else
-            _holdableSystem?.PressRight(targetPosition);
-    }
-
-    public void UseHoldableReleased(Vector2 targetPosition, bool isLeft)
-    {
-        if (isLeft)
-            _holdableSystem?.ReleaseLeft(targetPosition);
-        else
-            _holdableSystem?.ReleaseRight(targetPosition);
-    }
-
-    public void UseHoldableHeld(Vector2 targetPosition, bool isLeft)
-    {
-        if (isLeft)
-            _holdableSystem?.HeldLeft(targetPosition);
-        else
-            _holdableSystem?.HeldRight(targetPosition);
     }
 
     // ── Contact Damage ──────────────────────────────────

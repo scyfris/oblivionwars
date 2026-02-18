@@ -3,6 +3,7 @@ using Godot;
 public partial class NPCController : Node
 {
     [Export] private NPCEntityCharacterBody2D _characterBody;
+    [Export] private HoldableSystem _holdableSystem;
     [Export] private Label _healthLabel;
 
     public NPCEntityCharacterBody2D CharacterBody => _characterBody;
@@ -12,8 +13,14 @@ public partial class NPCController : Node
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
 
-        // Initialize weapons from Definition or scene based on flag
-        _characterBody.InitializeHoldables();
+        // Initialize holdables
+        if (_holdableSystem != null)
+        {
+            if (_holdableSystem.UseDefinitionWeapons)
+                _holdableSystem.InitializeWithDefinition(_characterBody, _characterBody.Definition);
+            else
+                _holdableSystem.Initialize(_characterBody);
+        }
 
         UpdateHealthLabel();
     }
@@ -24,16 +31,41 @@ public partial class NPCController : Node
         EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
     }
 
+    public override void _PhysicsProcess(double delta)
+    {
+        _holdableSystem?.Update(delta);
+    }
+
     // ── Movement Pass-Through (called by AIController) ───
 
     public void MoveLeft() => _characterBody.MoveLeft();
     public void MoveRight() => _characterBody.MoveRight();
     public void Stop() => _characterBody.Stop();
 
-    public void UpdateAim(Vector2 targetPosition) => _characterBody.UpdateAim(targetPosition);
-    public void UseHoldablePressed(Vector2 target, bool isLeft) => _characterBody.UseHoldablePressed(target, isLeft);
-    public void UseHoldableReleased(Vector2 target, bool isLeft) => _characterBody.UseHoldableReleased(target, isLeft);
-    public void UseHoldableHeld(Vector2 target, bool isLeft) => _characterBody.UseHoldableHeld(target, isLeft);
+    // ── Holdable API (called by AIController) ────────────
+
+    public void UpdateAim(Vector2 targetPosition)
+    {
+        _holdableSystem?.UpdateAim(targetPosition);
+    }
+
+    public void UseHoldablePressed(Vector2 target, bool isLeft)
+    {
+        if (isLeft) _holdableSystem?.PressLeft(target);
+        else _holdableSystem?.PressRight(target);
+    }
+
+    public void UseHoldableReleased(Vector2 target, bool isLeft)
+    {
+        if (isLeft) _holdableSystem?.ReleaseLeft(target);
+        else _holdableSystem?.ReleaseRight(target);
+    }
+
+    public void UseHoldableHeld(Vector2 target, bool isLeft)
+    {
+        if (isLeft) _holdableSystem?.HeldLeft(target);
+        else _holdableSystem?.HeldRight(target);
+    }
 
     // ── Event Handlers ───────────────────────────────────
 

@@ -118,13 +118,12 @@ script = ExtResource("9_1sdst")
 
 [node name="Player" type="Node" parent="." unique_id=585589969]
 
-[node name="PlayerBody2D" type="CharacterBody2D" parent="Player" unique_id=1704717355 node_paths=PackedStringArray("_holdableSystem", "_flipRoot", "_spriteNode", "_wallSlideDustPosition")]
+[node name="PlayerBody2D" type="CharacterBody2D" parent="Player" unique_id=1704717355 node_paths=PackedStringArray("_flipRoot", "_spriteNode", "_wallSlideDustPosition")]
 position = Vector2(610, 352)
 floor_constant_speed = true
 floor_snap_length = 32.0
 script = ExtResource("8_dry3g")
 _definition = ExtResource("9_ul1mu")
-_holdableSystem = NodePath("HoldableSystem")
 _flipRoot = NodePath("FlipRoot")
 _spriteNode = NodePath("FlipRoot/AnimatedSprite2D")
 _wallSlideDustPosition = NodePath("FlipRoot/WallSlideDustPosition")
@@ -152,9 +151,7 @@ frame_progress = 0.23829632
 
 [node name="HoldableSystem" type="Node" parent="Player/PlayerBody2D" unique_id=1767063964 node_paths=PackedStringArray("_weaponPosition")]
 script = ExtResource("19_epcmy")
-_rightHoldableScene = ExtResource("20_m6lt4")
 _weaponPosition = NodePath("../FlipRoot/WeaponPosition")
-UseDefinitionWeapons = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Player/PlayerBody2D" unique_id=317220997]
 
@@ -162,9 +159,11 @@ UseDefinitionWeapons = true
 script = ExtResource("1_o3cl4")
 _controller = NodePath("../PlayerController")
 
-[node name="PlayerController" type="Node" parent="Player" unique_id=1355700859 node_paths=PackedStringArray("_characterBody")]
+[node name="PlayerController" type="Node" parent="Player" unique_id=1355700859 node_paths=PackedStringArray("_characterBody", "_holdableSystem", "_spriteNode")]
 script = ExtResource("15_plctrl")
 _characterBody = NodePath("../PlayerBody2D")
+_holdableSystem = NodePath("../PlayerBody2D/HoldableSystem")
+_spriteNode = NodePath("../PlayerBody2D/FlipRoot/AnimatedSprite2D")
 
 [node name="CameraController" type="Node" parent="." unique_id=745475055 node_paths=PackedStringArray("_target", "_camera")]
 script = ExtResource("4_camera")
@@ -245,18 +244,15 @@ script = ExtResource("26_ul1mu")
 [node name="Enemies" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=645180807]
 
 [node name="TargetDummy" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=749725729 instance=ExtResource("7_sx5r3")]
-visible = false
 position = Vector2(1476, 27)
 
 [node name="TargetDummy2" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=1550581773 instance=ExtResource("7_sx5r3")]
 position = Vector2(1145, 317)
 
 [node name="TargetDummy3" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=313126440 instance=ExtResource("7_sx5r3")]
-visible = false
 position = Vector2(1695, 171)
 
 [node name="TargetDummy4" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=127267526 instance=ExtResource("7_sx5r3")]
-visible = false
 position = Vector2(1143, 36)
 
 [node name="Tiles" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=199917983]

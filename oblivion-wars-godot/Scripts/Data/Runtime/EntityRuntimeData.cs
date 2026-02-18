@@ -10,6 +10,7 @@ public class EntityRuntimeData
 
     public float CurrentHealth;
     public float MaxHealth;
+    public bool IsInvincible;
 
     public List<ActiveStatusEffect> StatusEffects = new();
 

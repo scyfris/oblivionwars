@@ -17,11 +17,10 @@ radius = 250.0
 
 [sub_resource type="BlackboardPlan" id="BlackboardPlan_7oewm"]
 
-[node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_flipRoot", "_holdableSystem")]
+[node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_flipRoot")]
 script = ExtResource("1_npc")
 _definition = ExtResource("2_def")
 _flipRoot = NodePath("FlipRoot")
-_holdableSystem = NodePath("HoldableSystem")
 _definition = ExtResource("2_def")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1232872331]
@@ -59,9 +58,10 @@ collision_layer = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea" unique_id=216436319]
 shape = SubResource("CircleShape2D_detect")
 
-[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_characterBody", "_healthLabel")]
+[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_characterBody", "_holdableSystem", "_healthLabel")]
 script = ExtResource("6_npcctrl")
 _characterBody = NodePath("..")
+_holdableSystem = NodePath("../HoldableSystem")
 _healthLabel = NodePath("../HealthLabel")
 
 [node name="AIController" type="Node" parent="." unique_id=555903100 node_paths=PackedStringArray("_controller", "_detectionArea")]
