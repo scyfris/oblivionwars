@@ -7,12 +7,15 @@
 [ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/AI/basic_walker.tres" id="4_behavior"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
 [ext_resource type="Script" uid="uid://c3r15ai6j4fbn" path="res://Scripts/Entity/NPCController.cs" id="6_npcctrl"]
+[ext_resource type="BehaviorTree" uid="uid://dl61h776nxf7c" path="res://Resources/Data/AI/basic_walker_BT.tres" id="8_hcars"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
 size = Vector2(32, 64)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_detect"]
 radius = 250.0
+
+[sub_resource type="BlackboardPlan" id="BlackboardPlan_7oewm"]
 
 [node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_flipRoot", "_holdableSystem")]
 script = ExtResource("1_npc")
@@ -66,3 +69,8 @@ script = ExtResource("3_ai")
 _controller = NodePath("../NPCController")
 _behavior = ExtResource("4_behavior")
 _detectionArea = NodePath("../DetectionArea")
+_isEnabled = false
+
+[node name="BTPlayer" type="BTPlayer" parent="." unique_id=1244629492]
+behavior_tree = ExtResource("8_hcars")
+blackboard_plan = SubResource("BlackboardPlan_7oewm")

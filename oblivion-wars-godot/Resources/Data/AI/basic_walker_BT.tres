@@ -1,0 +1,53 @@
+[gd_resource type="BehaviorTree" format=3 uid="uid://dl61h776nxf7c"]
+
+[sub_resource type="BlackboardPlan" id="BlackboardPlan_k866t"]
+var/direction/name = &"direction"
+var/direction/type = 2
+var/direction/value = 1
+var/direction/hint = 0
+var/direction/hint_string = ""
+
+[sub_resource type="BBNode" id="BBNode_v7gnt"]
+resource_name = "."
+saved_value = NodePath(".")
+
+[sub_resource type="BTCallMethod" id="BTCallMethod_ewgck"]
+node = SubResource("BBNode_v7gnt")
+method = &"MoveRight"
+
+[sub_resource type="BTWait" id="BTWait_k866t"]
+
+[sub_resource type="BBNode" id="BBNode_k866t"]
+resource_name = "."
+saved_value = NodePath(".")
+
+[sub_resource type="BTCallMethod" id="BTCallMethod_v7gnt"]
+node = SubResource("BBNode_k866t")
+method = &"Stop"
+
+[sub_resource type="BBNode" id="BBNode_r4djx"]
+resource_name = "."
+saved_value = NodePath(".")
+
+[sub_resource type="BTCallMethod" id="BTCallMethod_5awhx"]
+node = SubResource("BBNode_r4djx")
+method = &"MoveLeft"
+
+[sub_resource type="BTRandomWait" id="BTRandomWait_v7gnt"]
+
+[sub_resource type="BBNode" id="BBNode_ewgck"]
+resource_name = "."
+saved_value = NodePath(".")
+
+[sub_resource type="BTCallMethod" id="BTCallMethod_2iybq"]
+node = SubResource("BBNode_ewgck")
+method = &"Stop"
+
+[sub_resource type="BTRandomWait" id="BTRandomWait_k866t"]
+
+[sub_resource type="BTSequence" id="BTSequence_k866t"]
+children = [SubResource("BTCallMethod_ewgck"), SubResource("BTWait_k866t"), SubResource("BTCallMethod_v7gnt"), SubResource("BTCallMethod_5awhx"), SubResource("BTRandomWait_v7gnt"), SubResource("BTCallMethod_2iybq"), SubResource("BTRandomWait_k866t")]
+
+[resource]
+blackboard_plan = SubResource("BlackboardPlan_k866t")
+root_task = SubResource("BTSequence_k866t")

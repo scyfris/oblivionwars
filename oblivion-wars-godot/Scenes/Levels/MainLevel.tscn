@@ -245,15 +245,18 @@ script = ExtResource("26_ul1mu")
 [node name="Enemies" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=645180807]
 
 [node name="TargetDummy" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=749725729 instance=ExtResource("7_sx5r3")]
+visible = false
 position = Vector2(1476, 27)
 
 [node name="TargetDummy2" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=1550581773 instance=ExtResource("7_sx5r3")]
 position = Vector2(1145, 317)
 
 [node name="TargetDummy3" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=313126440 instance=ExtResource("7_sx5r3")]
+visible = false
 position = Vector2(1695, 171)
 
 [node name="TargetDummy4" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=127267526 instance=ExtResource("7_sx5r3")]
+visible = false
 position = Vector2(1143, 36)
 
 [node name="Tiles" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=199917983]

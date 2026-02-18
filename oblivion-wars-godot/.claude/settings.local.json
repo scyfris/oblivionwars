@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git mv:*)",
-      "Bash(powershell -File -:*)"
+      "Bash(powershell -File -:*)",
+      "WebFetch(domain:limboai.readthedocs.io)"
     ]
   }
 }

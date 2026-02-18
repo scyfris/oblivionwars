@@ -22,7 +22,7 @@ config/icon="res://icon.svg"
 
 EventBus="res://Scripts/Core/Events/EventBus.cs"
 SaveManager="res://Scripts/Core/SaveManager.cs"
-GlobalStateManager="*res://Scenes/GlobalStateManager.tscn"
+GlobalStateManager="*res://Scenes/Globals/GlobalStateManager.tscn"
 GlobalDefinitions="*uid://cusa02dp3x88j"
 
 [display]

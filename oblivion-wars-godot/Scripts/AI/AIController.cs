@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Godot;
 
 public partial class AIController : Node
@@ -5,7 +6,9 @@ public partial class AIController : Node
     [Export] private NPCController _controller;
     [Export] private AIBehaviorDefinition _behavior;
     [Export] private Area2D _detectionArea;
+    [Export] public bool _isEnabled = true;
 
+    // TODO: Replace with state machine 
     private enum AIState { Idle, Patrol, Chase, Attack, Returning }
 
     private AIState _state = AIState.Idle;
@@ -46,6 +49,10 @@ public partial class AIController : Node
 
     public override void _PhysicsProcess(double delta)
     {
+        if (_isEnabled == false)
+        {
+            return;
+        }
         if (_controller == null || _behavior == null) return;
 
         _attackCooldownTimer -= (float)delta;
