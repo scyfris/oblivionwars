@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://bwpnrn34w5mva" path="res://Scripts/Entity/NPCEntityCharacterBody2D.cs" id="1_npc"]
 [ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/target_dummy.tres" id="2_def"]
-[ext_resource type="Script" uid="uid://bb8aryxliebfh" path="res://Scripts/AI/AIController.cs" id="3_ai"]
 [ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="4_5tmo4"]
 [ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/AI/basic_walker.tres" id="4_behavior"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
@@ -58,19 +57,15 @@ collision_layer = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea" unique_id=216436319]
 shape = SubResource("CircleShape2D_detect")
 
-[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_characterBody", "_holdableSystem", "_healthLabel")]
+[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_characterBody", "_holdableSystem", "_healthLabel", "_detectionArea")]
 script = ExtResource("6_npcctrl")
 _characterBody = NodePath("..")
 _holdableSystem = NodePath("../HoldableSystem")
 _healthLabel = NodePath("../HealthLabel")
-
-[node name="AIController" type="Node" parent="." unique_id=555903100 node_paths=PackedStringArray("_controller", "_detectionArea")]
-script = ExtResource("3_ai")
-_controller = NodePath("../NPCController")
 _behavior = ExtResource("4_behavior")
 _detectionArea = NodePath("../DetectionArea")
-_isEnabled = false
 
 [node name="BTPlayer" type="BTPlayer" parent="." unique_id=1244629492]
 behavior_tree = ExtResource("8_hcars")
+agent_node = NodePath("../NPCController")
 blackboard_plan = SubResource("BlackboardPlan_7oewm")

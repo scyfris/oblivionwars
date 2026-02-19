@@ -241,12 +241,12 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         }
     }
 
-    public void MoveLeft()
+    public void StartMoveLeft()
     {
         _moveDirection = -1;
     }
 
-    public void MoveRight()
+    public void StartMoveRight()
     {
         _moveDirection = 1;
     }

@@ -89,8 +89,8 @@ public partial class PlayerController : Node
 
     public void Jump() => _characterBody.Jump();
     public void CancelJump() => _characterBody.CancelJump();
-    public void MoveLeft() => _characterBody.MoveLeft();
-    public void MoveRight() => _characterBody.MoveRight();
+    public void MoveLeft() => _characterBody.StartMoveLeft();
+    public void MoveRight() => _characterBody.StartMoveRight();
     public void Stop() => _characterBody.Stop();
     public void RotateGravityClockwise() => _characterBody.RotateGravityClockwise();
     public void RotateGravityCounterClockwise() => _characterBody.RotateGravityCounterClockwise();

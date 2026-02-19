@@ -15,7 +15,7 @@ public partial class CharacterDefinition : Resource
 
     [ExportGroup("Stats")]
     [Export] public float MaxHealth = 100.0f;
-    [Export] public float MoveSpeed = 300.0f;
+    [Export] public float MoveSpeed = 150.0f;
     [Export] public float KnockbackResistance = 0.0f;
     [Export] public float Mass = 1.0f;
 

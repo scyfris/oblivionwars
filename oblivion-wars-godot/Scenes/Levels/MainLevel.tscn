@@ -27,7 +27,6 @@
 [ext_resource type="Texture2D" uid="uid://bnik78bvq0tjp" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-7.png" id="17_2plqb"]
 [ext_resource type="Texture2D" uid="uid://bog08cdbdhtfx" path="res://Resources/Data/Characters/Player/Sprites/PlayerRun-8.png" id="18_mqlab"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="19_epcmy"]
-[ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Scenes/Weapons/Shotgun.tscn" id="20_m6lt4"]
 [ext_resource type="Script" uid="uid://ce2ke5b3y4uqa" path="res://Scripts/UI/DebugOverlay.cs" id="26_ul1mu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
@@ -244,16 +243,7 @@ script = ExtResource("26_ul1mu")
 [node name="Enemies" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=645180807]
 
 [node name="TargetDummy" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=749725729 instance=ExtResource("7_sx5r3")]
-position = Vector2(1476, 27)
-
-[node name="TargetDummy2" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=1550581773 instance=ExtResource("7_sx5r3")]
-position = Vector2(1145, 317)
-
-[node name="TargetDummy3" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=313126440 instance=ExtResource("7_sx5r3")]
-position = Vector2(1695, 171)
-
-[node name="TargetDummy4" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=127267526 instance=ExtResource("7_sx5r3")]
-position = Vector2(1143, 36)
+position = Vector2(1081, 344)
 
 [node name="Tiles" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=199917983]
 

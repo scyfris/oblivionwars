@@ -6,7 +6,13 @@ public partial class NPCController : Node
     [Export] private HoldableSystem _holdableSystem;
     [Export] private Label _healthLabel;
 
+    [ExportGroup("AIBehavior")]
+    [Export] private AIBehaviorDefinition _behavior;
+    [Export] private Area2D _detectionArea;
+
     public NPCEntityCharacterBody2D CharacterBody => _characterBody;
+
+    private PlayerCharacterBody2D _targetPlayer;
 
     public override void _Ready()
     {
@@ -20,6 +26,22 @@ public partial class NPCController : Node
                 _holdableSystem.InitializeWithDefinition(_characterBody, _characterBody.Definition);
             else
                 _holdableSystem.Initialize(_characterBody);
+        }
+
+        // Set detection area radius from behavior definition
+        if (_detectionArea != null && _behavior != null)
+        {
+            foreach (var child in _detectionArea.GetChildren())
+            {
+                if (child is CollisionShape2D cs && cs.Shape is CircleShape2D circle)
+                {
+                    circle.Radius = _behavior.DetectionRadius;
+                    break;
+                }
+            }
+
+            _detectionArea.BodyEntered += OnDetectionBodyEntered;
+            _detectionArea.BodyExited += OnDetectionBodyExited;
         }
 
         UpdateHealthLabel();
@@ -36,13 +58,99 @@ public partial class NPCController : Node
         _holdableSystem?.Update(delta);
     }
 
-    // ── Movement Pass-Through (called by AIController) ───
+    // ── Movement ────────────────────────────────────────────
 
-    public void MoveLeft() => _characterBody.MoveLeft();
-    public void MoveRight() => _characterBody.MoveRight();
-    public void Stop() => _characterBody.Stop();
+    public void StartMoveLeft() => _characterBody.StartMoveLeft();
+    public void StartMoveRight() => _characterBody.StartMoveRight();
+    public void StopMoving() => _characterBody.Stop();
 
-    // ── Holdable API (called by AIController) ────────────
+    public void StartMoveTowardsPlayer()
+    {
+        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
+        {
+            StopMoving();
+            return;
+        }
+
+        float dir = _targetPlayer.GlobalPosition.X - _characterBody.GlobalPosition.X;
+
+        if (dir > 5f)
+            StartMoveRight();
+        else if (dir < -5f)
+            StartMoveLeft();
+        else
+            StopMoving();
+    }
+
+    public void StartFleeFromPlayer()
+    {
+        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
+        {
+            StopMoving();
+            return;
+        }
+
+        float dir = _targetPlayer.GlobalPosition.X - _characterBody.GlobalPosition.X;
+
+        // Move opposite direction from player
+        if (dir > 0f)
+            StartMoveLeft();
+        else
+            StartMoveRight();
+    }
+
+    // ── Detection ───────────────────────────────────────────
+
+    // Detects player , using the bheavior's detection radius for this.
+    public bool DetectsPlayer()
+    {
+        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
+            return false;
+
+        float distance = _characterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
+        return distance <= _behavior.DetectionRadius;
+    }
+
+    private void OnDetectionBodyEntered(Node2D body)
+    {
+        if (body is PlayerCharacterBody2D player)
+            _targetPlayer = player;
+    }
+
+    private void OnDetectionBodyExited(Node2D body)
+    {
+        // Intentionally don't clear _targetPlayer on exit.
+        // Once the NPC knows about the player, it keeps the reference
+        // so movement/combat methods can still work.
+        // DetectsPlayer() handles the distance check for BT conditions.
+    }
+
+    // ── Combat ─────────────────────────────────────────────
+
+    public void AimAtPlayer()
+    {
+        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
+            return;
+
+        UpdateAim(_targetPlayer.GlobalPosition);
+    }
+
+    public void ShootAtPlayer()
+    {
+        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
+            return;
+
+        UpdateAim(_targetPlayer.GlobalPosition);
+        UseHoldablePressed(_targetPlayer.GlobalPosition, true);
+    }
+
+    public void StopShooting()
+    {
+        if (_targetPlayer != null && IsInstanceValid(_targetPlayer))
+            UseHoldableReleased(_targetPlayer.GlobalPosition, true);
+    }
+
+    // ── Holdable API ────────────────────────────────────────
 
     public void UpdateAim(Vector2 targetPosition)
     {

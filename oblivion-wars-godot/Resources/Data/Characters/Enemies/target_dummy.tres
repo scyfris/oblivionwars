@@ -15,6 +15,5 @@ script = ExtResource("1_script")
 IsBoss = true
 DropTable = Array[ExtResource("1_i4fh1")]([SubResource("Resource_i4fh1")])
 EntityId = "target_dummy"
-MaxHealth = 50.0
-MoveSpeed = 120.0
+MoveSpeed = 150.0
 metadata/_custom_type_script = "uid://dbdtd1ea68ii6"
