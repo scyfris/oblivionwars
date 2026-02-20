@@ -3,9 +3,12 @@ using Godot;
 // All the physics stuff
 public partial class EntityCharacterBody2D : CharacterBody2D
 {
+    // common
     [Export] protected CharacterDefinition _definition;
 
     // Runtime data
+
+    // XXX player runtime data ?? should this be shard in NPC?
     protected EntityRuntimeData _runtimeData;
     public EntityRuntimeData RuntimeData => _runtimeData;
     public CharacterDefinition Definition => _definition;
@@ -125,8 +128,8 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     protected virtual void UpdateMovement(double delta)
     {
         float currentGravity = _isWallSliding
-            ? _definition.Gravity * _definition.WallSlideSpeedFraction
-            : _definition.Gravity;
+            ? _definition.PhysicsDef.Gravity * _definition.WallSlideSpeedFraction
+            : _definition.PhysicsDef.Gravity;
 
         Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
 

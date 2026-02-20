@@ -2,7 +2,7 @@ using Godot;
 
 public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
 {
-    [Export] private new EnemyDefinition _definition;
+    [Export] private new NPCDefinition _definition;
 
     [ExportGroup("Visuals")]
     [Export] private Node2D _flipRoot;
@@ -11,7 +11,7 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
     private float _contactDamageCooldown = 0f;
     private const float ContactDamageCooldownTime = 0.5f;
 
-    public new EnemyDefinition Definition => _definition;
+    public new NPCDefinition Definition => _definition;
 
     public override void _Ready()
     {

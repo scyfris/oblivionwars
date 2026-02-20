@@ -9,6 +9,10 @@ public enum AimMode
 [GlobalClass]
 public partial class AIBehaviorDefinition : Resource
 {
+    [ExportGroup("Ranges")]
+    [Export] public float DetectionRange = 400.0f;
+    [Export] public float AggroRange = 200.0f;
+
     [ExportGroup("Patrol")]
     [Export] public float PatrolRadius = 150f;
     [Export] public float IdlePauseMin = 0.5f;

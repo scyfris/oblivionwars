@@ -3,10 +3,10 @@
 [ext_resource type="Script" uid="uid://bwpnrn34w5mva" path="res://Scripts/Entity/NPCEntityCharacterBody2D.cs" id="1_npc"]
 [ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/target_dummy.tres" id="2_def"]
 [ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="4_5tmo4"]
-[ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/AI/basic_walker.tres" id="4_behavior"]
+[ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/AI/NPCAIParams/basic_walker.tres" id="4_behavior"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
 [ext_resource type="Script" uid="uid://c3r15ai6j4fbn" path="res://Scripts/Entity/NPCController.cs" id="6_npcctrl"]
-[ext_resource type="BehaviorTree" uid="uid://dl61h776nxf7c" path="res://Resources/Data/AI/basic_walker_BT.tres" id="8_hcars"]
+[ext_resource type="BehaviorTree" uid="uid://dl61h776nxf7c" path="res://Resources/Data/AI/NPCNormal.tres" id="8_hcars"]
 [ext_resource type="Script" uid="uid://dvmr0gitmotiv" path="res://Scripts/Entity/NPCRangeGizmo.cs" id="9_gizmo"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]

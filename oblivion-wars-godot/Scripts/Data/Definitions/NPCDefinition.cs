@@ -1,12 +1,14 @@
 using Godot;
 
 [GlobalClass]
-public partial class EnemyDefinition : CharacterDefinition
+public partial class NPCDefinition : CharacterDefinition
 {
+    [ExportGroup("AI")]
+    [Export] public AIBehaviorDefinition AIBehavior;
+
     [ExportGroup("Combat")]
+    // How much damage is done to the player upon contact.
     [Export] public float ContactDamage = 10.0f;
-    [Export] public float DetectionRange = 400.0f;
-    [Export] public float AggroRange = 200.0f;
 
     [ExportGroup("Flags")]
     [Export] public bool IsBoss = false;

@@ -177,7 +177,7 @@ public partial class NPCController : Node
 
     private void SpawnDrops()
     {
-        var definition = _characterBody.Definition as EnemyDefinition;
+        var definition = _characterBody.Definition as NPCDefinition;
         if (definition?.DropTable == null) return;
 
         foreach (var entry in definition.DropTable)
