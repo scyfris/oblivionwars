@@ -1,7 +1,7 @@
 using Godot;
 
 [GlobalClass]
-public partial class BTCDetectsPlayer : BTCondition
+public partial class BTCPlayerInAggroRange : BTCondition
 {
     private NPCController _controller;
 
@@ -15,7 +15,7 @@ public partial class BTCDetectsPlayer : BTCondition
         if (_controller == null)
             return BT.Status.Failure;
 
-        return _controller.IsPlayerInDetectRange() ? BT.Status.Success : BT.Status.Failure;
+        return _controller.IsPlayerInAggroRange() ? BT.Status.Success : BT.Status.Failure;
     }
 
     public override void _Exit()

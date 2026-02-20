@@ -14,10 +14,6 @@ public partial class AIBehaviorDefinition : Resource
     [Export] public float IdlePauseMin = 0.5f;
     [Export] public float IdlePauseMax = 2.0f;
 
-    [ExportGroup("Detection")]
-    [Export] public float DetectionRadius = 200f;
-    [Export] public float DisengageDistance = 0f;  // 0 = same as detection radius
-
     [ExportGroup("Behavior")]
     [Export] public bool Aggressive = true;
     [Export] public AimMode AimMode = AimMode.TrackPlayer;

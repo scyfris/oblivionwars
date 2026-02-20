@@ -4,5 +4,4 @@
 
 [resource]
 script = ExtResource("1_script")
-DetectionRadius = 250.0
 metadata/_custom_type_script = "uid://din66r6aywcws"

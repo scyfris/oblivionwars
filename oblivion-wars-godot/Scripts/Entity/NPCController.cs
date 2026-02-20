@@ -8,7 +8,6 @@ public partial class NPCController : Node
 
     [ExportGroup("AIBehavior")]
     [Export] private AIBehaviorDefinition _behavior;
-    [Export] private Area2D _detectionArea;
 
     public NPCEntityCharacterBody2D CharacterBody => _characterBody;
 
@@ -28,21 +27,8 @@ public partial class NPCController : Node
                 _holdableSystem.Initialize(_characterBody);
         }
 
-        // Set detection area radius from behavior definition
-        if (_detectionArea != null && _behavior != null)
-        {
-            foreach (var child in _detectionArea.GetChildren())
-            {
-                if (child is CollisionShape2D cs && cs.Shape is CircleShape2D circle)
-                {
-                    circle.Radius = _behavior.DetectionRadius;
-                    break;
-                }
-            }
-
-            _detectionArea.BodyEntered += OnDetectionBodyEntered;
-            _detectionArea.BodyExited += OnDetectionBodyExited;
-        }
+        // Find and cache player reference
+        _targetPlayer = GetTree().GetFirstNodeInGroup(Groups.Entities.Player) as PlayerCharacterBody2D;
 
         UpdateHealthLabel();
     }
@@ -101,28 +87,22 @@ public partial class NPCController : Node
 
     // ── Detection ───────────────────────────────────────────
 
-    // Detects player , using the bheavior's detection radius for this.
-    public bool DetectsPlayer()
+    public bool IsPlayerInDetectRange()
     {
         if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
             return false;
 
         float distance = _characterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
-        return distance <= _behavior.DetectionRadius;
+        return distance <= _characterBody.Definition.DetectionRange;
     }
 
-    private void OnDetectionBodyEntered(Node2D body)
+    public bool IsPlayerInAggroRange()
     {
-        if (body is PlayerCharacterBody2D player)
-            _targetPlayer = player;
-    }
+        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
+            return false;
 
-    private void OnDetectionBodyExited(Node2D body)
-    {
-        // Intentionally don't clear _targetPlayer on exit.
-        // Once the NPC knows about the player, it keeps the reference
-        // so movement/combat methods can still work.
-        // DetectsPlayer() handles the distance check for BT conditions.
+        float distance = _characterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
+        return distance <= _characterBody.Definition.AggroRange;
     }
 
     // ── Combat ─────────────────────────────────────────────

@@ -5,6 +5,7 @@ public partial class EnemyDefinition : CharacterDefinition
 {
     [ExportGroup("Combat")]
     [Export] public float ContactDamage = 10.0f;
+    [Export] public float DetectionRange = 400.0f;
     [Export] public float AggroRange = 200.0f;
 
     [ExportGroup("Flags")]
