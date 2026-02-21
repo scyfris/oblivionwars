@@ -46,10 +46,11 @@ public abstract partial class Pickup : RigidBody2D
     {
         if (body is PlayerCharacterBody2D player)
         {
-            OnCollected(player);
+            PlayerCharacterBody2D playerBody = body as PlayerCharacterBody2D;
+            OnCollected(playerBody.Controller);
             QueueFree();
         }
     }
 
-    protected abstract void OnCollected(PlayerCharacterBody2D player);
+    protected abstract void OnCollected(PlayerController player);
 }

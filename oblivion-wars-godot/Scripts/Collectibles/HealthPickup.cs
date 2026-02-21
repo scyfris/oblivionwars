@@ -4,17 +4,17 @@ public partial class HealthPickup : Pickup
 {
     [Export] public float HealAmount = 25f;
 
-    protected override void OnCollected(PlayerCharacterBody2D player)
+    protected override void OnCollected(PlayerController player)
     {
-        if (player.RuntimeData != null)
+        if (player != null)
         {
-            player.RuntimeData.CurrentHealth = Mathf.Min(
-                player.RuntimeData.CurrentHealth + HealAmount,
-                player.RuntimeData.MaxHealth
+            player.PlayerStateCurrent.CurrentHealth = Mathf.Min(
+                player.PlayerStateCurrent.CurrentHealth + HealAmount,
+                player.PlayerStateCurrent.MaxHealth
             );
 
             if (GlobalStateManager.Instance.Player != null)
-                GlobalStateManager.Instance.Player.CurrentHealth = player.RuntimeData.CurrentHealth;
+                GlobalStateManager.Instance.Player.CurrentHealth = player.PlayerStateCurrent.CurrentHealth;
         }
 
         EventBus.Instance?.Raise(new ItemCollectedEvent

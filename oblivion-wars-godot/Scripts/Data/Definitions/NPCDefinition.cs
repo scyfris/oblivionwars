@@ -4,7 +4,7 @@ using Godot;
 public partial class NPCDefinition : CharacterDefinition
 {
     [ExportGroup("AI")]
-    [Export] public AIBehaviorDefinition AIBehavior;
+    [Export] public AIBehaviorDataDefinition AIBehaviorData;
 
     [ExportGroup("Combat")]
     // How much damage is done to the player upon contact.

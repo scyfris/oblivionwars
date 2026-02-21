@@ -8,28 +8,29 @@ public partial class GameHUD : CanvasLayer
     [Export] private Label _interactionPrompt;
     [Export] private SaveIndicator _saveIndicator;
 
-    [Export] private NodePath _playerPath;
-    private PlayerCharacterBody2D _player;
+    private PlayerController _playerController;
 
     public override void _Ready()
     {
-        if (_playerPath != null)
-        {
-            var node = GetNode(_playerPath);
-            if (node is PlayerCharacterBody2D player)
-                _player = player;
-        }
-
         if (_interactionPrompt != null)
             _interactionPrompt.Visible = false;
 
+        // todo - just stubs for now, they could trigger affects or something...
         EventBus.Instance?.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance?.Subscribe<ItemCollectedEvent>(OnItemCollected);
         EventBus.Instance?.Subscribe<WeaponSwitchedEvent>(OnWeaponSwitched);
 
+        PlayerCharacterBody2D playerbody = GetTree().GetFirstNodeInGroup(Groups.Entities.Player) as PlayerCharacterBody2D;
+
+        if (playerbody == null)
+        {
+            GD.PrintErr("Can't find player node!");
+        }
+        _playerController = playerbody.Controller;
+
         UpdateHealthDisplay();
         UpdateCoinDisplay();
-        UpdateWeaponDisplay(GlobalStateManager.Instance?.Player?.CurrentWeaponId ?? "");
+        UpdateWeaponDisplay();
     }
 
     public override void _ExitTree()
@@ -42,28 +43,24 @@ public partial class GameHUD : CanvasLayer
     public override void _Process(double delta)
     {
         UpdateInteractionPrompt();
+        UpdateHealthDisplay();
+        UpdateCoinDisplay();
+        UpdateWeaponDisplay();
     }
 
     private void OnDamageApplied(DamageAppliedEvent evt)
     {
-        if (_player != null && evt.TargetInstanceId == _player.GetInstanceId())
-            UpdateHealthDisplay();
     }
 
     private void OnItemCollected(ItemCollectedEvent evt)
     {
-        if (evt.ItemType == "coin")
-            UpdateCoinDisplay();
     }
 
     private void UpdateHealthDisplay()
     {
         if (_healthLabel == null) return;
 
-        if (_player?.RuntimeData != null)
-            _healthLabel.Text = $"HP: {_player.RuntimeData.CurrentHealth:F0}/{_player.RuntimeData.MaxHealth:F0}";
-        else
-            _healthLabel.Text = "HP: --";
+        _healthLabel.Text = $"HP: {_playerController.PlayerStateCurrent.CurrentHealth:F0}/{_playerController.PlayerStateCurrent.MaxHealth:F0}";
     }
 
     private void UpdateCoinDisplay()
@@ -74,9 +71,9 @@ public partial class GameHUD : CanvasLayer
 
     private void UpdateInteractionPrompt()
     {
-        if (_interactionPrompt == null || _player == null) return;
+        if (_interactionPrompt == null || _playerController == null) return;
 
-        var interactable = _player.NearestInteractable;
+        var interactable = _playerController.CharacterBody.NearestInteractable;
         if (interactable != null)
         {
             _interactionPrompt.Visible = true;
@@ -92,12 +89,15 @@ public partial class GameHUD : CanvasLayer
 
     private void OnWeaponSwitched(WeaponSwitchedEvent evt)
     {
-        UpdateWeaponDisplay(evt.NewWeaponId);
+//        UpdateWeaponDisplay(evt.NewWeaponId);
     }
 
-    private void UpdateWeaponDisplay(string weaponId)
+    private void UpdateWeaponDisplay()
     {
+
         if (_weaponLabel == null) return;
+
+        string weaponId = GlobalStateManager.Instance.Player.CurrentWeaponId;
 
         if (string.IsNullOrEmpty(weaponId))
         {

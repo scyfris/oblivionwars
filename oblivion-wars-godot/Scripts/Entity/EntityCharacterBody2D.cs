@@ -3,15 +3,34 @@ using Godot;
 // All the physics stuff
 public partial class EntityCharacterBody2D : CharacterBody2D
 {
-    // common
-    [Export] protected CharacterDefinition _definition;
+    // Gravity state
+    [ExportGroup("Gravity Flip")]
+    [Export] protected float _gravityFlipRotationSpeed = 10.0f;
+    [Export] protected float _bodyFlipDelay = 0.0f;
+    [Export] protected bool _maintainMomentumOnFlip = true;
+
+    [ExportGroup("Visuals")]
+    [Export] private Node2D _flipRoot;
+    [Export] private AnimatedSprite2D _spriteNode;
+    public AnimatedSprite2D SpriteNode => _spriteNode;
+    [Export] private string _idleAnimation = "default";
+    [Export] private string _walkFacingDirAnimation = "walk-facingdir";
+    [Export] private string _walkNonFacingDirAnimation = "walk-nonfacingdir";
+
+    [ExportGroup("Wall Slide Effects")]
+    [Export] private Node2D _wallSlideDustPosition;
+    [Export] private PackedScene _wallSlideDustScene;
+
+    private CpuParticles2D _wallSlideDust;
+    private bool _facingRight = true;
+
+    // Set by controller each frame for animation
+    public Vector2 AimTarget { get; set; }
+
+    [ExportGroup("Physics")]
+    [Export] private CommonPhysicsDef _physicsDef;
 
     // Runtime data
-
-    // XXX player runtime data ?? should this be shard in NPC?
-    protected EntityRuntimeData _runtimeData;
-    public EntityRuntimeData RuntimeData => _runtimeData;
-    public CharacterDefinition Definition => _definition;
 
     // Movement
     protected int _moveDirection = 0;
@@ -23,12 +42,6 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     protected float _wallJumpPushAwayDurationTimer = 0f;
     public bool IsWallSliding => _isWallSliding;
 
-    // Gravity state
-    [ExportGroup("Gravity Flip")]
-    [Export] protected float _gravityFlipRotationSpeed = 10.0f;
-    [Export] protected float _bodyFlipDelay = 0.0f;
-    [Export] protected bool _maintainMomentumOnFlip = true;
-
     protected int _gravityRotation = 0;
     protected Vector2 _gravityDirection = Vector2.Down;
     protected Vector2 _upDirection = Vector2.Up;
@@ -38,23 +51,20 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
     public override void _Ready()
     {
-        InitializeRuntimeData();
-    }
-
-    protected virtual void InitializeRuntimeData()
-    {
-        if (_definition != null)
+        if (_physicsDef == null)
         {
-            _runtimeData = new EntityRuntimeData
-            {
-                EntityId = _definition.EntityId,
-                RuntimeInstanceId = GetInstanceId(),
-                CurrentHealth = _definition.MaxHealth,
-                MaxHealth = _definition.MaxHealth,
-                Definition = _definition
-            };
+            GD.PrintErr($"{Name}: No physics definition on EntytCharacterBody2d resource");
+        }
+
+        // Initialize graphics
+        if (_wallSlideDustPosition != null && _wallSlideDustScene != null)
+        {
+            _wallSlideDust = _wallSlideDustScene.Instantiate<CpuParticles2D>();
+            _wallSlideDust.Emitting = false;
+            _wallSlideDustPosition.AddChild(_wallSlideDust);
         }
     }
+
 
     public override void _PhysicsProcess(double delta)
     {
@@ -70,6 +80,36 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
         ZeroFloorVelocity();
         CheckHazardTiles();
+
+        UpdateAnimation();
+        
+    }
+
+    // ── Animation ─────────────────────────────────────────
+
+    private void UpdateAnimation()
+    {
+        if (_spriteNode == null) return;
+
+        if (_moveDirection != 0)
+            _facingRight = _moveDirection > 0;
+
+        if (_flipRoot != null)
+            _flipRoot.Scale = new Vector2(_facingRight ? 1 : -1, 1);
+
+        if (_moveDirection != 0 && IsOnFloor())
+        {
+            Vector2 horizontalDir = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
+            float aimDot = (AimTarget - GlobalPosition).Dot(horizontalDir);
+            bool aimToLocalRight = aimDot > 0;
+            bool movingTowardAim = _facingRight == aimToLocalRight;
+
+            _spriteNode.Play(movingTowardAim ? _walkFacingDirAnimation : _walkNonFacingDirAnimation);
+        }
+        else
+        {
+            _spriteNode.Play(_idleAnimation);
+        }
     }
 
     protected virtual void UpdateGravityRotation(double delta)
@@ -128,8 +168,8 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     protected virtual void UpdateMovement(double delta)
     {
         float currentGravity = _isWallSliding
-            ? _definition.PhysicsDef.Gravity * _definition.WallSlideSpeedFraction
-            : _definition.PhysicsDef.Gravity;
+            ? _physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction
+            : _physicsDef.Gravity;
 
         Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
 
@@ -141,7 +181,7 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         }
         else
         {
-            horizontalVelocity = horizontalDirection * _moveDirection * _definition.MoveSpeed;
+            horizontalVelocity = horizontalDirection * _moveDirection * _physicsDef.MoveSpeed;
         }
 
         Vector2 newVel = horizontalVelocity;
@@ -155,7 +195,7 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         }
         else
         {
-            newVel = horizontalVelocity + _gravityDirection * (_definition.Gravity * _definition.WallSlideSpeedFraction);
+            newVel = horizontalVelocity + _gravityDirection * (_physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction);
         }
 
         Velocity = newVel;
@@ -213,6 +253,13 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     protected virtual void SetWallSliding(bool sliding)
     {
         _isWallSliding = sliding;
+
+        if (_wallSlideDust != null)
+        {
+            _wallSlideDust.Emitting = sliding;
+            if (sliding)
+                _wallSlideDust.Direction = _wallNormal;
+        }
     }
 
     public virtual void Jump()
@@ -222,17 +269,17 @@ public partial class EntityCharacterBody2D : CharacterBody2D
             Vector2 jumpDirection = -_gravityDirection;
             Vector2 pushDirection = _wallNormal;
 
-            Velocity = pushDirection * _definition.WallJumpPushAwayForce + jumpDirection * _definition.WallJumpStrength;
+            Velocity = pushDirection * _physicsDef.WallJumpPushAwayForce + jumpDirection * _physicsDef.WallJumpStrength;
             _isWallSliding = false;
 
-            _wallJumpInputLockTimer = _definition.WallJumpInputLockDuration;
-            _wallJumpPushAwayDurationTimer = _definition.WallJumpPushAwayDuration;
+            _wallJumpInputLockTimer = _physicsDef.WallJumpInputLockDuration;
+            _wallJumpPushAwayDurationTimer = _physicsDef.WallJumpPushAwayDuration;
             return;
         }
 
         if (!IsOnFloor()) return;
 
-        Velocity -= _gravityDirection * _definition.JumpStrength;
+        Velocity -= _gravityDirection * _physicsDef.JumpStrength;
     }
 
     public void CancelJump()

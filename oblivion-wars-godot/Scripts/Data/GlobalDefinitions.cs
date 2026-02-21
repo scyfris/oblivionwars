@@ -1,4 +1,5 @@
 using Godot;
+using System.ComponentModel;
 using System.Linq;
 
 /// <summary>
@@ -13,6 +14,9 @@ public partial class GlobalDefinitions : Node
     [ExportGroup("Weapons")]
     [Export] public WeaponRegistryEntry[] Weapons { get; set; } = System.Array.Empty<WeaponRegistryEntry>();
     [Export] public int DefaultWeaponIndex { get; set; } = 0;
+
+    [ExportGroup("Levels")]
+    [Export] public HazardDefinition HazardDefs;
 
     // ── Ability Definitions ────────────────────────────────────
     // TODO: Create AbilityDefinition Resource when needed

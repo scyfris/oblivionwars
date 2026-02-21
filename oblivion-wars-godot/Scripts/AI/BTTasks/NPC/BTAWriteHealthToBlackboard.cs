@@ -18,7 +18,7 @@ public partial class BTAWriteHealthToBlackboard : BTAction
         if (_controller == null)
             return BT.Status.Failure;
 
-        var runtimeData = _controller.CharacterBody.RuntimeData;
+        var runtimeData = _controller.NPCRuntimeData;
         if (runtimeData == null)
             return BT.Status.Failure;
 

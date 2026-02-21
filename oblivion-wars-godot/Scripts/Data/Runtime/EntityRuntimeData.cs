@@ -11,17 +11,4 @@ public class EntityRuntimeData
     public float CurrentHealth;
     public float MaxHealth;
     public bool IsInvincible;
-
-    public List<ActiveStatusEffect> StatusEffects = new();
-
-    public CharacterDefinition Definition;
-}
-
-public class ActiveStatusEffect
-{
-    public string EffectId;
-    public float RemainingDuration;
-    public float TickTimer;
-    public int CurrentStacks;
-    public StatusEffectDefinition Definition;
 }

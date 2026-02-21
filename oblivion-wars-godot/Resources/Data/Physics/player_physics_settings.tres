@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="CommonPhysicsDef" format=3 uid="uid://dyya6l2y86ua7"]
+
+[ext_resource type="Script" uid="uid://hqlr0po5fhhn" path="res://Scripts/Data/Definitions/CommonPhysicsDef.cs" id="1_w4kc0"]
+
+[resource]
+script = ExtResource("1_w4kc0")
+MoveSpeed = 300.0
+metadata/_custom_type_script = "uid://hqlr0po5fhhn"

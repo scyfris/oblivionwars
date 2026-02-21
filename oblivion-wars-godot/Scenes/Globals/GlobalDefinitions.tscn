@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://xbn7v88oatsv" path="res://Scripts/Data/Definitions/WeaponRegistryEntry.cs" id="4_fco27"]
 [ext_resource type="Texture2D" uid="uid://qg8ncem056sb" path="res://Resources/Data/Weapons/shotgun_icon.png" id="5_h8chj"]
 [ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Scenes/Weapons/Shotgun.tscn" id="6_jgp8o"]
+[ext_resource type="Resource" path="res://Resources/Data/HazardSettings/hazard_settings_common.tres" id="7_wlc62"]
 
 [sub_resource type="Resource" id="Resource_qdpsu"]
 script = ExtResource("4_fco27")
@@ -24,3 +25,4 @@ Icon = ExtResource("5_h8chj")
 [node name="GlobalDefinitions" type="Node" unique_id=1238841687]
 script = ExtResource("1_a4xi4")
 Weapons = [SubResource("Resource_qdpsu"), SubResource("Resource_0gruy")]
+HazardDefs = ExtResource("7_wlc62")

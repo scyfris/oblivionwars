@@ -2,14 +2,36 @@ using Godot;
 
 public partial class NPCController : Node
 {
-    [Export] private NPCEntityCharacterBody2D _characterBody;
+    [Export] private NPCDefinition _definition;
+    public NPCDefinition Definition => _definition;
+
+    [Export] private NPCEntityCharacterBody2D _npcCharacterBody;
     [Export] private HoldableSystem _holdableSystem;
     [Export] private Label _healthLabel;
 
     [ExportGroup("AIBehavior")]
-    [Export] private AIBehaviorDefinition _behavior;
+    [Export] private AIBehaviorDataDefinition _behavior;
 
-    public NPCEntityCharacterBody2D CharacterBody => _characterBody;
+    // XXX player runtime data ?? should this be shard in NPC?
+    protected EntityRuntimeData _runtimeData;
+    public EntityRuntimeData NPCRuntimeData => _runtimeData;
+
+    protected virtual void InitializeRuntimeData()
+    {
+        if (_definition != null)
+        {
+            // XXX TODO: NEed a player version of this data to differentiate from npc data.
+            _runtimeData = new EntityRuntimeData
+            {
+                EntityId = _definition.EntityId,
+                RuntimeInstanceId = GetInstanceId(),
+                CurrentHealth = _definition.MaxHealth,
+                MaxHealth = _definition.MaxHealth,
+            };
+        }
+    }
+
+    public NPCEntityCharacterBody2D NPCCharacterBody => _npcCharacterBody;
 
     private PlayerCharacterBody2D _targetPlayer;
 
@@ -17,14 +39,19 @@ public partial class NPCController : Node
     {
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
+        EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
+        EventBus.Instance.Subscribe<HitEvent>(OnHit);
+
+        InitializeRuntimeData();
+
 
         // Initialize holdables
         if (_holdableSystem != null)
         {
             if (_holdableSystem.UseDefinitionWeapons)
-                _holdableSystem.InitializeWithDefinition(_characterBody, _characterBody.Definition);
+                _holdableSystem.InitializeWithDefinition(_npcCharacterBody, Definition);
             else
-                _holdableSystem.Initialize(_characterBody);
+                _holdableSystem.Initialize(_npcCharacterBody);
         }
 
         // Find and cache player reference
@@ -46,9 +73,9 @@ public partial class NPCController : Node
 
     // ── Movement ────────────────────────────────────────────
 
-    public void StartMoveLeft() => _characterBody.StartMoveLeft();
-    public void StartMoveRight() => _characterBody.StartMoveRight();
-    public void StopMoving() => _characterBody.Stop();
+    public void StartMoveLeft() => _npcCharacterBody.StartMoveLeft();
+    public void StartMoveRight() => _npcCharacterBody.StartMoveRight();
+    public void StopMoving() => _npcCharacterBody.Stop();
 
     public void StartMoveTowardsPlayer()
     {
@@ -58,7 +85,7 @@ public partial class NPCController : Node
             return;
         }
 
-        float dir = _targetPlayer.GlobalPosition.X - _characterBody.GlobalPosition.X;
+        float dir = _targetPlayer.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
 
         if (dir > 5f)
             StartMoveRight();
@@ -76,7 +103,7 @@ public partial class NPCController : Node
             return;
         }
 
-        float dir = _targetPlayer.GlobalPosition.X - _characterBody.GlobalPosition.X;
+        float dir = _targetPlayer.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
 
         // Move opposite direction from player
         if (dir > 0f)
@@ -92,8 +119,8 @@ public partial class NPCController : Node
         if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
             return false;
 
-        float distance = _characterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
-        return distance <= _characterBody.Definition.DetectionRange;
+        float distance = _npcCharacterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
+        return distance <= _definition.AIBehaviorData.DetectionRange;
     }
 
     public bool IsPlayerInAggroRange()
@@ -101,8 +128,8 @@ public partial class NPCController : Node
         if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
             return false;
 
-        float distance = _characterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
-        return distance <= _characterBody.Definition.AggroRange;
+        float distance = _npcCharacterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
+        return distance <= _definition.AIBehaviorData.AggroRange;
     }
 
     // ── Combat ─────────────────────────────────────────────
@@ -159,17 +186,32 @@ public partial class NPCController : Node
 
     private void OnDamageApplied(DamageAppliedEvent evt)
     {
-        if (evt.TargetInstanceId != _characterBody.GetInstanceId()) return;
+        if (evt.TargetInstanceId != _npcCharacterBody.GetInstanceId()) return;
+        
+        NPCRuntimeData.CurrentHealth -= evt.FinalDamage;
+        if (NPCRuntimeData.CurrentHealth < 0)
+            NPCRuntimeData.CurrentHealth = 0;
+
+        if (NPCRuntimeData.CurrentHealth <= 0)
+        {
+            EventBus.Instance.Raise(new EntityDiedEvent
+            {
+                EntityInstanceId = evt.TargetInstanceId,
+                KillerInstanceId = 0
+            });
+        }
+
+
         UpdateHealthLabel();
     }
 
     private void OnEntityDied(EntityDiedEvent evt)
     {
-        if (evt.EntityInstanceId != _characterBody.GetInstanceId()) return;
+        if (evt.EntityInstanceId != _npcCharacterBody.GetInstanceId()) return;
 
-        GD.Print($"NPC {_characterBody.Definition?.EntityId ?? "unknown"} died!");
+        GD.Print($"NPC {_definition?.EntityId ?? "unknown"} died!");
         SpawnDrops();
-        _characterBody.QueueFree();
+        _npcCharacterBody.QueueFree();
         QueueFree();
     }
 
@@ -177,7 +219,7 @@ public partial class NPCController : Node
 
     private void SpawnDrops()
     {
-        var definition = _characterBody.Definition as NPCDefinition;
+        var definition = _definition as NPCDefinition;
         if (definition?.DropTable == null) return;
 
         foreach (var entry in definition.DropTable)
@@ -195,7 +237,7 @@ public partial class NPCController : Node
             for (int i = 0; i < count; i++)
             {
                 var pickup = entry.DropScene.Instantiate<Node2D>();
-                pickup.GlobalPosition = _characterBody.GlobalPosition;
+                pickup.GlobalPosition = _npcCharacterBody.GlobalPosition;
 
                 if (pickup is RigidBody2D rb)
                 {
@@ -204,14 +246,29 @@ public partial class NPCController : Node
                     rb.CallDeferred("apply_impulse", new Vector2(impulseX, impulseY));
                 }
 
-                _characterBody.GetParent().CallDeferred("add_child", pickup);
+                _npcCharacterBody.GetParent().CallDeferred("add_child", pickup);
             }
         }
     }
 
     private void UpdateHealthLabel()
     {
-        if (_healthLabel == null || _characterBody.RuntimeData == null) return;
-        _healthLabel.Text = $"{_characterBody.RuntimeData.CurrentHealth:F0}/{_characterBody.RuntimeData.MaxHealth:F0}";
+        if (_healthLabel == null || Definition == null) return;
+        _healthLabel.Text = $"{NPCRuntimeData.CurrentHealth:F0}/{NPCRuntimeData.MaxHealth:F0}";
+    }
+
+    private void OnHit(HitEvent evt)
+    {
+        var target = GodotObject.InstanceFromId(evt.TargetInstanceId);
+        if (target is not EntityCharacterBody2D entity)
+            return;
+
+        float finalDamage = evt.BaseDamage;
+
+        EventBus.Instance.Raise(new DamageAppliedEvent
+        {
+            TargetInstanceId = evt.TargetInstanceId,
+            FinalDamage = finalDamage,
+        });
     }
 }

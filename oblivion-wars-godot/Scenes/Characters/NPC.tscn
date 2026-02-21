@@ -1,24 +1,40 @@
 [gd_scene format=3 uid="uid://cygwcj2tkmvgn"]
 
 [ext_resource type="Script" uid="uid://bwpnrn34w5mva" path="res://Scripts/Entity/NPCEntityCharacterBody2D.cs" id="1_npc"]
-[ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/target_dummy.tres" id="2_def"]
+[ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/test_dummy_def.tres" id="2_def"]
+[ext_resource type="Texture2D" uid="uid://degmoqfpjxpbh" path="res://Resources/Sprites/TestDummyNPC.png" id="3_7oewm"]
+[ext_resource type="Resource" uid="uid://bv4jpxnmqlkb2" path="res://Resources/Data/Physics/npc_physics_settings.tres" id="3_iqlxx"]
 [ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="4_5tmo4"]
-[ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/AI/NPCAIParams/basic_walker.tres" id="4_behavior"]
+[ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/Characters/Enemies/CommonData/npc_patrol_common_data.tres" id="4_behavior"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
 [ext_resource type="Script" uid="uid://c3r15ai6j4fbn" path="res://Scripts/Entity/NPCController.cs" id="6_npcctrl"]
-[ext_resource type="BehaviorTree" uid="uid://dl61h776nxf7c" path="res://Resources/Data/AI/NPCNormal.tres" id="8_hcars"]
+[ext_resource type="BehaviorTree" uid="uid://dl61h776nxf7c" path="res://Resources/Data/Characters/Enemies/CommonData/npc_common_brain.tres" id="8_hcars"]
 [ext_resource type="Script" uid="uid://dvmr0gitmotiv" path="res://Scripts/Entity/NPCRangeGizmo.cs" id="9_gizmo"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
 size = Vector2(32, 64)
 
+[sub_resource type="SpriteFrames" id="SpriteFrames_iqlxx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_7oewm")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
 [sub_resource type="BlackboardPlan" id="BlackboardPlan_7oewm"]
 
-[node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_flipRoot")]
+[node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_controller", "_flipRoot", "_spriteNode")]
 script = ExtResource("1_npc")
-_definition = ExtResource("2_def")
+_controller = NodePath("NPCController")
 _flipRoot = NodePath("FlipRoot")
-_definition = ExtResource("2_def")
+_spriteNode = NodePath("FlipRoot/AnimatedSprite2D")
+_walkFacingDirAnimation = "default"
+_walkNonFacingDirAnimation = "default"
+_physicsDef = ExtResource("3_iqlxx")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1232872331]
 position = Vector2(0, -32)
@@ -26,14 +42,12 @@ shape = SubResource("RectangleShape2D_dummy")
 
 [node name="FlipRoot" type="Node2D" parent="." unique_id=1454104269]
 
-[node name="Visual" type="ColorRect" parent="FlipRoot" unique_id=1062645683]
-offset_left = -16.0
-offset_top = -64.0
-offset_right = 16.0
-color = Color(0.8, 0.2, 0.2, 1)
-
 [node name="WeaponPosition" type="Node2D" parent="FlipRoot" unique_id=1053823199]
 position = Vector2(14, -40)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="FlipRoot" unique_id=1131916459]
+position = Vector2(0, -32)
+sprite_frames = SubResource("SpriteFrames_iqlxx")
 
 [node name="HealthLabel" type="Label" parent="." unique_id=1674419487]
 offset_left = -30.0
@@ -49,14 +63,15 @@ script = ExtResource("5_holdable")
 _leftHoldableScene = ExtResource("4_5tmo4")
 _weaponPosition = NodePath("../FlipRoot/WeaponPosition")
 
-[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_characterBody", "_holdableSystem", "_healthLabel")]
+[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel")]
 script = ExtResource("6_npcctrl")
-_characterBody = NodePath("..")
+_definition = ExtResource("2_def")
+_npcCharacterBody = NodePath("..")
 _holdableSystem = NodePath("../HoldableSystem")
 _healthLabel = NodePath("../HealthLabel")
 _behavior = ExtResource("4_behavior")
 
-[node name="RangeGizmo" type="Node2D" parent="." unique_id=143130064]
+[node name="RangeGizmo" type="Node2D" parent="NPCController" unique_id=143130064]
 script = ExtResource("9_gizmo")
 
 [node name="BTPlayer" type="BTPlayer" parent="." unique_id=1244629492]

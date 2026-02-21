@@ -4,10 +4,9 @@ public partial class CoinPickup : Pickup
 {
     [Export] public int Value = 1;
 
-    protected override void OnCollected(PlayerCharacterBody2D player)
+    protected override void OnCollected(PlayerController player)
     {
-        if (GlobalStateManager.Instance.Player != null)
-            GlobalStateManager.Instance.Player.Coins += Value;
+        player.PlayerStateCurrent.Coins += Value;
 
         EventBus.Instance?.Raise(new ItemCollectedEvent
         {

@@ -7,7 +7,7 @@ public enum AimMode
 }
 
 [GlobalClass]
-public partial class AIBehaviorDefinition : Resource
+public partial class AIBehaviorDataDefinition : Resource
 {
     [ExportGroup("Ranges")]
     [Export] public float DetectionRange = 400.0f;

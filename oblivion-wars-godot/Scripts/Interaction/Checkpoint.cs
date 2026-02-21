@@ -105,7 +105,6 @@ public partial class Checkpoint : Interactable, ISaveableObject
             GlobalStateManager.Instance.Player.LastCheckpointId = UniqueId;
             GlobalStateManager.Instance.Player.LastCheckpointLevelId =
                 GlobalStateManager.Instance.Level?.CurrentLevel?.LevelId ?? "";
-            GlobalStateManager.Instance.Player.CurrentHealth = player.RuntimeData.CurrentHealth;
         }
 
         // 5. Save everything to disk
