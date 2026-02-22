@@ -1,9 +1,9 @@
 using Godot;
 
 [GlobalClass]
-public partial class NPCStateFlee_Basic : LimboState
+public partial class NPCBehaviorAttack_Basic : LimboState
 {
-    [Export] private NPCStateSettingsFlee_Basic _settings;
+    [Export] private NPCBehaviorParamsAttack_Basic _settings;
 
     private NPCController _controller;
 
@@ -14,16 +14,16 @@ public partial class NPCStateFlee_Basic : LimboState
 
     public override void _Enter()
     {
-        // TODO: Start fleeing from player
+        // TODO: Start aiming at player, begin attack cooldown
     }
 
     public override void _Update(double delta)
     {
-        // TODO: Move away from player
+        // TODO: Aim at player, shoot on cooldown, chase if needed
     }
 
     public override void _Exit()
     {
-        _controller.StopMoving();
+        _controller.StopShooting();
     }
 }

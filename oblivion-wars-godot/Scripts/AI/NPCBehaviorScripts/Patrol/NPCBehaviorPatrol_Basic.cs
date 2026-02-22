@@ -1,9 +1,9 @@
 using Godot;
 
 [GlobalClass]
-public partial class NPCStatePatrol_Basic : LimboState
+public partial class NPCBehaviorPatrol_Basic : LimboState
 {
-    [Export] public NPCStateSettingsPatrol_Basic _settings;
+    [Export] public NPCBehaviorParamsPatrol_Basic _settings;
 
     private NPCController _controller;
 

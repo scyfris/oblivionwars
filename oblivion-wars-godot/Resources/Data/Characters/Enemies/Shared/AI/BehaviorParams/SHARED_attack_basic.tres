@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="AttackSettings_Basic" format=3 uid="uid://cmcxybx5awxqs"]
 
-[ext_resource type="Script" uid="uid://bsletdow8rl0u" path="res://Scripts/Data/Definitions/NPCAISettings/NPCStateBehaviorSettings/NPCStateSettingsAttack_Basic.cs" id="1_ocbwu"]
+[ext_resource type="Script" uid="uid://bsletdow8rl0u" path="res://Scripts/Data/Definitions/NPCAISettings/NPCBehaviorParams/NPCBehaviorParamsAttack_Basic.cs" id="1_ocbwu"]
 
 [resource]
 script = ExtResource("1_ocbwu")
