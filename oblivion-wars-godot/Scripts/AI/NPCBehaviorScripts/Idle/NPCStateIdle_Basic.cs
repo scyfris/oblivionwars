@@ -1,10 +1,8 @@
 using Godot;
 
 [GlobalClass]
-public partial class NPCStatePatrol_BasicWalker : LimboState
+public partial class NPCStateIdle_Basic : LimboState
 {
-    [Export] private PatrolSettings _settings;
-
     private NPCController _controller;
 
     public override void _Setup()
@@ -14,16 +12,15 @@ public partial class NPCStatePatrol_BasicWalker : LimboState
 
     public override void _Enter()
     {
-        // TODO: Pick patrol direction, start walking
+        // TODO: Start idle timer, play idle animation
     }
 
     public override void _Update(double delta)
     {
-        // TODO: Walk back and forth within PatrolRadius, pause at endpoints
+        // TODO: Count down idle timer, dispatch "idle_timeout" when done
     }
 
     public override void _Exit()
     {
-        _controller.StopMoving();
     }
 }

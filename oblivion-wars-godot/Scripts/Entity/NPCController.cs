@@ -29,7 +29,7 @@ public partial class NPCController : Node
     [Export] private Label _healthLabel;
 
     [ExportGroup("AIBehavior")]
-    [Export] private AIBehaviorDataDefinition _behavior;
+    [Export] private NPCBehaviorSettingsGlobal _behavior;
 
     // XXX player runtime data ?? should this be shard in NPC?
     protected EntityRuntimeData _runtimeData;
@@ -126,7 +126,7 @@ public partial class NPCController : Node
             : 1f;
 
         // Priority order — highest priority first
-        if (healthPercent <= _behavior.FleeHealthThreshold)
+        if (healthPercent <= _definition.AIBehaviorData.FleeHealthThreshold)
             _stateTree.Dispatch(Event(NPCTransitionEvent.HealthLow));
         else if (IsPlayerInAggroRange())
             _stateTree.Dispatch(Event(NPCTransitionEvent.PlayerInRange));

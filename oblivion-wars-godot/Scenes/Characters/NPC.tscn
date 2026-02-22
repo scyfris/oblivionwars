@@ -10,10 +10,13 @@
 [ext_resource type="Script" uid="uid://c3r15ai6j4fbn" path="res://Scripts/Entity/NPCController.cs" id="6_npcctrl"]
 [ext_resource type="BehaviorTree" uid="uid://dl61h776nxf7c" path="res://Resources/Data/Characters/Enemies/CommonData/npc_common_brain.tres" id="8_hcars"]
 [ext_resource type="Script" uid="uid://dvmr0gitmotiv" path="res://Scripts/Entity/NPCRangeGizmo.cs" id="9_gizmo"]
-[ext_resource type="Script" uid="uid://d1jl01hebb3mn" path="res://Scripts/AI/StatesScripts/Idle/NPCStateIdle.cs" id="10_idle"]
-[ext_resource type="Script" uid="uid://dipdlqoetk81j" path="res://Scripts/AI/StatesScripts/Patrol/NPCStatePatrol_BasicWalker.cs" id="11_patrol"]
-[ext_resource type="Script" uid="uid://d33shgctsw3b5" path="res://Scripts/AI/StatesScripts/Attack/NPCStateAttack_BasicShooter.cs" id="12_attack"]
-[ext_resource type="Script" uid="uid://xvtytnrs76fw" path="res://Scripts/AI/StatesScripts/Flee/NPCStateFlee_BasicWalker.cs" id="13_flee"]
+[ext_resource type="Script" uid="uid://d1jl01hebb3mn" path="res://Scripts/AI/NPCBehaviorScripts/Idle/NPCStateIdle_Basic.cs" id="10_idle"]
+[ext_resource type="Script" uid="uid://dipdlqoetk81j" path="res://Scripts/AI/NPCBehaviorScripts/Patrol/NPCStatePatrol_Basic.cs" id="11_patrol"]
+[ext_resource type="Script" uid="uid://d33shgctsw3b5" path="res://Scripts/AI/NPCBehaviorScripts/Attack/NPCStateAttack_Basic.cs" id="12_attack"]
+[ext_resource type="Resource" uid="uid://cm76kgonh4m3p" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/patrol_settings_basic.tres" id="13_abgwp"]
+[ext_resource type="Script" uid="uid://xvtytnrs76fw" path="res://Scripts/AI/NPCBehaviorScripts/Flee/NPCStateFlee_Basic.cs" id="13_flee"]
+[ext_resource type="Resource" uid="uid://cmcxybx5awxqs" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/attack_settings_basic.tres" id="15_g3jgu"]
+[ext_resource type="Resource" uid="uid://dxwmrw8fynbn5" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/flee_settings_basic.tres" id="17_3vs80"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
 size = Vector2(32, 64)
@@ -95,9 +98,12 @@ script = ExtResource("10_idle")
 
 [node name="PatrolState" type="LimboState" parent="LimboHSM" unique_id=471946612]
 script = ExtResource("11_patrol")
+_settings = ExtResource("13_abgwp")
 
 [node name="AttackState" type="LimboState" parent="LimboHSM" unique_id=1992667500]
 script = ExtResource("12_attack")
+_settings = ExtResource("15_g3jgu")
 
 [node name="FleeState" type="LimboState" parent="LimboHSM" unique_id=1274158220]
 script = ExtResource("13_flee")
+_settings = ExtResource("17_3vs80")

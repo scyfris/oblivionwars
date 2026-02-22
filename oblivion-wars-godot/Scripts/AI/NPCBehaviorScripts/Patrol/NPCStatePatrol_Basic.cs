@@ -1,9 +1,9 @@
 using Godot;
 
 [GlobalClass]
-public partial class NPCStateFlee_BasicWalker : LimboState
+public partial class NPCStatePatrol_Basic : LimboState
 {
-    [Export] private FleeSettings _settings;
+    [Export] public NPCStateSettingsPatrol_Basic _settings;
 
     private NPCController _controller;
 
@@ -14,12 +14,12 @@ public partial class NPCStateFlee_BasicWalker : LimboState
 
     public override void _Enter()
     {
-        // TODO: Start fleeing from player
+        // TODO: Pick patrol direction, start walking
     }
 
     public override void _Update(double delta)
     {
-        // TODO: Move away from player
+        // TODO: Walk back and forth within PatrolRadius, pause at endpoints
     }
 
     public override void _Exit()

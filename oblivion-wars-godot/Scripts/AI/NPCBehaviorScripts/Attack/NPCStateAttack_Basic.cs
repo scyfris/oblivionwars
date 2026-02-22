@@ -1,8 +1,10 @@
 using Godot;
 
 [GlobalClass]
-public partial class NPCStateIdle : LimboState
+public partial class NPCStateAttack_Basic : LimboState
 {
+    [Export] private NPCStateSettingsAttack_Basic _settings;
+
     private NPCController _controller;
 
     public override void _Setup()
@@ -12,15 +14,16 @@ public partial class NPCStateIdle : LimboState
 
     public override void _Enter()
     {
-        // TODO: Start idle timer, play idle animation
+        // TODO: Start aiming at player, begin attack cooldown
     }
 
     public override void _Update(double delta)
     {
-        // TODO: Count down idle timer, dispatch "idle_timeout" when done
+        // TODO: Aim at player, shoot on cooldown, chase if needed
     }
 
     public override void _Exit()
     {
+        _controller.StopShooting();
     }
 }

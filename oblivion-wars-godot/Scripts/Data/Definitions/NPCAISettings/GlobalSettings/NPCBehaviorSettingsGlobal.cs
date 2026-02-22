@@ -1,5 +1,6 @@
 using Godot;
 
+// These are global and help the NPCController select which state the NPC should be in.
 public enum AimMode
 {
     TrackPlayer,
@@ -7,12 +8,13 @@ public enum AimMode
 }
 
 [GlobalClass]
-public partial class AIBehaviorDataDefinition : Resource
+public partial class NPCBehaviorSettingsGlobal : Resource
 {
     [ExportGroup("Ranges")]
     [Export] public float DetectionRange = 400.0f;
     [Export] public float AggroRange = 200.0f;
 
+    // XXX Remove this!
     [ExportGroup("Patrol")]
     [Export] public float PatrolRadius = 150f;
     [Export] public float IdlePauseMin = 0.5f;
@@ -23,6 +25,7 @@ public partial class AIBehaviorDataDefinition : Resource
     [Export] public AimMode AimMode = AimMode.TrackPlayer;
     [Export(PropertyHint.Range, "0,1,0.05")] public float FleeHealthThreshold = 0.25f;
 
+    // XXX Remove this!
     [ExportGroup("Combat")]
     [Export] public float AttackRange = 200f;
     [Export] public float AttackCooldown = 1.0f;

@@ -1,7 +1,7 @@
 using Godot;
 
 [GlobalClass]
-public partial class PatrolSettings : Resource
+public partial class NPCStateSettingsPatrol_Basic : Resource
 {
     [Export] public float PatrolRadius = 150f;
     [Export] public float IdlePauseMin = 0.5f;
