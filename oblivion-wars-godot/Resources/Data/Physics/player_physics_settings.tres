@@ -4,5 +4,9 @@
 
 [resource]
 script = ExtResource("1_w4kc0")
-MoveSpeed = 300.0
+MoveSpeed = 400.0
+WallJumpPushAwayForce = 600.0
+WallJumpPushAwayDuration = 0.3
+WallJumpInputLockDuration = 0.1
+WallSlideSpeedFraction = 0.15
 metadata/_custom_type_script = "uid://hqlr0po5fhhn"

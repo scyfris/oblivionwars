@@ -11,10 +11,11 @@ This guide explains the game's architecture, how systems work together, and how 
 1. [Architecture Overview](#architecture-overview)
 2. [Core Concepts](#core-concepts)
 3. [How Events Flow](#how-events-flow)
-4. [Adding New Features](#adding-new-features)
-5. [System Reference](#system-reference)
-6. [Common Patterns](#common-patterns)
-7. [Troubleshooting](#troubleshooting)
+4. [NPC AI System](#npc-ai-system)
+5. [Adding New Features](#adding-new-features)
+6. [System Reference](#system-reference)
+7. [Common Patterns](#common-patterns)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -197,6 +198,366 @@ When an enemy spawns:
    - Health reaches 0 → EntityDiedEvent raised
    - NPCEntityCharacterBody2D hears event → spawns drops → QueueFree()
    - Unsubscribes from events in _ExitTree()
+
+---
+
+## NPC AI System
+
+### Architecture: LimboHSM + LimboState Subclasses
+
+NPC AI uses three layers working together:
+
+1. **NPCController** — evaluates conditions and dispatches transition events (the "brain")
+2. **LimboHSM** — routes transition events to states based on the transition table
+3. **LimboState subclasses** — implement behavior within each state (the "body")
+
+States never worry about *when* to transition — they only implement *what to do*. NPCController owns all transition logic in one place, dispatching events like `"player_detected"` or `"health_low"`. The HSM routes those events to the correct state based on transitions defined at startup. Different enemies use different state scripts in the same HSM slot to get different behavior.
+
+### Scene Structure
+
+The NPC scene root is `NPCEntityCharacterBody2D`. NPCController, HSM, and states are children:
+
+```
+TargetDummy (NPCEntityCharacterBody2D)   ← scene root, handles physics/movement
+├── CollisionShape2D
+├── FlipRoot/
+│   ├── WeaponPosition
+│   └── AnimatedSprite2D
+├── HealthLabel
+├── HoldableSystem
+├── NPCController                        ← AI coordinator, holds refs + shared logic
+│   └── RangeGizmo
+└── LimboHSM                             ← state machine, lives in scene tree
+    ├── IdleState
+    ├── PatrolState          (NPCStatePatrol)
+    ├── ChaseState           (NPCStateChaseWalk)
+    ├── AttackState          (NPCStateAttackShoot — or swap for LeapAttack, etc.)
+    └── FleeState
+```
+
+### LimboState Subclasses as Behaviors
+
+LimboState provides virtual methods for the state lifecycle:
+
+- **`_setup()`** — called once during initialization
+- **`_enter()`** — called when the state becomes active
+- **`_update(delta)`** — called every frame while active
+- **`_exit()`** — called when transitioning away
+
+Each behavior is a LimboState subclass. State-specific tuning params live on a **settings Resource** exported by the state:
+
+```csharp
+// Settings resource — lives on disk as a .tres, reusable across enemies
+[GlobalClass]
+public partial class ShootAttackSettings : Resource
+{
+    [Export] public float AttackCooldown { get; set; } = 0.5f;
+    [Export] public int BurstCount { get; set; } = 3;
+    [Export] public float AccuracySpread { get; set; } = 5f;
+}
+
+// The state script — reads settings from its resource
+[GlobalClass]
+public partial class NPCStateAttackShoot : LimboState
+{
+    [Export] private ShootAttackSettings _settings;
+
+    private NPCController _controller;
+    private float _cooldownTimer;
+
+    public override void _Setup()
+    {
+        _controller = GetAgent<NPCController>();
+    }
+
+    public override void _Enter()
+    {
+        _cooldownTimer = 0f;
+        _controller.AimAtPlayer();
+    }
+
+    public override void _Update(double delta)
+    {
+        _controller.AimAtPlayer();
+        _cooldownTimer -= (float)delta;
+        if (_cooldownTimer <= 0f)
+        {
+            _controller.ShootAtPlayer();
+            _cooldownTimer = _settings.AttackCooldown;
+        }
+    }
+
+    public override void _Exit()
+    {
+        _controller.StopShooting();
+    }
+}
+```
+
+```csharp
+// A different attack behavior — swap this into the Attack slot
+[GlobalClass]
+public partial class LeapAttackSettings : Resource
+{
+    [Export] public float LeapForce { get; set; } = 600f;
+    [Export] public float LeapCooldown { get; set; } = 2f;
+    [Export] public float LeapArcHeight { get; set; } = 150f;
+}
+
+[GlobalClass]
+public partial class NPCStateAttackLeap : LimboState
+{
+    [Export] private LeapAttackSettings _settings;
+
+    private NPCController _controller;
+
+    public override void _Setup()
+    {
+        _controller = GetAgent<NPCController>();
+    }
+
+    public override void _Enter() { /* launch leap at player */ }
+    public override void _Update(double delta) { /* in-air tracking, land detection */ }
+    public override void _Exit() { /* recovery */ }
+}
+```
+
+```csharp
+// Patrol behavior
+[GlobalClass]
+public partial class PatrolSettings : Resource
+{
+    [Export] public float PauseTime { get; set; } = 1.5f;
+    [Export] public float PatrolDistance { get; set; } = 200f;
+}
+
+[GlobalClass]
+public partial class NPCStatePatrol : LimboState
+{
+    [Export] private PatrolSettings _settings;
+
+    private NPCController _controller;
+
+    public override void _Setup()
+    {
+        _controller = GetAgent<NPCController>();
+    }
+
+    public override void _Update(double delta)
+    {
+        // Walk back and forth within patrol distance, pause at endpoints
+    }
+
+    public override void _Exit()
+    {
+        _controller.StopMoving();
+    }
+}
+```
+
+### Data Organization
+
+Two levels of settings, cleanly separated:
+
+**AIBehaviorDataDefinition** — NPC-wide params that control *state transitions* (when do I change state?):
+- DetectionRange, AggroRange
+- Flee health threshold
+- Aggressive flag
+- IdlePauseMin/Max
+
+**Per-state settings Resources** — params that control *behavior within a state* (what do I do here?):
+- `ShootAttackSettings.tres` — cooldown, burst count, accuracy
+- `LeapAttackSettings.tres` — leap force, cooldown, arc height
+- `PatrolSettings.tres` — patrol distance, pause time
+
+This means you can have two enemies with the same attack behavior but different detection ranges, or the same detection range but completely different attack styles.
+
+```
+Resources/Data/Characters/Enemies/
+├── CommonData/
+│   ├── AIBehaviorData/
+│   │   ├── aggressive_behavior.tres        (AIBehaviorDataDefinition)
+│   │   └── passive_behavior.tres           (AIBehaviorDataDefinition)
+│   └── StateSettings/
+│       ├── shoot_attack_fast.tres           (ShootAttackSettings)
+│       ├── shoot_attack_slow.tres           (ShootAttackSettings)
+│       ├── leap_attack_default.tres         (LeapAttackSettings)
+│       └── patrol_short.tres                (PatrolSettings)
+├── grunt_def.tres                           (NPCDefinition)
+├── leaper_def.tres                          (NPCDefinition)
+└── warper_def.tres                          (NPCDefinition)
+```
+
+### Enemy Variants via Scene Inheritance
+
+LimboHSM lives in the scene tree (it's a Node, not a resource like BehaviorTree). To share HSM structure across enemies, use **Godot scene inheritance**:
+
+1. **`NPC_Base.tscn`** — base scene with the full HSM, default states (patrol + shoot), default settings resources
+2. **`NPC_Leaper.tscn`** inherits `NPC_Base.tscn` — override the Attack state's script to `NPCStateAttackLeap`, assign `LeapAttackSettings.tres`
+3. **`NPC_Warper.tscn`** inherits `NPC_Base.tscn` — override Attack state script, add teleport logic
+
+Each inherited scene only overrides what's different. The HSM structure, transitions, and shared states all come from the base. For enemies that only differ in tuning (fast grunt vs slow grunt), you don't even need a new scene — just point the state's settings export to a different `.tres`.
+
+### How to Swap Behaviors Per Enemy
+
+To change what "attacking" means for a specific enemy type:
+
+1. Create an inherited scene from `NPC_Base.tscn`
+2. Select the Attack state node under `LimboHSM`
+3. Change its script from `NPCStateAttackShoot` to `NPCStateAttackLeap`
+4. Assign the appropriate settings resource (e.g., `leap_attack_default.tres`)
+5. Adjust the `[Export]` params in the inspector or create a new settings `.tres`
+
+The HSM transitions remain identical — only the state scripts and settings change.
+
+### Adding Special Behaviors (Teleport, Summon, etc.)
+
+For behaviors that layer on top of a state (e.g., teleporting periodically while attacking):
+
+**Option A: Compose inside the state script.** Create a variant state that handles both:
+
+```csharp
+[GlobalClass]
+public partial class NPCStateAttackShootWithTeleport : LimboState
+{
+    [Export] private ShootAttackSettings _shootSettings;
+    [Export] private TeleportSettings _teleportSettings;
+
+    public override void _Update(double delta)
+    {
+        // Shoot logic + teleport timer
+    }
+}
+```
+
+**Option B: Use LimboHSM's hierarchy.** Nest a sub-HSM inside the Attack state that alternates between shooting and teleporting. LimboHSM supports this natively since `LimboHSM` inherits from `LimboState`.
+
+Option A is simpler for one-off combos. Option B is better when the sub-behaviors are reusable across multiple enemy types.
+
+### NPC States
+
+Standard states for regular NPCs:
+
+| State | Description |
+|---|---|
+| **Idle** | Standing still, waiting for idle timer to expire |
+| **Patrol** | Moving within patrol area |
+| **Chase** | Moving toward player |
+| **Attack** | Engaging player (shooting, leaping, melee, etc.) |
+| **Flee** | Running from player (health below threshold) |
+
+### Standard Transitions
+
+```
+Idle     → Patrol     (idle timer expires)
+Patrol   → Chase      (player in detect range)
+Chase    → Attack     (player in attack range)
+Chase    → Patrol     (player leaves detect range)
+Attack   → Chase      (player leaves attack range)
+Any      → Flee       (health < flee threshold)
+Flee     → Patrol     (player out of detect range)
+```
+
+### Centralized Transition Logic
+
+**States never evaluate transition conditions.** All transition logic lives in NPCController, which dispatches events to the HSM every physics frame. This prevents bugs from forgetting to check conditions in new state variants and keeps the "when to switch" concern in one place:
+
+```csharp
+// NPCController — the single source of transition decisions
+public override void _PhysicsProcess(double delta)
+{
+    _holdableSystem?.Update(delta);
+    EvaluateTransitions();
+}
+
+private void EvaluateTransitions()
+{
+    // Priority order matters — highest priority first
+    if (NPCRuntimeData.CurrentHealth < _behavior.FleeThreshold)
+        _hsm.Dispatch("health_low");
+    else if (IsPlayerInAggroRange())
+        _hsm.Dispatch("player_in_range");
+    else if (IsPlayerInDetectRange())
+        _hsm.Dispatch("player_detected");
+    else
+        _hsm.Dispatch("player_lost");
+}
+```
+
+The HSM only acts on a dispatch if a matching transition exists from the current state. Dispatching `"player_detected"` while in AttackState does nothing if there's no transition defined for it — the transition table (set up in `_Ready()`) is the filter.
+
+### HSM Setup
+
+Transitions are registered in NPCController's `_Ready()`:
+
+```csharp
+public override void _Ready()
+{
+    // ... existing setup ...
+
+    var hsm = _npcCharacterBody.GetNode<LimboHSM>("LimboHSM");
+    var idle = hsm.GetNode<LimboState>("IdleState");
+    var patrol = hsm.GetNode<LimboState>("PatrolState");
+    var chase = hsm.GetNode<LimboState>("ChaseState");
+    var attack = hsm.GetNode<LimboState>("AttackState");
+    var flee = hsm.GetNode<LimboState>("FleeState");
+
+    hsm.AddTransition(idle, patrol, "idle_timeout");
+    hsm.AddTransition(patrol, chase, "player_detected");
+    hsm.AddTransition(chase, attack, "player_in_range");
+    hsm.AddTransition(chase, patrol, "player_lost");
+    hsm.AddTransition(attack, chase, "player_out_of_range");
+    hsm.AddTransition(hsm.ANYSTATE, flee, "health_low");
+    hsm.AddTransition(flee, patrol, "player_lost");
+
+    hsm.Initialize(this);   // pass NPCController as the agent
+    hsm.SetActive(true);
+}
+```
+
+**Why not use a Behavior Tree for transitions?** A BT evaluating conditions and dispatching events does the exact same thing as `EvaluateTransitions()` — but spread across 8+ BTTask files instead of 10 lines of C#. BTs add value for branching, sequencing, and parallel execution (boss fights). A priority list of condition checks is just an if/else ladder, and C# is the best tool for that.
+
+### Building Different Enemy Types
+
+| Enemy | Patrol State | Attack State | Settings | Scene |
+|---|---|---|---|---|
+| Grunt | NPCStatePatrol | NPCStateAttackShoot | shoot_attack_fast.tres | NPC_Base.tscn |
+| Leaper | NPCStatePatrol | NPCStateAttackLeap | leap_attack_default.tres | NPC_Leaper.tscn |
+| Warper | NPCStatePatrol | NPCStateAttackShootWithTeleport | shoot + teleport .tres | NPC_Warper.tscn |
+| Turret | — | NPCStateAttackShoot | shoot_attack_slow.tres | NPC_Turret.tscn |
+
+Only create a new inherited scene when the state scripts differ. For tuning-only variants (fast grunt vs slow grunt), reuse the same scene and swap the settings `.tres` in the inspector.
+
+### Animations
+
+Each state script triggers its own animations. The state calls into NPCController or the character body directly, so animation names live with the behavior that uses them.
+
+### Bosses
+
+Bosses use **LimboAI Behavior Trees** instead of the shared HSM. Boss fights have complex sequencing that BTs handle well:
+
+- Multi-phase behavior with unique phase transitions
+- Telegraph → attack → recovery → vulnerability windows
+- Interruptible combos (stagger mid-sequence)
+- Parallel behaviors (summon adds while attacking)
+
+Each boss gets its own BT `.tres` file and can subclass `NPCController` as `BossController` to expose boss-specific actions as BT tasks.
+
+### Where Things Live
+
+| Concern | Location |
+|---|---|
+| Transition conditions (when to switch states) | `NPCController.EvaluateTransitions()` |
+| Transition routing (which state follows which) | `NPCController._Ready()` via `HSM.AddTransition()` |
+| What each state does | LimboState subclass script on the state node |
+| State-specific tuning (cooldowns, forces) | Per-state settings Resource `.tres` |
+| NPC-wide tuning (detect range, aggro range) | AIBehaviorDataDefinition `.tres` |
+| Shared utilities (player ref, health checks) | NPCController |
+| Per-enemy composition | Scene inheritance (which state scripts are assigned) |
+
+### Future Escape Hatch
+
+If you end up with 30+ enemy variants and scene inheritance feels heavy, you can switch to runtime HSM construction — store state script references in `AIBehaviorDataDefinition` and build the HSM in `_Ready()`. You'd lose editor-time visual editing but keep runtime inspection (the constructed HSM is visible in Godot's Remote scene tree during play). Not worth it yet, but the architecture doesn't prevent it.
 
 ---
 

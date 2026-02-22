@@ -78,3 +78,13 @@ script = ExtResource("9_gizmo")
 behavior_tree = ExtResource("8_hcars")
 agent_node = NodePath("../NPCController")
 blackboard_plan = SubResource("BlackboardPlan_7oewm")
+
+[node name="LimboHSM" type="LimboHSM" parent="." unique_id=924673097]
+
+[node name="IdleState" type="LimboState" parent="LimboHSM" unique_id=2002680120]
+
+[node name="PatrolState" type="LimboState" parent="LimboHSM" unique_id=471946612]
+
+[node name="AttackState" type="LimboState" parent="LimboHSM" unique_id=1992667500]
+
+[node name="FleeState" type="LimboState" parent="LimboHSM" unique_id=1274158220]
