@@ -13,10 +13,10 @@
 [ext_resource type="Script" uid="uid://d1jl01hebb3mn" path="res://Scripts/AI/NPCBehaviorScripts/Idle/NPCStateIdle_Basic.cs" id="10_idle"]
 [ext_resource type="Script" uid="uid://dipdlqoetk81j" path="res://Scripts/AI/NPCBehaviorScripts/Patrol/NPCStatePatrol_Basic.cs" id="11_patrol"]
 [ext_resource type="Script" uid="uid://d33shgctsw3b5" path="res://Scripts/AI/NPCBehaviorScripts/Attack/NPCStateAttack_Basic.cs" id="12_attack"]
-[ext_resource type="Resource" uid="uid://cm76kgonh4m3p" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/patrol_settings_basic.tres" id="13_abgwp"]
+[ext_resource type="Resource" uid="uid://cm76kgonh4m3p" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/patrol_settings_basic_SHARED.tres" id="13_abgwp"]
 [ext_resource type="Script" uid="uid://xvtytnrs76fw" path="res://Scripts/AI/NPCBehaviorScripts/Flee/NPCStateFlee_Basic.cs" id="13_flee"]
-[ext_resource type="Resource" uid="uid://cmcxybx5awxqs" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/attack_settings_basic.tres" id="15_g3jgu"]
-[ext_resource type="Resource" uid="uid://dxwmrw8fynbn5" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/flee_settings_basic.tres" id="17_3vs80"]
+[ext_resource type="Resource" uid="uid://cmcxybx5awxqs" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/attack_settings_basic_SHARED.tres" id="15_g3jgu"]
+[ext_resource type="Resource" uid="uid://dxwmrw8fynbn5" path="res://Resources/Data/Characters/Enemies/CommonData/Behaviors/StateSettingsTemplates/flee_settings_basic_SHARED.tres" id="17_3vs80"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
 size = Vector2(32, 64)
