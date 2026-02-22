@@ -21,6 +21,7 @@ public partial class AIBehaviorDataDefinition : Resource
     [ExportGroup("Behavior")]
     [Export] public bool Aggressive = true;
     [Export] public AimMode AimMode = AimMode.TrackPlayer;
+    [Export(PropertyHint.Range, "0,1,0.05")] public float FleeHealthThreshold = 0.25f;
 
     [ExportGroup("Combat")]
     [Export] public float AttackRange = 200f;

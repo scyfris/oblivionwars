@@ -1,9 +1,28 @@
 using Godot;
 
+public enum NPCTransitionEvent
+{
+    IdleTimeout,
+    PatrolDone,
+    PlayerInRange,
+    PlayerLost,
+    HealthLow,
+}
+
 public partial class NPCController : Node
 {
+    private static StringName Event(NPCTransitionEvent evt) => EnumStringNames<NPCTransitionEvent>.Get(evt);
+
     [Export] private NPCDefinition _definition;
     public NPCDefinition Definition => _definition;
+
+    [Export] private LimboHsm _stateTree;
+
+    [ExportGroup("HSM States")]
+    [Export] private LimboState _idleState;
+    [Export] private LimboState _patrolState;
+    [Export] private LimboState _attackState;
+    [Export] private LimboState _fleeState;
 
     [Export] private NPCEntityCharacterBody2D _npcCharacterBody;
     [Export] private HoldableSystem _holdableSystem;
@@ -39,11 +58,9 @@ public partial class NPCController : Node
     {
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
-        EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance.Subscribe<HitEvent>(OnHit);
 
         InitializeRuntimeData();
-
 
         // Initialize holdables
         if (_holdableSystem != null)
@@ -57,6 +74,7 @@ public partial class NPCController : Node
         // Find and cache player reference
         _targetPlayer = GetTree().GetFirstNodeInGroup(Groups.Entities.Player) as PlayerCharacterBody2D;
 
+        SetupHSM();
         UpdateHealthLabel();
     }
 
@@ -69,6 +87,51 @@ public partial class NPCController : Node
     public override void _PhysicsProcess(double delta)
     {
         _holdableSystem?.Update(delta);
+        EvaluateTransitions();
+    }
+
+    // ── HSM Setup ─────────────────────────────────────────
+
+    private void SetupHSM()
+    {
+        if (_stateTree == null) return;
+
+        // Idle transitions
+        _stateTree.AddTransition(_idleState, _patrolState, Event(NPCTransitionEvent.IdleTimeout));
+        _stateTree.AddTransition(_idleState, _attackState, Event(NPCTransitionEvent.PlayerInRange));
+
+        // Patrol transitions
+        _stateTree.AddTransition(_patrolState, _idleState, Event(NPCTransitionEvent.PatrolDone));
+        _stateTree.AddTransition(_patrolState, _attackState, Event(NPCTransitionEvent.PlayerInRange));
+
+        // Attack transitions
+        _stateTree.AddTransition(_attackState, _patrolState, Event(NPCTransitionEvent.PlayerLost));
+
+        // Flee transitions
+        _stateTree.AddTransition(_fleeState, _patrolState, Event(NPCTransitionEvent.PlayerLost));
+
+        // Any state can flee
+        _stateTree.AddTransition(_stateTree.Anystate(), _fleeState, Event(NPCTransitionEvent.HealthLow));
+
+        _stateTree.Initialize(this);
+        _stateTree.SetActive(true);
+    }
+
+    private void EvaluateTransitions()
+    {
+        if (_stateTree == null) return;
+
+        float healthPercent = NPCRuntimeData.MaxHealth > 0
+            ? NPCRuntimeData.CurrentHealth / NPCRuntimeData.MaxHealth
+            : 1f;
+
+        // Priority order — highest priority first
+        if (healthPercent <= _behavior.FleeHealthThreshold)
+            _stateTree.Dispatch(Event(NPCTransitionEvent.HealthLow));
+        else if (IsPlayerInAggroRange())
+            _stateTree.Dispatch(Event(NPCTransitionEvent.PlayerInRange));
+        else if (!IsPlayerInDetectRange())
+            _stateTree.Dispatch(Event(NPCTransitionEvent.PlayerLost));
     }
 
     // ── Movement ────────────────────────────────────────────

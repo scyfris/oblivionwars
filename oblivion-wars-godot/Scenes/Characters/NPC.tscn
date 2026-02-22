@@ -10,6 +10,10 @@
 [ext_resource type="Script" uid="uid://c3r15ai6j4fbn" path="res://Scripts/Entity/NPCController.cs" id="6_npcctrl"]
 [ext_resource type="BehaviorTree" uid="uid://dl61h776nxf7c" path="res://Resources/Data/Characters/Enemies/CommonData/npc_common_brain.tres" id="8_hcars"]
 [ext_resource type="Script" uid="uid://dvmr0gitmotiv" path="res://Scripts/Entity/NPCRangeGizmo.cs" id="9_gizmo"]
+[ext_resource type="Script" uid="uid://d1jl01hebb3mn" path="res://Scripts/AI/StatesScripts/Idle/NPCStateIdle.cs" id="10_idle"]
+[ext_resource type="Script" uid="uid://dipdlqoetk81j" path="res://Scripts/AI/StatesScripts/Patrol/NPCStatePatrol_BasicWalker.cs" id="11_patrol"]
+[ext_resource type="Script" uid="uid://d33shgctsw3b5" path="res://Scripts/AI/StatesScripts/Attack/NPCStateAttack_BasicShooter.cs" id="12_attack"]
+[ext_resource type="Script" uid="uid://xvtytnrs76fw" path="res://Scripts/AI/StatesScripts/Flee/NPCStateFlee_BasicWalker.cs" id="13_flee"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
 size = Vector2(32, 64)
@@ -63,9 +67,14 @@ script = ExtResource("5_holdable")
 _leftHoldableScene = ExtResource("4_5tmo4")
 _weaponPosition = NodePath("../FlipRoot/WeaponPosition")
 
-[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel")]
+[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState", "_npcCharacterBody", "_holdableSystem", "_healthLabel")]
 script = ExtResource("6_npcctrl")
 _definition = ExtResource("2_def")
+_stateTree = NodePath("../LimboHSM")
+_idleState = NodePath("../LimboHSM/IdleState")
+_patrolState = NodePath("../LimboHSM/PatrolState")
+_attackState = NodePath("../LimboHSM/AttackState")
+_fleeState = NodePath("../LimboHSM/FleeState")
 _npcCharacterBody = NodePath("..")
 _holdableSystem = NodePath("../HoldableSystem")
 _healthLabel = NodePath("../HealthLabel")
@@ -82,9 +91,13 @@ blackboard_plan = SubResource("BlackboardPlan_7oewm")
 [node name="LimboHSM" type="LimboHSM" parent="." unique_id=924673097]
 
 [node name="IdleState" type="LimboState" parent="LimboHSM" unique_id=2002680120]
+script = ExtResource("10_idle")
 
 [node name="PatrolState" type="LimboState" parent="LimboHSM" unique_id=471946612]
+script = ExtResource("11_patrol")
 
 [node name="AttackState" type="LimboState" parent="LimboHSM" unique_id=1992667500]
+script = ExtResource("12_attack")
 
 [node name="FleeState" type="LimboState" parent="LimboHSM" unique_id=1274158220]
+script = ExtResource("13_flee")
