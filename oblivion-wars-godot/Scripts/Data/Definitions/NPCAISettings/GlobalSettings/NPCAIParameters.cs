@@ -9,7 +9,7 @@ public enum AimMode
 
 [GlobalClass]
 // Controls things like when to transition states and such
-public partial class NPCBehaviorSettingsGlobal : Resource
+public partial class NPCAIParameters : Resource
 {
     //
     // All of htese are for specifying when states transition
@@ -37,5 +37,4 @@ public partial class NPCBehaviorSettingsGlobal : Resource
     // XXX Remove this!
     [ExportGroup("Combat")]
     [Export] public float AttackRange = 200f; // XXX - Move to NPCStateSettingsAttack_Basic
-    [Export] public float AttackCooldown = 1.0f;
 }

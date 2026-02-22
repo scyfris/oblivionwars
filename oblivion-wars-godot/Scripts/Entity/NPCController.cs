@@ -29,7 +29,7 @@ public partial class NPCController : Node
     [Export] private Label _healthLabel;
 
     [ExportGroup("AIBehavior")]
-    [Export] private NPCBehaviorSettingsGlobal _behavior;
+    [Export] private NPCAIParameters _behavior;
 
     // XXX player runtime data ?? should this be shard in NPC?
     protected EntityRuntimeData _runtimeData;
