@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PatrolSettings_Basic" format=3 uid="uid://cm76kgonh4m3p"]
 
-[ext_resource type="Script" uid="uid://badat7v2dlvkn" path="res://Scripts/Data/Definitions/NPCAISettings/NPCStateBehaviorSettings/NPCStateSettingsPatrolSettings_Basic.cs" id="1_hrhcp"]
+[ext_resource type="Script" uid="uid://badat7v2dlvkn" path="res://Scripts/Data/Definitions/NPCAISettings/NPCStateBehaviorSettings/NPCStateSettingsPatrol_Basic.cs" id="1_hrhcp"]
 
 [resource]
 script = ExtResource("1_hrhcp")

@@ -1,15 +1,15 @@
 [gd_resource type="BehaviorTree" format=3 uid="uid://dl61h776nxf7c"]
 
-[ext_resource type="Script" uid="uid://bbeohyfpb6wjm" path="res://Scripts/AI/BTTasks/NPC/BTAWriteHealthToBlackboard.cs" id="1_un383"]
-[ext_resource type="Script" uid="uid://btpwmg8hsc1qr" path="res://Scripts/AI/BTTasks/Utility/FloatParam.cs" id="2_wymun"]
-[ext_resource type="Script" uid="uid://byeukyvhx7i4r" path="res://Scripts/AI/BTTasks/Utility/BTAMathDiv.cs" id="3_qkpwh"]
-[ext_resource type="Script" uid="uid://vr4wv0ipe6a2" path="res://Scripts/AI/BTTasks/NPC/BTCDetectsPlayer.cs" id="4_wd3ke"]
-[ext_resource type="Script" uid="uid://bl08mx1k1brvf" path="res://Scripts/AI/BTTasks/NPC/BTAChasePlayer.cs" id="5_abfse"]
-[ext_resource type="Script" uid="uid://c63nupcx4bbfc" path="res://Scripts/AI/BTTasks/NPC/BTAShootAtPlayer.cs" id="6_24tgj"]
-[ext_resource type="Script" uid="uid://b5a3j6dfrtaww" path="res://Scripts/AI/BTTasks/NPC/BTAStartMoveRight.cs" id="7_60kbb"]
-[ext_resource type="Script" uid="uid://qs5rw6vluesc" path="res://Scripts/AI/BTTasks/NPC/BTAStopMoving.cs" id="8_v2tvq"]
-[ext_resource type="Script" uid="uid://mk0f0t6832qo" path="res://Scripts/AI/BTTasks/NPC/BTAStartMoveLeft.cs" id="9_ee6pb"]
-[ext_resource type="Script" uid="uid://drqplw48gxmxn" path="res://Scripts/AI/BTTasks/NPC/BTAFleeFromPlayer.cs" id="10_xkbxe"]
+[ext_resource type="Script" uid="uid://bbeohyfpb6wjm" path="res://Scripts/AI/BTTasks/NPC/BTAWriteHealthToBlackboard.cs" id="1_7h38q"]
+[ext_resource type="Script" uid="uid://btpwmg8hsc1qr" path="res://Scripts/AI/BTTasks/Utility/FloatParam.cs" id="2_b4671"]
+[ext_resource type="Script" uid="uid://byeukyvhx7i4r" path="res://Scripts/AI/BTTasks/Utility/BTAMathDiv.cs" id="3_rvpva"]
+[ext_resource type="Script" uid="uid://vr4wv0ipe6a2" path="res://Scripts/AI/BTTasks/NPC/BTCDetectsPlayer.cs" id="4_7a6b3"]
+[ext_resource type="Script" uid="uid://bl08mx1k1brvf" path="res://Scripts/AI/BTTasks/NPC/BTAChasePlayer.cs" id="5_vfb6n"]
+[ext_resource type="Script" uid="uid://c63nupcx4bbfc" path="res://Scripts/AI/BTTasks/NPC/BTAShootAtPlayer.cs" id="6_0ggmn"]
+[ext_resource type="Script" uid="uid://b5a3j6dfrtaww" path="res://Scripts/AI/BTTasks/NPC/BTAStartMoveRight.cs" id="7_xtpn6"]
+[ext_resource type="Script" uid="uid://qs5rw6vluesc" path="res://Scripts/AI/BTTasks/NPC/BTAStopMoving.cs" id="8_uqmua"]
+[ext_resource type="Script" uid="uid://mk0f0t6832qo" path="res://Scripts/AI/BTTasks/NPC/BTAStartMoveLeft.cs" id="9_x0u3b"]
+[ext_resource type="Script" uid="uid://drqplw48gxmxn" path="res://Scripts/AI/BTTasks/NPC/BTAFleeFromPlayer.cs" id="10_ce7hf"]
 
 [sub_resource type="BlackboardPlan" id="BlackboardPlan_k866t"]
 var/health/name = &"health"
@@ -29,21 +29,21 @@ var/result_health_percentage/hint = 0
 var/result_health_percentage/hint_string = "Written to by MathDiv"
 
 [sub_resource type="BTAction" id="BTAction_yyb3s"]
-script = ExtResource("1_un383")
+script = ExtResource("1_7h38q")
 
 [sub_resource type="Resource" id="Resource_omh23"]
-script = ExtResource("2_wymun")
+script = ExtResource("2_b4671")
 Source = 1
 BlackboardKey = "health"
 
 [sub_resource type="Resource" id="Resource_fhjjr"]
-script = ExtResource("2_wymun")
+script = ExtResource("2_b4671")
 Source = 1
 BlackboardKey = "max_health"
 
 [sub_resource type="BTAction" id="BTAction_cdald"]
 custom_name = "Health percentage written to result_health_percentage"
-script = ExtResource("3_qkpwh")
+script = ExtResource("3_rvpva")
 _dividend = SubResource("Resource_omh23")
 _divisor = SubResource("Resource_fhjjr")
 _resultKey = "result_health_percentage"
@@ -59,13 +59,13 @@ check_type = 3
 value = SubResource("BBVariant_u31vs")
 
 [sub_resource type="BTCondition" id="BTCondition_o1qct"]
-script = ExtResource("4_wd3ke")
+script = ExtResource("4_7a6b3")
 
 [sub_resource type="BTAction" id="BTAction_k7rru"]
-script = ExtResource("5_abfse")
+script = ExtResource("5_vfb6n")
 
 [sub_resource type="BTAction" id="BTAction_vt0v1"]
-script = ExtResource("6_24tgj")
+script = ExtResource("6_0ggmn")
 
 [sub_resource type="BTParallel" id="BTParallel_y5s81"]
 children = [SubResource("BTAction_k7rru"), SubResource("BTAction_vt0v1")]
@@ -75,20 +75,20 @@ custom_name = "Combat (If player in range)"
 children = [SubResource("BTCondition_o1qct"), SubResource("BTParallel_y5s81")]
 
 [sub_resource type="BTAction" id="BTAction_6xn4i"]
-script = ExtResource("7_60kbb")
+script = ExtResource("7_xtpn6")
 
 [sub_resource type="BTWait" id="BTWait_u03o5"]
 
 [sub_resource type="BTAction" id="BTAction_lh6ur"]
-script = ExtResource("8_v2tvq")
+script = ExtResource("8_uqmua")
 
 [sub_resource type="BTAction" id="BTAction_f2vpa"]
-script = ExtResource("9_ee6pb")
+script = ExtResource("9_x0u3b")
 
 [sub_resource type="BTWait" id="BTWait_jjsbo"]
 
 [sub_resource type="BTAction" id="BTAction_c6ay8"]
-script = ExtResource("8_v2tvq")
+script = ExtResource("8_uqmua")
 
 [sub_resource type="BTSequence" id="BTSequence_k7rru"]
 custom_name = "Patrol (If player NOT in range)"
@@ -103,7 +103,7 @@ custom_name = "Fight"
 children = [SubResource("BTCheckVar_kie0j"), SubResource("BTSelector_kie0j")]
 
 [sub_resource type="BTAction" id="BTAction_tm37k"]
-script = ExtResource("10_xkbxe")
+script = ExtResource("10_ce7hf")
 
 [sub_resource type="BTSequence" id="BTSequence_y5s81"]
 custom_name = "Flight"
