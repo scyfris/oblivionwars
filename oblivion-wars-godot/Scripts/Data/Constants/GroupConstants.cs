@@ -5,7 +5,7 @@ using Godot;
 /// Use these constants instead of hardcoded strings to avoid typos and enable refactoring.
 /// Add groups to nodes via Inspector -> Node -> Groups, then reference them here in code.
 /// </summary>
-public static class Groups
+public static class GroupConstants
 {
     // ========================================
     // ENTITIES

@@ -18,6 +18,8 @@ public partial class GlobalDefinitions : Node
     [ExportGroup("Levels")]
     [Export] public HazardDefinition HazardDefs;
 
+    // Some private ones
+
     // ── Ability Definitions ────────────────────────────────────
     // TODO: Create AbilityDefinition Resource when needed
 

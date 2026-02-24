@@ -4,22 +4,22 @@ public partial class PlayerInputController : Node
 {
     [Export] private PlayerController _controller;
 
-    [Export] private string _moveInputLeftAction = "move_left";
-    [Export] private string _moveInputRightAction = "move_right";
-    [Export] private string _jumpAction = "jump";
-    [Export] private string _useLeftAction = "shoot";
-    [Export] private string _useRightAction = "shoot_right";
-    [Export] private string _rotateGravityClockwiseAction = "rotate_gravity_cw";
-    [Export] private string _rotateGravityCounterClockwiseAction = "rotate_gravity_ccw";
-    [Export] private string _interactAction = "interact";
+    [Export] private string _moveInputLeftAction = InputMapConstants.MoveLeft;
+    [Export] private string _moveInputRightAction = InputMapConstants.MoveRight;
+    [Export] private string _jumpAction = InputMapConstants.Jump;
+    [Export] private string _useLeftAction = InputMapConstants.Shoot;
+    [Export] private string _useRightAction = InputMapConstants.ShootRight;
+    [Export] private string _rotateGravityClockwiseAction = InputMapConstants.RotateGravityCW;
+    [Export] private string _rotateGravityCounterClockwiseAction = InputMapConstants.RotateGravityCCW;
+    [Export] private string _interactAction = InputMapConstants.Interact;
 
     [ExportGroup("Weapon Switching")]
     [Export] private string[] _weaponSlotActions = new[] {
-        "weapon_slot_1", "weapon_slot_2", "weapon_slot_3", "weapon_slot_4",
-        "weapon_slot_5", "weapon_slot_6", "weapon_slot_7"
+        InputMapConstants.WeaponSlot1, InputMapConstants.WeaponSlot2, InputMapConstants.WeaponSlot3, InputMapConstants.WeaponSlot4,
+        InputMapConstants.WeaponSlot5, InputMapConstants.WeaponSlot6, InputMapConstants.WeaponSlot7
     };
-    [Export] private string _weaponNextAction = "weapon_next";
-    [Export] private string _weaponPrevAction = "weapon_prev";
+    [Export] private string _weaponNextAction = InputMapConstants.WeaponNext;
+    [Export] private string _weaponPrevAction = InputMapConstants.WeaponPrev;
 
     public override void _UnhandledInput(InputEvent @event)
     {
