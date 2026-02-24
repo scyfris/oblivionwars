@@ -19,11 +19,38 @@ public partial class NPCBehaviorAttack_Basic : LimboState
 
     public override void _Update(double delta)
     {
-        // TODO: Aim at player, shoot on cooldown, chase if needed
+
+        // If player is not in attack range, move towards the player.
+        if (_controller.IsPlayerInAttackRange())
+        {
+            _controller.StopMoving();
+
+            // Update aim
+            if (_settings.AimMode == AimMode.TrackPlayer)
+            {
+                _controller.AimAtPlayer();
+            }
+            else
+            {
+                _controller.AimAtFacingDir();
+            }
+            
+            // Shoot player
+            _controller.StartShooting();
+        } else
+        {
+            // Move
+            _controller.StopShooting();
+            _controller.StartMoveTowardsPlayer();
+        }
+    
+        // TODO: Have a "moveandattach" option that denotes behavior of enemy standing in place whlie shooting or running towards player and shooting.
+        // TODO: Have a "mindistfromplayer" parameter so npc doesn't try to shove itself into the play lol
     }
 
     public override void _Exit()
     {
+        _controller.StopMoving();
         _controller.StopShooting();
     }
 }

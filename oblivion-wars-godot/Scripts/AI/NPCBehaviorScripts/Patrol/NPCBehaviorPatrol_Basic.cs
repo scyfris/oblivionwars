@@ -6,6 +6,11 @@ public partial class NPCBehaviorPatrol_Basic : LimboState
     [Export] public NPCBehaviorParamsPatrol_Basic _settings;
 
     private NPCController _controller;
+    private double _timer;
+    private bool _movingRight;
+
+    // secs in each direction, should come from params
+    private float dirTime = 1.0f;
 
     public override void _Setup()
     {
@@ -14,12 +19,23 @@ public partial class NPCBehaviorPatrol_Basic : LimboState
 
     public override void _Enter()
     {
-        // TODO: Pick patrol direction, start walking
+        _timer = 0.0;
+        _movingRight = true;
+        _controller.StartMoveRight();
     }
 
     public override void _Update(double delta)
     {
-        // TODO: Walk back and forth within PatrolRadius, pause at endpoints
+        _timer += delta;
+        if (_timer >= dirTime)
+        {
+            _timer = 0.0;
+            _movingRight = !_movingRight;
+            if (_movingRight)
+                _controller.StartMoveRight();
+            else
+                _controller.StartMoveLeft();
+        }
     }
 
     public override void _Exit()

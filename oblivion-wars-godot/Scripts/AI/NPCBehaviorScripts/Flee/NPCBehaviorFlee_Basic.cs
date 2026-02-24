@@ -14,12 +14,13 @@ public partial class NPCBehaviorFlee_Basic : LimboState
 
     public override void _Enter()
     {
-        // TODO: Start fleeing from player
     }
 
     public override void _Update(double delta)
     {
-        // TODO: Move away from player
+        // TODO: Figure out how much logic you want to push in here.  Really 
+        // start flee from player - this should probably all be defined in here...
+        _controller.StartFleeFromPlayer();
     }
 
     public override void _Exit()

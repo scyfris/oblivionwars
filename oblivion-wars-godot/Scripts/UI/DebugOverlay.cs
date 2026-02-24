@@ -25,6 +25,13 @@ public partial class DebugOverlay : Control
             SetOpen(!Visible);
             GetViewport().SetInputAsHandled();
         }
+        else if (@event.IsActionPressed("debug_mode_toggle"))
+        {
+            var global = GlobalStateManager.Instance.Global;
+            global.IsDebugModeEnabled = !global.IsDebugModeEnabled;
+            GD.Print($"Debug mode: {(global.IsDebugModeEnabled ? "ON" : "OFF")}");
+            GetViewport().SetInputAsHandled();
+        }
     }
 
     private void SetOpen(bool open)

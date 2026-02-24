@@ -5,10 +5,9 @@
 [ext_resource type="Texture2D" uid="uid://degmoqfpjxpbh" path="res://Resources/Sprites/TestDummyNPC.png" id="3_7oewm"]
 [ext_resource type="Resource" uid="uid://bv4jpxnmqlkb2" path="res://Resources/Data/Physics/npc_physics_settings.tres" id="3_iqlxx"]
 [ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="4_5tmo4"]
-[ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/Characters/Enemies/TestDummy/test_dummy_ai_def_MERGE_wITH_MAIN_DEF.tres" id="4_behavior"]
+[ext_resource type="Script" uid="uid://brlpnvstlgdf3" path="res://Scripts/UI/DebugModeFilter.cs" id="4_gebkd"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
 [ext_resource type="Script" uid="uid://c3r15ai6j4fbn" path="res://Scripts/Entity/NPCController.cs" id="6_npcctrl"]
-[ext_resource type="BehaviorTree" uid="uid://dl61h776nxf7c" path="res://Resources/Data/Characters/Enemies/Shared/AI/BossBrains/boss_brain_NOT_USED_YET.tres" id="8_hcars"]
 [ext_resource type="Script" uid="uid://dvmr0gitmotiv" path="res://Scripts/Entity/NPCRangeGizmo.cs" id="9_gizmo"]
 [ext_resource type="Script" uid="uid://d1jl01hebb3mn" path="res://Scripts/AI/NPCBehaviorScripts/Idle/NPCStateIdle_Basic.cs" id="10_idle"]
 [ext_resource type="Script" uid="uid://dipdlqoetk81j" path="res://Scripts/AI/NPCBehaviorScripts/Patrol/NPCBehaviorPatrol_Basic.cs" id="11_patrol"]
@@ -31,8 +30,6 @@ animations = [{
 "name": &"default",
 "speed": 5.0
 }]
-
-[sub_resource type="BlackboardPlan" id="BlackboardPlan_7oewm"]
 
 [node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_controller", "_flipRoot", "_spriteNode")]
 script = ExtResource("1_npc")
@@ -60,36 +57,45 @@ sprite_frames = SubResource("SpriteFrames_iqlxx")
 offset_left = -30.0
 offset_top = -80.0
 offset_right = 30.0
-offset_bottom = -65.0
+offset_bottom = -57.0
 text = "50/50"
 horizontal_alignment = 1
-metadata/_edit_use_anchors_ = true
+
+[node name="Debug" type="Control" parent="." unique_id=427836217]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("4_gebkd")
+
+[node name="StateLabelDebug" type="Label" parent="Debug" unique_id=2119354597]
+layout_mode = 0
+offset_left = -38.0
+offset_top = -104.0
+offset_right = 55.0
+offset_bottom = -81.0
+text = "StateDebug"
 
 [node name="HoldableSystem" type="Node" parent="." unique_id=752884601 node_paths=PackedStringArray("_weaponPosition")]
 script = ExtResource("5_holdable")
 _leftHoldableScene = ExtResource("4_5tmo4")
 _weaponPosition = NodePath("../FlipRoot/WeaponPosition")
 
-[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState", "_npcCharacterBody", "_holdableSystem", "_healthLabel")]
+[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel", "_stateLabel", "_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState")]
 script = ExtResource("6_npcctrl")
 _definition = ExtResource("2_def")
+_npcCharacterBody = NodePath("..")
+_holdableSystem = NodePath("../HoldableSystem")
+_healthLabel = NodePath("../HealthLabel")
+_stateLabel = NodePath("../Debug/StateLabelDebug")
 _stateTree = NodePath("../LimboHSM")
 _idleState = NodePath("../LimboHSM/IdleState")
 _patrolState = NodePath("../LimboHSM/PatrolState")
 _attackState = NodePath("../LimboHSM/AttackState")
 _fleeState = NodePath("../LimboHSM/FleeState")
-_npcCharacterBody = NodePath("..")
-_holdableSystem = NodePath("../HoldableSystem")
-_healthLabel = NodePath("../HealthLabel")
-_behavior = ExtResource("4_behavior")
 
 [node name="RangeGizmo" type="Node2D" parent="NPCController" unique_id=143130064]
 script = ExtResource("9_gizmo")
-
-[node name="BTPlayer" type="BTPlayer" parent="." unique_id=1244629492]
-behavior_tree = ExtResource("8_hcars")
-agent_node = NodePath("../NPCController")
-blackboard_plan = SubResource("BlackboardPlan_7oewm")
 
 [node name="LimboHSM" type="LimboHSM" parent="." unique_id=924673097]
 

@@ -7,6 +7,11 @@ using Godot;
 /// </summary>
 public class GlobalState : ISaveableState<GlobalSaveData>
 {
+    // ── Transient Runtime State (not serialized) ──────────────
+    public bool IsDebugModeEnabled { get; set; } = false;
+
+    // ── Saveable State ──────────────────────────────────────────
+
     // Global flags for world events (e.g., "bridge_destroyed", "boss_intro_seen", etc.)
     private Godot.Collections.Dictionary<string, bool> _globalFlags = new();
 

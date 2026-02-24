@@ -23,6 +23,8 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
     private CpuParticles2D _wallSlideDust;
     private bool _facingRight = true;
+    public bool IsFacingRight => _facingRight;
+    public Vector2 HorizontalDir => new Vector2(_gravityDirection.Y, -_gravityDirection.X);
 
     // Set by controller each frame for animation
     public Vector2 AimTarget { get; set; }
@@ -99,8 +101,7 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
         if (_moveDirection != 0 && IsOnFloor())
         {
-            Vector2 horizontalDir = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
-            float aimDot = (AimTarget - GlobalPosition).Dot(horizontalDir);
+            float aimDot = (AimTarget - GlobalPosition).Dot(HorizontalDir);
             bool aimToLocalRight = aimDot > 0;
             bool movingTowardAim = _facingRight == aimToLocalRight;
 
@@ -171,17 +172,15 @@ public partial class EntityCharacterBody2D : CharacterBody2D
             ? _physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction
             : _physicsDef.Gravity;
 
-        Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
-
         Vector2 horizontalVelocity;
         if (_wallJumpInputLockTimer > 0 || _wallJumpPushAwayDurationTimer > 0)
         {
-            float currentHorizontalSpeed = Velocity.Dot(horizontalDirection);
-            horizontalVelocity = horizontalDirection * currentHorizontalSpeed;
+            float currentHorizontalSpeed = Velocity.Dot(HorizontalDir);
+            horizontalVelocity = HorizontalDir * currentHorizontalSpeed;
         }
         else
         {
-            horizontalVelocity = horizontalDirection * _moveDirection * _physicsDef.MoveSpeed;
+            horizontalVelocity = HorizontalDir * _moveDirection * _physicsDef.MoveSpeed;
         }
 
         Vector2 newVel = horizontalVelocity;
@@ -225,8 +224,7 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         {
             _wallNormal = GetWallNormal();
 
-            Vector2 horizontalDirection = new Vector2(_gravityDirection.Y, -_gravityDirection.X);
-            float wallHorizontalDirection = _wallNormal.Dot(horizontalDirection);
+            float wallHorizontalDirection = _wallNormal.Dot(HorizontalDir);
 
             bool movingAwayFromWall = false;
             if (wallHorizontalDirection > 0.1f && _moveDirection > 0)

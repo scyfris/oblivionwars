@@ -3,7 +3,7 @@
 [ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/Characters/Enemies/TestDummy/test_dummy_ai_def_MERGE_wITH_MAIN_DEF.tres" id="1_gruc5"]
 [ext_resource type="Script" uid="uid://ckc6l3wdh00w8" path="res://Scripts/Data/Definitions/DropTableEntry.cs" id="2_lst3f"]
 [ext_resource type="PackedScene" uid="uid://bjcbsg2001eff" path="res://Scenes/LevelComponents/Pickups/CoinPickup.tscn" id="3_kfoch"]
-[ext_resource type="Script" uid="uid://dbdtd1ea68ii6" path="res://Scripts/Data/Definitions/NPCDefinition.cs" id="4_lpvv2"]
+[ext_resource type="Script" uid="uid://dbdtd1ea68ii6" path="res://Scripts/Data/Definitions/NPC/GlobalSettings/NPCDefinition.cs" id="4_gruc5"]
 
 [sub_resource type="Resource" id="Resource_i4fh1"]
 script = ExtResource("2_lst3f")
@@ -12,7 +12,7 @@ MaxCount = 10
 metadata/_custom_type_script = "uid://ckc6l3wdh00w8"
 
 [resource]
-script = ExtResource("4_lpvv2")
+script = ExtResource("4_gruc5")
 AIBehaviorData = ExtResource("1_gruc5")
 IsBoss = true
 DropTable = Array[ExtResource("2_lst3f")]([SubResource("Resource_i4fh1")])

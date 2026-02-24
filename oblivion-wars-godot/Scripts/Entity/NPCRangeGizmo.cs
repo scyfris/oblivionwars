@@ -4,8 +4,9 @@ using Godot;
 public partial class NPCRangeGizmo : Node2D
 {
     private const string DefinitionProperty = "_definition";
+    private const string AIBehaviorDataProperty = "AIBehaviorData";
     private const string DetectionRangeProperty = "DetectionRange";
-    private const string AggroRangeProperty = "AggroRange";
+    private const string AttackRangeProperty = "AttackRange";
 
     public override void _Process(double delta)
     {
@@ -31,20 +32,39 @@ public partial class NPCRangeGizmo : Node2D
         var definition = defVariant.AsGodotObject();
         if (definition == null) return;
 
-        var detectionVariant = definition.Get(DetectionRangeProperty);
-        var aggroVariant = definition.Get(AggroRangeProperty);
-        if (detectionVariant.VariantType == Variant.Type.Nil || aggroVariant.VariantType == Variant.Type.Nil)
+        var aiVariant = definition.Get(AIBehaviorDataProperty);
+        if (aiVariant.VariantType == Variant.Type.Nil)
+        {
+            GD.PrintErr($"NPCRangeGizmo: Definition has no '{AIBehaviorDataProperty}' property.");
             return;
+        }
+
+        var aiParams = aiVariant.AsGodotObject();
+        if (aiParams == null) return;
+
+        var detectionVariant = aiParams.Get(DetectionRangeProperty);
+        if (detectionVariant.VariantType == Variant.Type.Nil)
+        {
+            GD.PrintErr($"NPCRangeGizmo: AIBehaviorData has no '{DetectionRangeProperty}' property.");
+            return;
+        }
+
+        var attackVariant = aiParams.Get(AttackRangeProperty);
+        if (attackVariant.VariantType == Variant.Type.Nil)
+        {
+            GD.PrintErr($"NPCRangeGizmo: AIBehaviorData has no '{AttackRangeProperty}' property.");
+            return;
+        }
 
         float detectionRange = detectionVariant.AsSingle();
-        float aggroRange = aggroVariant.AsSingle();
+        float attackRange = attackVariant.AsSingle();
 
         // Yellow circle = DetectionRange
         DrawArc(Vector2.Zero, detectionRange, 0, Mathf.Tau, 128,
                 new Color(1f, 1f, 0f, 0.8f), 3f);
 
-        // Red circle = AggroRange
-        DrawArc(Vector2.Zero, aggroRange, 0, Mathf.Tau, 128,
+        // Red circle = AttackRange
+        DrawArc(Vector2.Zero, attackRange, 0, Mathf.Tau, 128,
                 new Color(1f, 0.2f, 0.2f, 0.8f), 3f);
     }
 }

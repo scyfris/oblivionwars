@@ -4,7 +4,7 @@ public enum NPCTransitionEvent
 {
     IdleTimeout,
     PatrolDone,
-    PlayerInRange,
+    PlayerDetected,
     PlayerLost,
     HealthLow,
 }
@@ -13,34 +13,35 @@ public partial class NPCController : Node
 {
     private static StringName Event(NPCTransitionEvent evt) => EnumStringNames<NPCTransitionEvent>.Get(evt);
 
+    [ExportGroup("NPC Definition")]
     [Export] private NPCDefinition _definition;
     public NPCDefinition Definition => _definition;
 
+
+    [ExportGroup("Node References")]
+    [Export] private NPCEntityCharacterBody2D _npcCharacterBody;
+    [Export] private HoldableSystem _holdableSystem;
+    [Export] private Label _healthLabel;
+    [Export] private Label _stateLabel;
     [Export] private LimboHsm _stateTree;
 
-    [ExportGroup("HSM States")]
+
+    [ExportGroup("HSM State Information")]
     [Export] private LimboState _idleState;
     [Export] private LimboState _patrolState;
     [Export] private LimboState _attackState;
     [Export] private LimboState _fleeState;
 
-    [Export] private NPCEntityCharacterBody2D _npcCharacterBody;
-    [Export] private HoldableSystem _holdableSystem;
-    [Export] private Label _healthLabel;
-
-    [ExportGroup("AIBehavior")]
-    [Export] private NPCAIParameters _behavior;
-
     // XXX player runtime data ?? should this be shard in NPC?
-    protected EntityRuntimeData _runtimeData;
-    public EntityRuntimeData NPCRuntimeData => _runtimeData;
+    protected NPCRuntimeData _runtimeData;
+    public NPCRuntimeData NPCRuntimeData => _runtimeData;
 
     protected virtual void InitializeRuntimeData()
     {
         if (_definition != null)
         {
             // XXX TODO: NEed a player version of this data to differentiate from npc data.
-            _runtimeData = new EntityRuntimeData
+            _runtimeData = new NPCRuntimeData
             {
                 EntityId = _definition.EntityId,
                 RuntimeInstanceId = GetInstanceId(),
@@ -98,11 +99,11 @@ public partial class NPCController : Node
 
         // Idle transitions
         _stateTree.AddTransition(_idleState, _patrolState, Event(NPCTransitionEvent.IdleTimeout));
-        _stateTree.AddTransition(_idleState, _attackState, Event(NPCTransitionEvent.PlayerInRange));
+        _stateTree.AddTransition(_idleState, _attackState, Event(NPCTransitionEvent.PlayerDetected));
 
         // Patrol transitions
         _stateTree.AddTransition(_patrolState, _idleState, Event(NPCTransitionEvent.PatrolDone));
-        _stateTree.AddTransition(_patrolState, _attackState, Event(NPCTransitionEvent.PlayerInRange));
+        _stateTree.AddTransition(_patrolState, _attackState, Event(NPCTransitionEvent.PlayerDetected));
 
         // Attack transitions
         _stateTree.AddTransition(_attackState, _patrolState, Event(NPCTransitionEvent.PlayerLost));
@@ -113,8 +114,23 @@ public partial class NPCController : Node
         // Any state can flee
         _stateTree.AddTransition(_stateTree.Anystate(), _fleeState, Event(NPCTransitionEvent.HealthLow));
 
+        _stateTree.ActiveStateChanged += OnActiveStateChanged;
+
         _stateTree.Initialize(this);
         _stateTree.SetActive(true);
+        UpdateStateLabel();
+    }
+
+    private void OnActiveStateChanged(LimboState current, LimboState previous)
+    {
+        UpdateStateLabel();
+    }
+
+    private void UpdateStateLabel()
+    {
+        if (_stateLabel == null) return;
+        var active = _stateTree?.GetActiveState();
+        _stateLabel.Text = active != null ? active.Name : "";
     }
 
     private void EvaluateTransitions()
@@ -128,10 +144,15 @@ public partial class NPCController : Node
         // Priority order — highest priority first
         if (healthPercent <= _definition.AIBehaviorData.FleeHealthThreshold)
             _stateTree.Dispatch(Event(NPCTransitionEvent.HealthLow));
-        else if (IsPlayerInAggroRange())
-            _stateTree.Dispatch(Event(NPCTransitionEvent.PlayerInRange));
+        else if (IsPlayerInDetectRange())
+            _stateTree.Dispatch(Event(NPCTransitionEvent.PlayerDetected));
         else if (!IsPlayerInDetectRange())
             _stateTree.Dispatch(Event(NPCTransitionEvent.PlayerLost));
+    }
+
+    public PlayerCharacterBody2D GetTargetPlayer()
+    {
+        return _targetPlayer;
     }
 
     // ── Movement ────────────────────────────────────────────
@@ -186,16 +207,23 @@ public partial class NPCController : Node
         return distance <= _definition.AIBehaviorData.DetectionRange;
     }
 
-    public bool IsPlayerInAggroRange()
+    public bool IsPlayerInAttackRange()
     {
         if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
             return false;
 
         float distance = _npcCharacterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
-        return distance <= _definition.AIBehaviorData.AggroRange;
+        return distance <= _definition.AIBehaviorData.AttackRange;
     }
 
     // ── Combat ─────────────────────────────────────────────
+
+    public void AimAtFacingDir()
+    {
+        float sign = _npcCharacterBody.IsFacingRight ? 1f : -1f;
+        Vector2 target = _npcCharacterBody.GlobalPosition + _npcCharacterBody.HorizontalDir * sign * 100f;
+        UpdateAim(target);
+    }
 
     public void AimAtPlayer()
     {
@@ -205,12 +233,10 @@ public partial class NPCController : Node
         UpdateAim(_targetPlayer.GlobalPosition);
     }
 
-    public void ShootAtPlayer()
+    public void StartShooting()
     {
         if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
             return;
-
-        UpdateAim(_targetPlayer.GlobalPosition);
         UseHoldablePressed(_targetPlayer.GlobalPosition, true);
     }
 

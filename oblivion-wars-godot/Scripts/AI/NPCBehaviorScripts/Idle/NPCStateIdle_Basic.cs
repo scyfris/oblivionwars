@@ -13,6 +13,7 @@ public partial class NPCStateIdle_Basic : LimboState
     public override void _Enter()
     {
         // TODO: Start idle timer, play idle animation
+        _controller.StopMoving();
     }
 
     public override void _Update(double delta)
