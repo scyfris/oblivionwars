@@ -307,8 +307,7 @@ public partial class PlayerController : Node
     int cntr = 0;
     private void OnHit(HitEvent evt)
     {
-        var target = GodotObject.InstanceFromId(evt.TargetInstanceId);
-        if (target is not EntityCharacterBody2D entity)
+        if (evt.TargetInstanceId != _characterBody.GetInstanceId())
             return;
 
         if (_isInvincibleFromDamage)

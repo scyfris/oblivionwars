@@ -8,6 +8,8 @@ public partial class NPCRangeGizmo : Node2D
     private const string DetectionRangeProperty = "DetectionRange";
     private const string AttackRangeProperty = "AttackRange";
 
+    [Export] private NodePath _npcControllerPath;
+
     public override void _Process(double delta)
     {
         if (Engine.IsEditorHint())
@@ -21,11 +23,30 @@ public partial class NPCRangeGizmo : Node2D
         var parent = GetParent();
         if (parent == null) return;
 
+        if (parent is not Node2D)
+        {
+            GD.PrintErr($"NPCRangeGizmo: Must be a child of a Node2D, but parent '{parent.Name}' is a {parent.GetClass()}.");
+            return;
+        }
+
+        // Resolve the NPC controller via exported NodePath
+        if (_npcControllerPath == null || _npcControllerPath.IsEmpty)
+        {
+            GD.PrintErr("NPCRangeGizmo: _npcControllerPath is not set.");
+            return;
+        }
+        var controller = GetNode(_npcControllerPath);
+        if (controller == null)
+        {
+            GD.PrintErr($"NPCRangeGizmo: Could not find node at path '{_npcControllerPath}'.");
+            return;
+        }
+
         // Non-tool C# types aren't available in editor, so read via Get()
-        var defVariant = parent.Get(DefinitionProperty);
+        var defVariant = controller.Get(DefinitionProperty);
         if (defVariant.VariantType == Variant.Type.Nil)
         {
-            GD.PrintErr($"NPCRangeGizmo: Parent '{parent.Name}' has no '{DefinitionProperty}' property.");
+            GD.PrintErr($"NPCRangeGizmo: '{controller.Name}' has no '{DefinitionProperty}' property.");
             return;
         }
 
