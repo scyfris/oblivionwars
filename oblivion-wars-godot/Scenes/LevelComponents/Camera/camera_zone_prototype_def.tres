@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_e0rp4")
-UseDefaultZoom = false
+UseDefaultDeadzone = false
+Deadzone = Vector2(80, 70)
 Zoom = Vector2(1.25, 1.25)
 metadata/_custom_type_script = "uid://bphwn0lhjpi8p"

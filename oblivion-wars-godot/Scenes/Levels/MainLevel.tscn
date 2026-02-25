@@ -233,7 +233,7 @@ script = ExtResource("26_ul1mu")
 [node name="Enemies" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=645180807]
 
 [node name="TargetDummy" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=749725729 instance=ExtResource("7_sx5r3")]
-position = Vector2(1198, 358)
+position = Vector2(1361, 358)
 
 [node name="Tiles" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=199917983]
 
