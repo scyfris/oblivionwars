@@ -41,10 +41,10 @@ public partial class PlayerController : Node
         // Initialize holdables
         if (_holdableSystem != null)
         {
-            if (_holdableSystem.UseDefinitionWeapons)
-                _holdableSystem.InitializeWithDefinition(_characterBody, _definition);
-            else
+            if (_holdableSystem.UseDebugWeaponScenes)
                 _holdableSystem.Initialize(_characterBody);
+            else
+                _holdableSystem.InitializeWithDefinition(_characterBody, _definition);
         }
 
         // Ensure weapons are unlocked (handles testing without save system / new-game flow)
@@ -155,22 +155,22 @@ public partial class PlayerController : Node
         _holdableSystem?.UpdateAim(targetPosition);
     }
 
-    public void UseHoldablePressed(Vector2 target, bool isLeft)
+    public void UseHoldablePressed(bool isLeft)
     {
-        if (isLeft) _holdableSystem?.PressLeft(target);
-        else _holdableSystem?.PressRight(target);
+        if (isLeft) _holdableSystem?.PressLeft();
+        else _holdableSystem?.PressRight();
     }
 
-    public void UseHoldableReleased(Vector2 target, bool isLeft)
+    public void UseHoldableReleased(bool isLeft)
     {
-        if (isLeft) _holdableSystem?.ReleaseLeft(target);
-        else _holdableSystem?.ReleaseRight(target);
+        if (isLeft) _holdableSystem?.ReleaseLeft();
+        else _holdableSystem?.ReleaseRight();
     }
 
-    public void UseHoldableHeld(Vector2 target, bool isLeft)
+    public void UseHoldableHeld(bool isLeft)
     {
-        if (isLeft) _holdableSystem?.HeldLeft(target);
-        else _holdableSystem?.HeldRight(target);
+        if (isLeft) _holdableSystem?.HeldLeft();
+        else _holdableSystem?.HeldRight();
     }
 
     // ── Interaction ────────────────────────────────────────
@@ -298,7 +298,7 @@ public partial class PlayerController : Node
 
     private Checkpoint FindCheckpointById(string checkpointId)
     {
-        var checkpoints = GetTree().GetNodesInGroup(Groups.Level.Checkpoint);
+        var checkpoints = GetTree().GetNodesInGroup(GroupConstants.Level.Checkpoint);
         return checkpoints
             .OfType<Checkpoint>()
             .FirstOrDefault(cp => cp.UniqueId == checkpointId);

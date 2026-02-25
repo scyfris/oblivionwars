@@ -43,25 +43,13 @@ public partial class PlayerInputController : Node
 
         // Holdable press/release
         if (@event.IsActionPressed(_useLeftAction))
-        {
-            var targetPos = _controller.GetGlobalMousePosition();
-            _controller.UseHoldablePressed(targetPos, true);
-        }
+            _controller.UseHoldablePressed(true);
         if (@event.IsActionReleased(_useLeftAction))
-        {
-            var targetPos = _controller.GetGlobalMousePosition();
-            _controller.UseHoldableReleased(targetPos, true);
-        }
+            _controller.UseHoldableReleased(true);
         if (@event.IsActionPressed(_useRightAction))
-        {
-            var targetPos = _controller.GetGlobalMousePosition();
-            _controller.UseHoldablePressed(targetPos, false);
-        }
+            _controller.UseHoldablePressed(false);
         if (@event.IsActionReleased(_useRightAction))
-        {
-            var targetPos = _controller.GetGlobalMousePosition();
-            _controller.UseHoldableReleased(targetPos, false);
-        }
+            _controller.UseHoldableReleased(false);
 
         // Gravity rotation
         if (@event.IsActionPressed(_rotateGravityClockwiseAction))
@@ -98,8 +86,8 @@ public partial class PlayerInputController : Node
 
         // Call held every frame while button is pressed (for automatic weapons, charged items, etc.)
         if (Input.IsActionPressed(_useLeftAction))
-            _controller.UseHoldableHeld(targetPos, true);
+            _controller.UseHoldableHeld(true);
         if (Input.IsActionPressed(_useRightAction))
-            _controller.UseHoldableHeld(targetPos, false);
+            _controller.UseHoldableHeld(false);
     }
 }

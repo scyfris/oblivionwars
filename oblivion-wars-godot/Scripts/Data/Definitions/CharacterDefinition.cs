@@ -13,6 +13,6 @@ public partial class CharacterDefinition : Resource
 //    [Export] public float KnockbackResistance = 0.0f;
 
     [ExportGroup("Loadout")]
-    [Export] public PackedScene LeftHoldableScene;
-    [Export] public PackedScene RightHoldableScene;
+    [Export] public WeaponRegistryEntry LeftWeapon;
+    [Export] public WeaponRegistryEntry RightWeapon;
 }

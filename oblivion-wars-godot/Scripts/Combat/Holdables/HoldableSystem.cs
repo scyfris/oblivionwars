@@ -2,13 +2,15 @@ using Godot;
 
 public partial class HoldableSystem : Node
 {
-    [ExportGroup("Scene Weapons (For Visual Testing)")]
-    [Export] private PackedScene _leftHoldableScene;
-    [Export] private PackedScene _rightHoldableScene;
-    [Export] private Node2D _weaponPosition;
+    [ExportGroup("Debug scene Weapons (to visualize - override for tesing)")]
+    [Export] public bool UseDebugWeaponScenes = false;
+    [Export] private PackedScene _leftHoldableSceneDebug;
+    [Export] private PackedScene _rightHoldableSceneDebug;
 
-    [ExportGroup("Runtime Behavior")]
-    [Export] public bool UseDefinitionWeapons = false;
+    [ExportGroup("Positioning")]
+    [Export] private Node2D _weaponPositionNode;
+    public Vector2 WeaponGlobalPosition => _weaponPositionNode != null ? _weaponPositionNode.GlobalPosition : _owner.GlobalPosition;
+
 
     private Holdable _leftHoldable;
     private Holdable _rightHoldable;
@@ -18,15 +20,21 @@ public partial class HoldableSystem : Node
     {
         _owner = owner;
 
-        // If UseDefinitionWeapons is true, Initialize will be called with definition by the entity
-        // Otherwise, use scene weapons for visual testing/positioning
-        if (!UseDefinitionWeapons)
+        // If UseDebugWeaponScenes is true, use scene weapons for visual testing/positioning
+        // Otherwise, InitializeWithDefinition will be called by the entity
+        if (UseDebugWeaponScenes)
         {
-            if (_leftHoldableScene != null)
-                _leftHoldable = InstantiateHoldable(_leftHoldableScene);
+            if (_leftHoldableSceneDebug == null && _rightHoldableSceneDebug == null)
+            {
+                GD.Print($"[HoldableSystem] '{owner.Name}': No holdable scenes assigned in the inspector. Weapons may be assigned at runtime via SwapLeft/SwapRight.");
+                return;
+            }
 
-            if (_rightHoldableScene != null)
-                _rightHoldable = InstantiateHoldable(_rightHoldableScene);
+            if (_leftHoldableSceneDebug != null)
+                _leftHoldable = InstantiateHoldable(_leftHoldableSceneDebug);
+
+            if (_rightHoldableSceneDebug != null)
+                _rightHoldable = InstantiateHoldable(_rightHoldableSceneDebug);
         }
     }
 
@@ -34,13 +42,33 @@ public partial class HoldableSystem : Node
     {
         _owner = owner;
 
-        if (definition == null) return;
+        if (definition == null)
+        {
+            GD.PrintErr($"[HoldableSystem] '{owner.Name}': InitializeWithDefinition called with null definition. Assign a CharacterDefinition to the entity.");
+            return;
+        }
 
-        if (definition.LeftHoldableScene != null)
-            _leftHoldable = InstantiateHoldable(definition.LeftHoldableScene);
+        if (definition.LeftWeapon == null && definition.RightWeapon == null)
+        {
+            GD.PrintErr($"[HoldableSystem] '{owner.Name}': CharacterDefinition '{definition.ResourceName}' has no weapons assigned (LeftWeapon / RightWeapon). Assign WeaponRegistryEntry resources in the definition.");
+            return;
+        }
 
-        if (definition.RightHoldableScene != null)
-            _rightHoldable = InstantiateHoldable(definition.RightHoldableScene);
+        if (definition.LeftWeapon != null)
+        {
+            if (definition.LeftWeapon.Scene == null)
+                GD.PrintErr($"[HoldableSystem] '{owner.Name}': LeftWeapon '{definition.LeftWeapon.Name}' has no Scene assigned in its WeaponRegistryEntry.");
+            else
+                _leftHoldable = InstantiateHoldable(definition.LeftWeapon.Scene);
+        }
+
+        if (definition.RightWeapon != null)
+        {
+            if (definition.RightWeapon.Scene == null)
+                GD.PrintErr($"[HoldableSystem] '{owner.Name}': RightWeapon '{definition.RightWeapon.Name}' has no Scene assigned in its WeaponRegistryEntry.");
+            else
+                _rightHoldable = InstantiateHoldable(definition.RightWeapon.Scene);
+        }
     }
 
     public void Update(double delta)
@@ -55,12 +83,12 @@ public partial class HoldableSystem : Node
         _rightHoldable?.UpdateAim(target);
     }
 
-    public void PressLeft(Vector2 target) { _leftHoldable?.OnUsePressed(target); }
-    public void PressRight(Vector2 target) { _rightHoldable?.OnUsePressed(target); }
-    public void HeldLeft(Vector2 target) { _leftHoldable?.OnUseHeld(target); }
-    public void HeldRight(Vector2 target) { _rightHoldable?.OnUseHeld(target); }
-    public void ReleaseLeft(Vector2 target) { _leftHoldable?.OnUseReleased(target); }
-    public void ReleaseRight(Vector2 target) { _rightHoldable?.OnUseReleased(target); }
+    public void PressLeft() { _leftHoldable?.OnUsePressed(); }
+    public void PressRight() { _rightHoldable?.OnUsePressed(); }
+    public void HeldLeft() { _leftHoldable?.OnUseHeld(); }
+    public void HeldRight() { _rightHoldable?.OnUseHeld(); }
+    public void ReleaseLeft() { _leftHoldable?.OnUseReleased(); }
+    public void ReleaseRight() { _rightHoldable?.OnUseReleased(); }
 
     public void SwapLeft(PackedScene newScene)
     {
@@ -73,7 +101,7 @@ public partial class HoldableSystem : Node
 
         if (newScene != null)
         {
-            _leftHoldableScene = newScene;
+            _leftHoldableSceneDebug = newScene;
             _leftHoldable = InstantiateHoldable(newScene);
         }
     }
@@ -89,7 +117,7 @@ public partial class HoldableSystem : Node
 
         if (newScene != null)
         {
-            _rightHoldableScene = newScene;
+            _rightHoldableSceneDebug = newScene;
             _rightHoldable = InstantiateHoldable(newScene);
         }
     }
@@ -97,7 +125,7 @@ public partial class HoldableSystem : Node
     private Holdable InstantiateHoldable(PackedScene scene)
     {
         var instance = scene.Instantiate<Holdable>();
-        var parent = _weaponPosition != null ? (Node)_weaponPosition : this;
+        var parent = _weaponPositionNode != null ? (Node)_weaponPositionNode : this;
         parent.AddChild(instance);
         instance.InitOwner(_owner);
         instance.OnEquip();

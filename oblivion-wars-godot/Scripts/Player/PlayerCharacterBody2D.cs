@@ -16,7 +16,7 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
         {
             GD.PrintErr("Player Character Body2d must have a reference to its player controller");
         }
-        AddToGroup(Groups.Entities.Player);
+        AddToGroup(GroupConstants.Entities.Player);
 
         base._Ready();
 

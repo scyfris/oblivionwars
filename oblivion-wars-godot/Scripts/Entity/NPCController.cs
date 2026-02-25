@@ -66,14 +66,14 @@ public partial class NPCController : Node
         // Initialize holdables
         if (_holdableSystem != null)
         {
-            if (_holdableSystem.UseDefinitionWeapons)
-                _holdableSystem.InitializeWithDefinition(_npcCharacterBody, Definition);
-            else
+            if (_holdableSystem.UseDebugWeaponScenes)
                 _holdableSystem.Initialize(_npcCharacterBody);
+            else
+                _holdableSystem.InitializeWithDefinition(_npcCharacterBody, Definition);
         }
 
         // Find and cache player reference
-        _targetPlayer = GetTree().GetFirstNodeInGroup(Groups.Entities.Player) as PlayerCharacterBody2D;
+        _targetPlayer = GetTree().GetFirstNodeInGroup(GroupConstants.Entities.Player) as PlayerCharacterBody2D;
 
         SetupHSM();
         UpdateHealthLabel();
@@ -221,7 +221,8 @@ public partial class NPCController : Node
     public void AimAtFacingDir()
     {
         float sign = _npcCharacterBody.IsFacingRight ? 1f : -1f;
-        Vector2 target = _npcCharacterBody.GlobalPosition + _npcCharacterBody.HorizontalDir * sign * 100f;
+        Vector2 origin = _holdableSystem.WeaponGlobalPosition;
+        Vector2 target = origin + _npcCharacterBody.HorizontalDir * sign * 100f;
         UpdateAim(target);
     }
 
@@ -230,20 +231,18 @@ public partial class NPCController : Node
         if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
             return;
 
+        GD.Print("AIMATPLAYER");
         UpdateAim(_targetPlayer.GlobalPosition);
     }
 
     public void StartShooting()
     {
-        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
-            return;
-        UseHoldablePressed(_targetPlayer.GlobalPosition, true);
+        UseHoldablePressed(true);
     }
 
     public void StopShooting()
     {
-        if (_targetPlayer != null && IsInstanceValid(_targetPlayer))
-            UseHoldableReleased(_targetPlayer.GlobalPosition, true);
+        UseHoldableReleased(true);
     }
 
     // ── Holdable API ────────────────────────────────────────
@@ -253,22 +252,22 @@ public partial class NPCController : Node
         _holdableSystem?.UpdateAim(targetPosition);
     }
 
-    public void UseHoldablePressed(Vector2 target, bool isLeft)
+    public void UseHoldablePressed(bool isLeft)
     {
-        if (isLeft) _holdableSystem?.PressLeft(target);
-        else _holdableSystem?.PressRight(target);
+        if (isLeft) _holdableSystem?.PressLeft();
+        else _holdableSystem?.PressRight();
     }
 
-    public void UseHoldableReleased(Vector2 target, bool isLeft)
+    public void UseHoldableReleased(bool isLeft)
     {
-        if (isLeft) _holdableSystem?.ReleaseLeft(target);
-        else _holdableSystem?.ReleaseRight(target);
+        if (isLeft) _holdableSystem?.ReleaseLeft();
+        else _holdableSystem?.ReleaseRight();
     }
 
-    public void UseHoldableHeld(Vector2 target, bool isLeft)
+    public void UseHoldableHeld(bool isLeft)
     {
-        if (isLeft) _holdableSystem?.HeldLeft(target);
-        else _holdableSystem?.HeldRight(target);
+        if (isLeft) _holdableSystem?.HeldLeft();
+        else _holdableSystem?.HeldRight();
     }
 
     // ── Event Handlers ───────────────────────────────────

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qg8ncem056sb"
-path="res://.godot/imported/shotgun_icon.png-21b437387220f8f7b3b2b21f38753c40.ctex"
+path="res://.godot/imported/shotgun_icon.png-0fcf01c1aee070765f68e274fbb1e280.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Resources/Data/Weapons/shotgun_icon.png"
-dest_files=["res://.godot/imported/shotgun_icon.png-21b437387220f8f7b3b2b21f38753c40.ctex"]
+source_file="res://Resources/Data/Weapons/Shotgun/shotgun_icon.png"
+dest_files=["res://.godot/imported/shotgun_icon.png-0fcf01c1aee070765f68e274fbb1e280.ctex"]
 
 [params]
 

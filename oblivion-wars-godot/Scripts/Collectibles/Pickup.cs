@@ -28,7 +28,7 @@ public abstract partial class Pickup : RigidBody2D
 
     private void ExcludePlayerCollision()
     {
-        foreach (var node in GetTree().GetNodesInGroup(Groups.Entities.Player))
+        foreach (var node in GetTree().GetNodesInGroup(GroupConstants.Entities.Player))
         {
             if (node is PhysicsBody2D pb)
                 AddCollisionExceptionWith(pb);

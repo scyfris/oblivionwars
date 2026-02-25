@@ -133,9 +133,9 @@ scale = Vector2(0.09127149, 0.08331295)
 sprite_frames = SubResource("SpriteFrames_qwv0h")
 frame_progress = 0.23829632
 
-[node name="HoldableSystem" type="Node" parent="Player/PlayerBody2D" unique_id=1767063964 node_paths=PackedStringArray("_weaponPosition")]
+[node name="HoldableSystem" type="Node" parent="Player/PlayerBody2D" unique_id=1767063964 node_paths=PackedStringArray("_weaponPositionNode")]
 script = ExtResource("19_epcmy")
-_weaponPosition = NodePath("../FlipRoot/WeaponPosition")
+_weaponPositionNode = NodePath("../FlipRoot/WeaponPosition")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Player/PlayerBody2D" unique_id=317220997]
 

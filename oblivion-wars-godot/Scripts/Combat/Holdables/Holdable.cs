@@ -26,9 +26,9 @@ public abstract partial class Holdable : Node2D
         _timeSinceLastUse = 0f;
     }
 
-    public virtual void OnUsePressed(Vector2 targetPosition) { }
-    public virtual void OnUseReleased(Vector2 targetPosition) { }
-    public virtual void OnUseHeld(Vector2 targetPosition) { }
+    public virtual void OnUsePressed() { }
+    public virtual void OnUseReleased() { }
+    public virtual void OnUseHeld() { }
 
     public virtual void UpdateAim(Vector2 targetPosition) { }
 

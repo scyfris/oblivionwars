@@ -20,7 +20,7 @@ public partial class GameHUD : CanvasLayer
         EventBus.Instance?.Subscribe<ItemCollectedEvent>(OnItemCollected);
         EventBus.Instance?.Subscribe<WeaponSwitchedEvent>(OnWeaponSwitched);
 
-        PlayerCharacterBody2D playerbody = GetTree().GetFirstNodeInGroup(Groups.Entities.Player) as PlayerCharacterBody2D;
+        PlayerCharacterBody2D playerbody = GetTree().GetFirstNodeInGroup(GroupConstants.Entities.Player) as PlayerCharacterBody2D;
 
         if (playerbody == null)
         {

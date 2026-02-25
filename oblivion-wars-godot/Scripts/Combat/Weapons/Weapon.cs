@@ -3,10 +3,12 @@ using Godot;
 public partial class Weapon : Holdable
 {
     [Export] private WeaponDefinition _weaponDefinition;
-    [Export] private Node2D _projectileSpawn;
+    [Export] private Node2D _projectileSpawnLocationNode;
     [Export] private AnimationPlayer _animationPlayer;
 
     private bool _hasFiredThisPress = false;
+
+    private Vector2 AimDirection => GlobalTransform.X.Normalized();
 
     public override void UpdateAim(Vector2 targetPosition)
     {
@@ -26,24 +28,24 @@ public partial class Weapon : Holdable
             _useCooldown = _weaponDefinition.UseCooldown;
     }
 
-    public override void OnUsePressed(Vector2 targetPosition)
+    public override void OnUsePressed()
     {
         _hasFiredThisPress = false;
-        TryFire(targetPosition);
+        TryFire();
     }
 
-    public override void OnUseHeld(Vector2 targetPosition)
+    public override void OnUseHeld()
     {
         if (!_weaponDefinition.IsAutomatic && _hasFiredThisPress) return;
-        TryFire(targetPosition);
+        TryFire();
     }
 
-    public override void OnUseReleased(Vector2 targetPosition)
+    public override void OnUseReleased()
     {
         _hasFiredThisPress = false;
     }
 
-    private void TryFire(Vector2 targetPosition)
+    private void TryFire()
     {
         if (!CanUse() || _weaponDefinition?.Projectile == null) return;
         _hasFiredThisPress = true;
@@ -52,9 +54,9 @@ public partial class Weapon : Holdable
         float damage = projDef.Damage * _weaponDefinition.DamageScale;
 
         if (projDef.Speed == 0)
-            FireInstant(targetPosition, damage, projDef);
+            FireInstant(damage, projDef);
         else
-            FireProjectile(targetPosition, damage, projDef);
+            FireProjectile(damage, projDef);
 
         ResetCooldown();
 
@@ -64,9 +66,9 @@ public partial class Weapon : Holdable
             CameraController.Instance.Shake(_weaponDefinition.ScreenShakeScale, _weaponDefinition.ScreenShakeDurationScale);
     }
 
-    private void FireProjectile(Vector2 targetPosition, float damage, ProjectileDefinition projDef)
+    private void FireProjectile(float damage, ProjectileDefinition projDef)
     {
-        Vector2 baseDirection = (targetPosition - GetSpawnPosition()).Normalized();
+        Vector2 baseDirection = AimDirection;
 
         if (_weaponDefinition.SpreadCount <= 1)
         {
@@ -91,7 +93,7 @@ public partial class Weapon : Holdable
 
     private Vector2 GetSpawnPosition()
     {
-        return _projectileSpawn != null ? _projectileSpawn.GlobalPosition : _owner.GlobalPosition;
+        return _projectileSpawnLocationNode != null ? _projectileSpawnLocationNode.GlobalPosition : _owner.GlobalPosition;
     }
 
     private void SpawnProjectile(Vector2 direction, float damage, ProjectileDefinition projDef)
@@ -105,10 +107,10 @@ public partial class Weapon : Holdable
         _owner.GetParent().AddChild(projectile);
     }
 
-    private void FireInstant(Vector2 targetPosition, float damage, ProjectileDefinition projDef)
+    private void FireInstant(float damage, ProjectileDefinition projDef)
     {
         Vector2 spawnPos = GetSpawnPosition();
-        Vector2 direction = (targetPosition - spawnPos).Normalized();
+        Vector2 direction = AimDirection;
 
         var spaceState = _owner.GetWorld2D().DirectSpaceState;
         var query = PhysicsRayQueryParameters2D.Create(

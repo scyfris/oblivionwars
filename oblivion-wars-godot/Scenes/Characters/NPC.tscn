@@ -4,7 +4,6 @@
 [ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/TestDummy/test_dummy_def.tres" id="2_def"]
 [ext_resource type="Texture2D" uid="uid://degmoqfpjxpbh" path="res://Resources/Sprites/TestDummyNPC.png" id="3_7oewm"]
 [ext_resource type="Resource" uid="uid://bv4jpxnmqlkb2" path="res://Resources/Data/Physics/npc_physics_settings.tres" id="3_iqlxx"]
-[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Scenes/Weapons/Pistol.tscn" id="4_5tmo4"]
 [ext_resource type="Script" uid="uid://brlpnvstlgdf3" path="res://Scripts/UI/DebugModeFilter.cs" id="4_gebkd"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
 [ext_resource type="Script" uid="uid://c3r15ai6j4fbn" path="res://Scripts/Entity/NPCController.cs" id="6_npcctrl"]
@@ -44,6 +43,10 @@ _physicsDef = ExtResource("3_iqlxx")
 position = Vector2(0, -32)
 shape = SubResource("RectangleShape2D_dummy")
 
+[node name="HoldableSystem" type="Node" parent="." unique_id=752884601 node_paths=PackedStringArray("_weaponPositionNode")]
+script = ExtResource("5_holdable")
+_weaponPositionNode = NodePath("../FlipRoot/WeaponPosition")
+
 [node name="FlipRoot" type="Node2D" parent="." unique_id=1454104269]
 
 [node name="WeaponPosition" type="Node2D" parent="FlipRoot" unique_id=1053823199]
@@ -75,11 +78,6 @@ offset_top = -104.0
 offset_right = 55.0
 offset_bottom = -81.0
 text = "StateDebug"
-
-[node name="HoldableSystem" type="Node" parent="." unique_id=752884601 node_paths=PackedStringArray("_weaponPosition")]
-script = ExtResource("5_holdable")
-_leftHoldableScene = ExtResource("4_5tmo4")
-_weaponPosition = NodePath("../FlipRoot/WeaponPosition")
 
 [node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel", "_stateLabel", "_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState")]
 script = ExtResource("6_npcctrl")
