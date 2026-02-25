@@ -1,17 +1,15 @@
 [gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://bkksyfiyb5e3y"]
 
-[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="1_script"]
-[ext_resource type="Resource" uid="uid://d17y8xwqekvkh" path="res://Resources/Data/Projectiles/bullet.tres" id="2_projectile"]
+[ext_resource type="Resource" uid="uid://d4mosgvbycq4v" path="res://Resources/Data/Projectiles/raycast_bullet_projectile.tres" id="1_m3xye"]
+[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="2_sq3vr"]
 
 [resource]
-script = ExtResource("1_script")
-WeaponId = "shotgun"
-UseCooldown = 0.6
-IsAutomatic = false
+script = ExtResource("2_sq3vr")
+UseCooldown = 0.75
 DamageScale = 0.5
-Knockback = 150.0
-ScreenShakeScale = 2.0
-Projectile = ExtResource("2_projectile")
+ScreenShakeScale = 1.5
+ScreenShakeDurationScale = 0.4
+Projectile = ExtResource("1_m3xye")
 SpreadCount = 5
 SpreadAngle = 30.0
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"

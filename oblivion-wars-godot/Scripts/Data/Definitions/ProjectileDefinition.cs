@@ -17,6 +17,9 @@ public partial class ProjectileDefinition : Resource
     [ExportGroup("Raycast")]
     [Export] public float HitscanRange = 1000.0f;
     [Export] public float TrailDuration = 0.1f;
+    [Export] public bool TrailUseSweep = true;
+    [Export(PropertyHint.Range, "0,10,0.1")] public float TrailWidenScale = 3f;
+    [Export] public Gradient TrailGradient;
 
     [ExportGroup("Explosion")]
     [Export] public float ExplosionRadius = 0.0f;

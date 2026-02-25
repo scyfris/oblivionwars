@@ -109,8 +109,32 @@ public partial class Weapon : Holdable
 
     private void FireInstant(float damage, ProjectileDefinition projDef)
     {
+        Vector2 baseDirection = AimDirection;
+
+        if (_weaponDefinition.SpreadCount <= 1)
+        {
+            FireSingleRay(baseDirection, damage, projDef);
+        }
+        else
+        {
+            float totalAngle = Mathf.DegToRad(_weaponDefinition.SpreadAngle);
+            float startAngle = -totalAngle / 2f;
+            float step = _weaponDefinition.SpreadCount > 1
+                ? totalAngle / (_weaponDefinition.SpreadCount - 1)
+                : 0f;
+
+            for (int i = 0; i < _weaponDefinition.SpreadCount; i++)
+            {
+                float angle = startAngle + step * i;
+                Vector2 spreadDir = baseDirection.Rotated(angle);
+                FireSingleRay(spreadDir, damage, projDef);
+            }
+        }
+    }
+
+    private void FireSingleRay(Vector2 direction, float damage, ProjectileDefinition projDef)
+    {
         Vector2 spawnPos = GetSpawnPosition();
-        Vector2 direction = AimDirection;
 
         var spaceState = _owner.GetWorld2D().DirectSpaceState;
         var query = PhysicsRayQueryParameters2D.Create(
@@ -155,7 +179,7 @@ public partial class Weapon : Holdable
             _owner.GetTree().Root.AddChild(effect);
         }
 
-        // Spawn projectile scene for trail VFX — AddChild first so _trail export resolves
+        // Spawn projectile scene for trail VFX
         if (projDef.ProjectileScene != null)
         {
             var trailProjectile = projDef.ProjectileScene.Instantiate<Projectile>();

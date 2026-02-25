@@ -12,6 +12,11 @@ public abstract partial class Projectile : Area2D
 
     private bool _isHitscanTrail = false;
     private float _hitscanTrailTimer = 0f;
+    private float _hitscanTrailDuration = 0f;
+    private float _hitscanTrailInitialWidth = 0f;
+    private Color _hitscanTrailColor;
+    private Vector2 _hitscanFrom;
+    private Vector2 _hitscanTo;
 
     public override void _Ready()
     {
@@ -34,7 +39,8 @@ public abstract partial class Projectile : Area2D
     public void InitializeAsHitscanTrail(Vector2 from, Vector2 to)
     {
         _isHitscanTrail = true;
-        _hitscanTrailTimer = _projectileDefinition?.TrailDuration ?? 0.1f;
+        _hitscanTrailDuration = _projectileDefinition?.TrailDuration ?? 0.1f;
+        _hitscanTrailTimer = _hitscanTrailDuration;
 
         // Disable collision for trail-only projectiles
         SetDeferred("monitoring", false);
@@ -47,10 +53,18 @@ public abstract partial class Projectile : Area2D
 
         if (_trail != null)
         {
+            _hitscanFrom = from;
+            _hitscanTo = to;
             _trail.ClearPoints();
             _trail.AddPoint(from);
             _trail.AddPoint(to);
             _trail.Visible = true;
+            _hitscanTrailInitialWidth = _trail.Width;
+            _hitscanTrailColor = _trail.DefaultColor;
+
+            // Apply gradient from definition if set
+            if (_projectileDefinition?.TrailGradient != null)
+                _trail.Gradient = (Gradient)_projectileDefinition.TrailGradient.Duplicate();
         }
     }
 
@@ -86,7 +100,31 @@ public abstract partial class Projectile : Area2D
     {
         _hitscanTrailTimer -= (float)delta;
         if (_hitscanTrailTimer <= 0)
+        {
             QueueFree();
+            return;
+        }
+
+        if (_trail == null || _hitscanTrailDuration <= 0f) return;
+
+        float t = 1f - (_hitscanTrailTimer / _hitscanTrailDuration); // 0→1 over lifetime
+        float widenScale = _projectileDefinition?.TrailWidenScale ?? 3f;
+        bool useSweep = _projectileDefinition?.TrailUseSweep ?? true;
+
+        if (useSweep)
+        {
+            // Sweep: move the gun-end point toward the hit point over time
+            // The gradient remaps naturally over the shrinking line
+            Vector2 newStart = _hitscanFrom.Lerp(_hitscanTo, t);
+            _trail.SetPointPosition(0, newStart);
+        }
+
+        // Fade overall alpha over time
+        float alpha = 1f - t;
+        _trail.Modulate = new Color(1f, 1f, 1f, alpha);
+
+        // Widen to simulate smoke dissipating
+        _trail.Width = _hitscanTrailInitialWidth * (1f + t * widenScale);
     }
 
     protected virtual void UpdateLifetime(double delta)

@@ -6,6 +6,7 @@ public partial class WeaponDefinition : Resource
     [Export] public float UseCooldown = 0.2f;
     [Export] public bool IsAutomatic = true;
     [Export] public float DamageScale = 1.0f;
+    // XXX UNUSED
     [Export] public float Knockback = 100.0f;
     [Export] public float ScreenShakeScale = 1.0f;
     [Export] public float ScreenShakeDurationScale = 1.0f;
