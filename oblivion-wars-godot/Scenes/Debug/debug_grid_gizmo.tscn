@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://27ca1evhhhhg"]
+
+[ext_resource type="Script" uid="uid://qe0mdxyjfalp" path="res://Scripts/Debug/TileGridDebugGizmo.cs" id="1_m2nk6"]
+
+[node name="DebugGridGizmo" type="Node2D" unique_id=1165749310]
+script = ExtResource("1_m2nk6")

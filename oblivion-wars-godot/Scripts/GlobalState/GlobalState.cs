@@ -11,6 +11,7 @@ public class GlobalState : ISaveableState<GlobalSaveData>
     public bool IsDebugModeEnabled { get; set; } = false;
     public bool ShowCameraGizmo { get; set; } = true;
     public bool ShowNPCRangeGizmo { get; set; } = true;
+    public bool ShowTileGrid { get; set; } = false;
 
     // ── Saveable State ──────────────────────────────────────────
 

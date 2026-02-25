@@ -10,6 +10,7 @@ public partial class DebugOverlay : Control
     private readonly Dictionary<string, CheckBox> _weaponCheckboxes = new();
     private CheckBox _cameraGizmoCb;
     private CheckBox _npcRangeGizmoCb;
+    private CheckBox _tileGridCb;
     private Input.MouseModeEnum _savedMouseMode;
 
     public override void _Ready()
@@ -139,6 +140,15 @@ public partial class DebugOverlay : Control
         };
         _gizmoSection.AddChild(_npcRangeGizmoCb);
 
+        _tileGridCb = new CheckBox();
+        _tileGridCb.Text = "Tile Grid";
+        _tileGridCb.Toggled += (pressed) =>
+        {
+            var global = GlobalStateManager.Instance?.Global;
+            if (global != null) global.ShowTileGrid = pressed;
+        };
+        _gizmoSection.AddChild(_tileGridCb);
+
         // Spacer
         var spacer = new Control();
         spacer.SizeFlagsVertical = SizeFlags.ExpandFill;
@@ -166,6 +176,7 @@ public partial class DebugOverlay : Control
         if (global == null) return;
         _cameraGizmoCb?.SetPressedNoSignal(global.ShowCameraGizmo);
         _npcRangeGizmoCb?.SetPressedNoSignal(global.ShowNPCRangeGizmo);
+        _tileGridCb?.SetPressedNoSignal(global.ShowTileGrid);
     }
 
     private void RefreshWeapons()

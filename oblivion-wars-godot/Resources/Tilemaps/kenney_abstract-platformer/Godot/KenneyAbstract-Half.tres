@@ -418,7 +418,7 @@ texture_region_size = Vector2i(32, 32)
 21:11/0 = 0
 
 [resource]
-tile_size = Vector2i(32, 32)
+tile_size = Vector2i(64, 64)
 physics_layer_0/collision_layer = 1
 custom_data_layer_0/name = "surface_type"
 custom_data_layer_0/type = 2

@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://dg2ca2viy4a1u"]
+
+[ext_resource type="Script" uid="uid://dvmr0gitmotiv" path="res://Scripts/Entity/NPCRangeGizmo.cs" id="1_ff2x2"]
+
+[node name="NPCDebugRangeGizmo" type="Node2D" unique_id=1741832860]
+script = ExtResource("1_ff2x2")
+_npcControllerPath = NodePath("../NPCController")

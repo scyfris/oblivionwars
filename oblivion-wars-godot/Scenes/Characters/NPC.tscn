@@ -6,18 +6,19 @@
 [ext_resource type="Resource" uid="uid://bv4jpxnmqlkb2" path="res://Resources/Data/Physics/npc_physics_settings.tres" id="3_iqlxx"]
 [ext_resource type="Script" uid="uid://brlpnvstlgdf3" path="res://Scripts/UI/DebugModeFilter.cs" id="4_gebkd"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
+[ext_resource type="PackedScene" uid="uid://dg2ca2viy4a1u" path="res://Scenes/Debug/npc_debug_range_gizmo.tscn" id="6_gebkd"]
 [ext_resource type="Script" uid="uid://c3r15ai6j4fbn" path="res://Scripts/Entity/NPCController.cs" id="6_npcctrl"]
-[ext_resource type="Script" uid="uid://dvmr0gitmotiv" path="res://Scripts/Entity/NPCRangeGizmo.cs" id="9_gizmo"]
 [ext_resource type="Script" uid="uid://d1jl01hebb3mn" path="res://Scripts/AI/NPCBehaviorScripts/Idle/NPCStateIdle_Basic.cs" id="10_idle"]
 [ext_resource type="Script" uid="uid://dipdlqoetk81j" path="res://Scripts/AI/NPCBehaviorScripts/Patrol/NPCBehaviorPatrol_Basic.cs" id="11_patrol"]
 [ext_resource type="Script" uid="uid://d33shgctsw3b5" path="res://Scripts/AI/NPCBehaviorScripts/Attack/NPCBehaviorAttack_Basic.cs" id="12_attack"]
 [ext_resource type="Resource" uid="uid://cm76kgonh4m3p" path="res://Resources/Data/Characters/Enemies/Shared/AI/BehaviorParams/SHARED_patrol_basic.tres" id="13_abgwp"]
 [ext_resource type="Script" uid="uid://xvtytnrs76fw" path="res://Scripts/AI/NPCBehaviorScripts/Flee/NPCBehaviorFlee_Basic.cs" id="13_flee"]
 [ext_resource type="Resource" uid="uid://cmcxybx5awxqs" path="res://Resources/Data/Characters/Enemies/Shared/AI/BehaviorParams/SHARED_attack_basic.tres" id="15_g3jgu"]
+[ext_resource type="Script" uid="uid://qe0mdxyjfalp" path="res://Scripts/Debug/TileGridDebugGizmo.cs" id="16_gebkd"]
 [ext_resource type="Resource" uid="uid://dxwmrw8fynbn5" path="res://Resources/Data/Characters/Enemies/Shared/AI/BehaviorParams/SHARED_flee_basic.tres" id="17_3vs80"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
-size = Vector2(32, 64)
+size = Vector2(56, 121)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_iqlxx"]
 animations = [{
@@ -39,21 +40,22 @@ _walkFacingDirAnimation = "default"
 _walkNonFacingDirAnimation = "default"
 _physicsDef = ExtResource("3_iqlxx")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1232872331]
-position = Vector2(0, -32)
-shape = SubResource("RectangleShape2D_dummy")
-
 [node name="HoldableSystem" type="Node" parent="." unique_id=752884601 node_paths=PackedStringArray("_weaponPositionNode")]
 script = ExtResource("5_holdable")
 _weaponPositionNode = NodePath("../FlipRoot/WeaponPosition")
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1232872331]
+position = Vector2(-31, -60.499992)
+shape = SubResource("RectangleShape2D_dummy")
+
 [node name="FlipRoot" type="Node2D" parent="." unique_id=1454104269]
 
 [node name="WeaponPosition" type="Node2D" parent="FlipRoot" unique_id=1053823199]
-position = Vector2(14, -40)
+position = Vector2(1, -60)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="FlipRoot" unique_id=1131916459]
-position = Vector2(0, -32)
+position = Vector2(-31.499998, -63.749996)
+scale = Vector2(1.9687501, 1.9765624)
 sprite_frames = SubResource("SpriteFrames_iqlxx")
 
 [node name="HealthLabel" type="Label" parent="." unique_id=1674419487]
@@ -79,9 +81,7 @@ offset_right = 55.0
 offset_bottom = -81.0
 text = "StateDebug"
 
-[node name="RangeGizmo" type="Node2D" parent="." unique_id=143130064]
-script = ExtResource("9_gizmo")
-_npcControllerPath = NodePath("../NPCController")
+[node name="NPCDebugRangeGizmo" parent="." unique_id=1741832860 instance=ExtResource("6_gebkd")]
 
 [node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel", "_stateLabel", "_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState")]
 script = ExtResource("6_npcctrl")
@@ -112,3 +112,6 @@ _settings = ExtResource("15_g3jgu")
 [node name="FleeState" type="LimboState" parent="LimboHSM" unique_id=1274158220]
 script = ExtResource("13_flee")
 _settings = ExtResource("17_3vs80")
+
+[node name="DebugGridGizmo" type="Node2D" parent="." unique_id=251228638]
+script = ExtResource("16_gebkd")

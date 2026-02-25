@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://ciki2nofi8s2f"]
+
+[ext_resource type="Script" uid="uid://cofgmakiecn5q" path="res://Scripts/Camera/CameraDebugGizmo.cs" id="1_56sb6"]
+
+[node name="DebugCameraGizmo" type="Node2D" unique_id=1458507767]
+script = ExtResource("1_56sb6")
+_cameraControllerPath = NodePath("../CameraController")
+_lineWidth = 10.0

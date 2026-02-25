@@ -1,10 +1,10 @@
 [gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://t1a573wpeldn"]
 
-[ext_resource type="Resource" uid="uid://d17y8xwqekvkh" path="res://Resources/Data/Projectiles/bullet.tres" id="1_6yfgo"]
-[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="2_tg7k0"]
+[ext_resource type="Resource" uid="uid://d17y8xwqekvkh" path="res://Resources/Data/Projectiles/bullet.tres" id="1_v4mrx"]
+[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="2_54u4k"]
 
 [resource]
-script = ExtResource("2_tg7k0")
-UseCooldown = 0.2
-Projectile = ExtResource("1_6yfgo")
+script = ExtResource("2_54u4k")
+UseCooldown = 1.0
+Projectile = ExtResource("1_v4mrx")
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"
