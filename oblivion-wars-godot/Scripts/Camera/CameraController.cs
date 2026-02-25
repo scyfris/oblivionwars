@@ -77,7 +77,12 @@ public partial class CameraController : Node
 	/// <summary>
 	/// Returns the zone's CameraSettings if an active zone has one, otherwise the default settings.
 	/// </summary>
-	private CameraSettings EffectiveSettings => _activeZone?.Settings ?? _defaultSettings;
+	public CameraSettings EffectiveSettings => _activeZone?.Settings ?? _defaultSettings;
+
+	/// <summary>
+	/// The default camera settings resource (used as fallback for zone overrides).
+	/// </summary>
+	public CameraSettings DefaultSettings => _defaultSettings;
 
 	public override void _Ready()
 	{
@@ -215,12 +220,21 @@ public partial class CameraController : Node
 		// Calculate target position (camera center + offset needed to keep player in deadzone)
 		Vector2 targetPosition = _camera.GlobalPosition + deadzoneOffset;
 
-		// Apply boundaries if enabled
+		// Apply boundaries if enabled (clamp so camera edges don't exceed bounds)
 		if (s.GetUseBoundaries(_defaultSettings))
 		{
 			var bounds = s.GetCameraBounds(_defaultSettings);
-			targetPosition.X = Mathf.Clamp(targetPosition.X, bounds.Position.X, bounds.End.X);
-			targetPosition.Y = Mathf.Clamp(targetPosition.Y, bounds.Position.Y, bounds.End.Y);
+			Vector2 viewportSize = GetViewport().GetVisibleRect().Size / _currentZoom;
+			Vector2 halfView = viewportSize / 2f;
+
+			float minX = bounds.Position.X + halfView.X;
+			float maxX = bounds.End.X - halfView.X;
+			float minY = bounds.Position.Y + halfView.Y;
+			float maxY = bounds.End.Y - halfView.Y;
+
+			// If bounds are smaller than viewport, center the camera in that axis
+			targetPosition.X = minX <= maxX ? Mathf.Clamp(targetPosition.X, minX, maxX) : (bounds.Position.X + bounds.End.X) / 2f;
+			targetPosition.Y = minY <= maxY ? Mathf.Clamp(targetPosition.Y, minY, maxY) : (bounds.Position.Y + bounds.End.Y) / 2f;
 		}
 
 		// Apply zone constraints (world-space clamping)
@@ -554,16 +568,6 @@ public partial class CameraController : Node
 	{
 		_mode = CameraMode.Cutscene;
 		GD.Print("Camera entered cutscene mode");
-	}
-
-	/// <summary>
-	/// Set camera boundaries (useful for keeping camera within level bounds)
-	/// </summary>
-	public void SetBoundaries(Rect2 bounds, bool enabled = true)
-	{
-		if (_defaultSettings == null) return;
-		_defaultSettings.CameraBounds = bounds;
-		_defaultSettings.UseBoundaries = enabled;
 	}
 
 	/// <summary>

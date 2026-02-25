@@ -35,7 +35,12 @@ public partial class CameraSettings : Resource
 
     [Export] public bool UseDefaultBoundaries = true;
     [Export] public bool UseBoundaries = false;
-    [Export] public Rect2 CameraBounds = new Rect2(-10000, -10000, 20000, 20000);
+    [Export] public float BoundLeft = -10000f;
+    [Export] public float BoundRight = 10000f;
+    /// <summary>Lowest point of bounds (Y-up convention, positive = up).</summary>
+    [Export] public float BoundBottom = -10000f;
+    /// <summary>Highest point of bounds (Y-up convention, positive = up).</summary>
+    [Export] public float BoundTop = 10000f;
 
     // ── Rotation ──────────────────────────────────────────
     [ExportGroup("Rotation")]
@@ -68,7 +73,8 @@ public partial class CameraSettings : Resource
             nameof(LookAheadDistance) => UseDefaultLookAheadDistance,
             nameof(LookAheadSpeed) => UseDefaultLookAheadSpeed,
             nameof(Zoom) => UseDefaultZoom,
-            nameof(UseBoundaries) or nameof(CameraBounds) => UseDefaultBoundaries,
+            nameof(UseBoundaries) or nameof(BoundLeft) or nameof(BoundRight)
+                or nameof(BoundBottom) or nameof(BoundTop) => UseDefaultBoundaries,
             nameof(RotateWithPlayer) or nameof(RotationSpeed)
                 or nameof(MinRotationSpeed) or nameof(RotationDelay) => UseDefaultRotation,
             nameof(BaseShakeStrength) or nameof(BaseShakeDuration) => UseDefaultShake,
@@ -108,8 +114,14 @@ public partial class CameraSettings : Resource
     public bool GetUseBoundaries(CameraSettings defaults) =>
         UseDefaultBoundaries ? defaults.UseBoundaries : UseBoundaries;
 
-    public Rect2 GetCameraBounds(CameraSettings defaults) =>
-        UseDefaultBoundaries ? defaults.CameraBounds : CameraBounds;
+    public Rect2 GetCameraBounds(CameraSettings defaults)
+    {
+        var s = UseDefaultBoundaries ? defaults : this;
+        // Convert Y-up convention to Godot's Y-down: negate and swap top/bottom
+        float godotMinY = -s.BoundTop;
+        float godotMaxY = -s.BoundBottom;
+        return new Rect2(s.BoundLeft, godotMinY, s.BoundRight - s.BoundLeft, godotMaxY - godotMinY);
+    }
 
     public bool GetRotateWithPlayer(CameraSettings defaults) =>
         UseDefaultRotation ? defaults.RotateWithPlayer : RotateWithPlayer;

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CameraSettings" format=3 uid="uid://cmq8e4k64txg7"]
+
+[ext_resource type="Script" uid="uid://bphwn0lhjpi8p" path="res://Scripts/Data/Definitions/CameraSettings.cs" id="1_e0rp4"]
+
+[resource]
+script = ExtResource("1_e0rp4")
+UseDefaultZoom = false
+Zoom = Vector2(1.25, 1.25)
+metadata/_custom_type_script = "uid://bphwn0lhjpi8p"
