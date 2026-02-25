@@ -9,6 +9,8 @@ public class GlobalState : ISaveableState<GlobalSaveData>
 {
     // ── Transient Runtime State (not serialized) ──────────────
     public bool IsDebugModeEnabled { get; set; } = false;
+    public bool ShowCameraGizmo { get; set; } = true;
+    public bool ShowNPCRangeGizmo { get; set; } = true;
 
     // ── Saveable State ──────────────────────────────────────────
 

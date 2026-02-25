@@ -15,6 +15,7 @@ UseDefaultZoom = false
 Zoom = Vector2(1.25, 1.25)
 UseDefaultBoundaries = false
 UseBoundaries = true
+BoundBottom = -500.0
 UseDefaultRotation = false
 RotationSpeed = 7.0
 MinRotationSpeed = 2.0

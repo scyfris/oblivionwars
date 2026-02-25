@@ -6,7 +6,10 @@ public partial class DebugOverlay : Control
     [Export] private string _toggleAction = "debug_menu";
 
     private VBoxContainer _weaponSection;
+    private VBoxContainer _gizmoSection;
     private readonly Dictionary<string, CheckBox> _weaponCheckboxes = new();
+    private CheckBox _cameraGizmoCb;
+    private CheckBox _npcRangeGizmoCb;
     private Input.MouseModeEnum _savedMouseMode;
 
     public override void _Ready()
@@ -107,6 +110,35 @@ public partial class DebugOverlay : Control
         _weaponSection.AddThemeConstantOverride("separation", 2);
         root.AddChild(_weaponSection);
 
+        root.AddChild(new HSeparator());
+
+        // Gizmos section
+        var gizmosLabel = new Label();
+        gizmosLabel.Text = "Gizmos";
+        root.AddChild(gizmosLabel);
+
+        _gizmoSection = new VBoxContainer();
+        _gizmoSection.AddThemeConstantOverride("separation", 2);
+        root.AddChild(_gizmoSection);
+
+        _cameraGizmoCb = new CheckBox();
+        _cameraGizmoCb.Text = "Camera Debug";
+        _cameraGizmoCb.Toggled += (pressed) =>
+        {
+            var global = GlobalStateManager.Instance?.Global;
+            if (global != null) global.ShowCameraGizmo = pressed;
+        };
+        _gizmoSection.AddChild(_cameraGizmoCb);
+
+        _npcRangeGizmoCb = new CheckBox();
+        _npcRangeGizmoCb.Text = "NPC Ranges";
+        _npcRangeGizmoCb.Toggled += (pressed) =>
+        {
+            var global = GlobalStateManager.Instance?.Global;
+            if (global != null) global.ShowNPCRangeGizmo = pressed;
+        };
+        _gizmoSection.AddChild(_npcRangeGizmoCb);
+
         // Spacer
         var spacer = new Control();
         spacer.SizeFlagsVertical = SizeFlags.ExpandFill;
@@ -125,6 +157,15 @@ public partial class DebugOverlay : Control
     private void RefreshAll()
     {
         RefreshWeapons();
+        RefreshGizmos();
+    }
+
+    private void RefreshGizmos()
+    {
+        var global = GlobalStateManager.Instance?.Global;
+        if (global == null) return;
+        _cameraGizmoCb?.SetPressedNoSignal(global.ShowCameraGizmo);
+        _npcRangeGizmoCb?.SetPressedNoSignal(global.ShowNPCRangeGizmo);
     }
 
     private void RefreshWeapons()

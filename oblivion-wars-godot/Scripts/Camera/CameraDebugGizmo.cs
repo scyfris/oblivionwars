@@ -1,9 +1,9 @@
 using Godot;
 
 /// <summary>
-/// [Tool] debug overlay that draws camera boundaries, viewport extents, deadzone, and follow offset
-/// in the editor. Export a NodePath to the CameraController node; settings are read via Get() since
-/// CameraController is not a [Tool] script.
+/// [Tool] debug overlay that draws camera boundaries, viewport extents, deadzone, and follow offset.
+/// In the editor: reads settings via Get() from an exported NodePath to the CameraController.
+/// At runtime: reads directly from CameraController.Instance when debug mode is enabled.
 /// </summary>
 [Tool]
 public partial class CameraDebugGizmo : Node2D
@@ -35,29 +35,62 @@ public partial class CameraDebugGizmo : Node2D
 	[ExportGroup("Line Width")]
 	[Export] private float _lineWidth = 2f;
 
+	private bool _wasDebugActive;
+
 	public override void _Process(double delta)
 	{
 		if (Engine.IsEditorHint())
+		{
 			QueueRedraw();
+			return;
+		}
+
+		var global = GlobalStateManager.Instance?.Global;
+		bool debugActive = global?.IsDebugModeEnabled == true && global?.ShowCameraGizmo == true;
+
+		if (debugActive)
+		{
+			var cam = CameraController.Instance?.GetCamera();
+			if (cam != null)
+				GlobalPosition = cam.GlobalPosition;
+			QueueRedraw();
+		}
+		else if (_wasDebugActive)
+		{
+			// Debug just turned off — one final redraw to clear the gizmos
+			QueueRedraw();
+		}
+
+		_wasDebugActive = debugActive;
 	}
 
 	public override void _Draw()
 	{
-		if (!Engine.IsEditorHint()) return;
+		if (Engine.IsEditorHint())
+		{
+			DrawEditor();
+		}
+		else
+		{
+			var global = GlobalStateManager.Instance?.Global;
+			if (global?.IsDebugModeEnabled == true && global?.ShowCameraGizmo == true)
+				DrawRuntime();
+		}
+	}
 
+	private void DrawEditor()
+	{
 		if (_cameraControllerPath == null || _cameraControllerPath.IsEmpty)
 			return;
 
 		var controller = GetNodeOrNull(_cameraControllerPath);
 		if (controller == null) return;
 
-		// Read the _defaultSettings resource from the CameraController
 		var settingsVariant = controller.Get(DefaultSettingsProperty);
 		if (settingsVariant.VariantType == Variant.Type.Nil) return;
 		var settings = settingsVariant.AsGodotObject();
 		if (settings == null) return;
 
-		// Read properties from the settings resource
 		Vector2 zoom = GetVector2(settings, ZoomProperty, Vector2.One);
 		Vector2 deadzone = GetVector2(settings, DeadzoneProperty, new Vector2(40, 30));
 		Vector2 followOffset = GetVector2(settings, FollowOffsetProperty, Vector2.Zero);
@@ -67,15 +100,50 @@ public partial class CameraDebugGizmo : Node2D
 		float boundBottom = GetFloat(settings, BoundBottomProperty, -10000f);
 		float boundTop = GetFloat(settings, BoundTopProperty, 10000f);
 
-		// Read viewport size from project settings
 		int viewW = (int)ProjectSettings.GetSetting("display/window/size/viewport_width");
 		int viewH = (int)ProjectSettings.GetSetting("display/window/size/viewport_height");
 		Vector2 viewportSize = new Vector2(viewW, viewH) / zoom;
 		Vector2 halfView = viewportSize / 2f;
 
-		// Draw everything relative to local origin (this node's position = "camera center")
 		Vector2 center = Vector2.Zero;
 
+		DrawGizmos(center, halfView, deadzone, followOffset, useBounds, boundLeft, boundRight, boundBottom, boundTop);
+	}
+
+	private void DrawRuntime()
+	{
+		var controller = CameraController.Instance;
+		if (controller == null) return;
+
+		var camera = controller.GetCamera();
+		if (camera == null) return;
+
+		var settings = controller.EffectiveSettings;
+		var defaults = controller.DefaultSettings;
+		if (settings == null || defaults == null) return;
+
+		Vector2 zoom = camera.Zoom;
+		Vector2 deadzone = settings.GetDeadzone(defaults);
+		Vector2 followOffset = settings.GetFollowOffset(defaults);
+		bool useBounds = settings.GetUseBoundaries(defaults);
+
+		var s = settings.UseDefaultBoundaries ? defaults : settings;
+		float boundLeft = s.BoundLeft;
+		float boundRight = s.BoundRight;
+		float boundBottom = s.BoundBottom;
+		float boundTop = s.BoundTop;
+
+		Vector2 viewportSize = GetViewport().GetVisibleRect().Size / zoom;
+		Vector2 halfView = viewportSize / 2f;
+
+		Vector2 center = Vector2.Zero;
+
+		DrawGizmos(center, halfView, deadzone, followOffset, useBounds, boundLeft, boundRight, boundBottom, boundTop);
+	}
+
+	private void DrawGizmos(Vector2 center, Vector2 halfView, Vector2 deadzone, Vector2 followOffset,
+		bool useBounds, float boundLeft, float boundRight, float boundBottom, float boundTop)
+	{
 		if (_drawViewport)
 		{
 			var rect = new Rect2(center - halfView, halfView * 2f);
@@ -84,14 +152,11 @@ public partial class CameraDebugGizmo : Node2D
 
 		if (_drawBounds && useBounds)
 		{
-			// Convert Y-up convention to Godot Y-down
 			float godotMinY = -boundTop;
 			float godotMaxY = -boundBottom;
 			Vector2 boundsMin = new Vector2(boundLeft, godotMinY) - GlobalPosition;
 			Vector2 boundsMax = new Vector2(boundRight, godotMaxY) - GlobalPosition;
-			var boundsRect = new Rect2(boundsMin, boundsMax - boundsMin);
-			GD.Print($"CameraDebugGizmo: left={boundLeft} right={boundRight} bottom={boundBottom} top={boundTop} godotY=[{godotMinY},{godotMaxY}] rect={boundsRect}");
-			DrawRect(boundsRect, _boundsColor, false, _lineWidth);
+			DrawRect(new Rect2(boundsMin, boundsMax - boundsMin), _boundsColor, false, _lineWidth);
 		}
 
 		if (_drawDeadzone)

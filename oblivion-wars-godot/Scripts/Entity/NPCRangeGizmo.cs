@@ -10,16 +10,43 @@ public partial class NPCRangeGizmo : Node2D
 
     [Export] private NodePath _npcControllerPath;
 
+    private bool _wasDebugActive;
+
     public override void _Process(double delta)
     {
         if (Engine.IsEditorHint())
+        {
             QueueRedraw();
+            return;
+        }
+
+        var global = GlobalStateManager.Instance?.Global;
+        bool debugActive = global?.IsDebugModeEnabled == true && global?.ShowNPCRangeGizmo == true;
+
+        if (debugActive)
+            QueueRedraw();
+        else if (_wasDebugActive)
+            QueueRedraw();
+
+        _wasDebugActive = debugActive;
     }
 
     public override void _Draw()
     {
-        if (!Engine.IsEditorHint()) return;
+        if (Engine.IsEditorHint())
+        {
+            DrawEditor();
+        }
+        else
+        {
+            var global = GlobalStateManager.Instance?.Global;
+            if (global?.IsDebugModeEnabled == true && global?.ShowNPCRangeGizmo == true)
+                DrawRuntime();
+        }
+    }
 
+    private void DrawEditor()
+    {
         var parent = GetParent();
         if (parent == null) return;
 
@@ -29,7 +56,6 @@ public partial class NPCRangeGizmo : Node2D
             return;
         }
 
-        // Resolve the NPC controller via exported NodePath
         if (_npcControllerPath == null || _npcControllerPath.IsEmpty)
         {
             GD.PrintErr("NPCRangeGizmo: _npcControllerPath is not set.");
@@ -64,22 +90,29 @@ public partial class NPCRangeGizmo : Node2D
         if (aiParams == null) return;
 
         var detectionVariant = aiParams.Get(DetectionRangeProperty);
-        if (detectionVariant.VariantType == Variant.Type.Nil)
-        {
-            GD.PrintErr($"NPCRangeGizmo: AIBehaviorData has no '{DetectionRangeProperty}' property.");
-            return;
-        }
+        if (detectionVariant.VariantType == Variant.Type.Nil) return;
 
         var attackVariant = aiParams.Get(AttackRangeProperty);
-        if (attackVariant.VariantType == Variant.Type.Nil)
-        {
-            GD.PrintErr($"NPCRangeGizmo: AIBehaviorData has no '{AttackRangeProperty}' property.");
-            return;
-        }
+        if (attackVariant.VariantType == Variant.Type.Nil) return;
 
-        float detectionRange = detectionVariant.AsSingle();
-        float attackRange = attackVariant.AsSingle();
+        DrawRangeCircles(detectionVariant.AsSingle(), attackVariant.AsSingle());
+    }
 
+    private void DrawRuntime()
+    {
+        if (_npcControllerPath == null || _npcControllerPath.IsEmpty) return;
+
+        var controllerNode = GetNodeOrNull(_npcControllerPath);
+        if (controllerNode is not NPCController controller) return;
+
+        var def = controller.Definition;
+        if (def?.AIBehaviorData == null) return;
+
+        DrawRangeCircles(def.AIBehaviorData.DetectionRange, def.AIBehaviorData.AttackRange);
+    }
+
+    private void DrawRangeCircles(float detectionRange, float attackRange)
+    {
         // Yellow circle = DetectionRange
         DrawArc(Vector2.Zero, detectionRange, 0, Mathf.Tau, 128,
                 new Color(1f, 1f, 0f, 0.8f), 3f);
