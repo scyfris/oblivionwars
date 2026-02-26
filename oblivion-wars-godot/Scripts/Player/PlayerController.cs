@@ -125,8 +125,7 @@ public partial class PlayerController : Node
                     SourceInstanceId = GetInstanceId(),
                     BaseDamage = _npcDef.ContactDamage,
                     HitDirection = hitDir,
-                    HitPosition = collision.GetPosition(),
-                    Projectile = null
+                    HitPosition = collision.GetPosition()
                 });
                 _contactDamageCooldown = ContactDamageCooldownTime;
                 break;
@@ -351,8 +350,7 @@ public partial class PlayerController : Node
             SourceInstanceId = 0,
             BaseDamage = damage,
             HitDirection = Godot.Vector2.Zero,
-            HitPosition = evt.Position,
-            Projectile = null
+            HitPosition = evt.Position
         });
     }
 }

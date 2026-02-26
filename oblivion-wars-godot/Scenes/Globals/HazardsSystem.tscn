@@ -47,8 +47,7 @@ public partial class HazardSystem : GameSystem
             SourceInstanceId = 0,
             BaseDamage = damage,
             HitDirection = Godot.Vector2.Zero,
-            HitPosition = evt.Position,
-            Projectile = null
+            HitPosition = evt.Position
         });
     }
 }

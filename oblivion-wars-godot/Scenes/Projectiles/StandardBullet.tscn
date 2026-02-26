@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dpq3s5f61p7r3"]
 
-[ext_resource type="Script" uid="uid://bfbv41kfycbro" path="res://Scripts/Combat/Projectiles/StandardBullet.cs" id="1_standard_bullet"]
+[ext_resource type="Script" uid="uid://cs1e3lth4fnx7" path="res://Scripts/Combat/Projectiles/Projectile.cs" id="1_standard_bullet"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bullet"]
 radius = 4.0
@@ -8,6 +8,7 @@ radius = 4.0
 [node name="StandardBullet" type="Area2D" unique_id=759644214 node_paths=PackedStringArray("_trail")]
 script = ExtResource("1_standard_bullet")
 _trail = NodePath("Trail")
+_trailLength = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1975654421]
 shape = SubResource("CircleShape2D_bullet")

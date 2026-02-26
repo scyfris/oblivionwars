@@ -22,11 +22,7 @@ public partial class Weapon : Holdable
         Scale = new Vector2(1, parentFlipped ? -1 : 1);
     }
 
-    public override void _Ready()
-    {
-        if (_weaponDefinition != null)
-            _useCooldown = _weaponDefinition.UseCooldown;
-    }
+    protected override float GetUseCooldown() => _weaponDefinition?.UseCooldown ?? 0.2f;
 
     public override void OnUsePressed()
     {
@@ -47,13 +43,10 @@ public partial class Weapon : Holdable
 
     private void TryFire()
     {
-        if (!CanUse() || _weaponDefinition?.Projectile == null) return;
+        if (!CanUse() || _weaponDefinition?.ProjectileScene == null) return;
         _hasFiredThisPress = true;
 
-        var projDef = _weaponDefinition.Projectile;
-        float damage = projDef.Damage * _weaponDefinition.DamageScale;
-
-        FireProjectile(damage, projDef);
+        FireProjectile();
 
         ResetCooldown();
 
@@ -63,13 +56,13 @@ public partial class Weapon : Holdable
             CameraController.Instance.Shake(_weaponDefinition.ScreenShakeScale, _weaponDefinition.ScreenShakeDurationScale);
     }
 
-    private void FireProjectile(float damage, ProjectileDefinition projDef)
+    private void FireProjectile()
     {
         Vector2 baseDirection = AimDirection;
 
         if (_weaponDefinition.SpreadCount <= 1)
         {
-            SpawnProjectile(baseDirection, damage, projDef);
+            SpawnProjectile(baseDirection);
         }
         else
         {
@@ -82,8 +75,7 @@ public partial class Weapon : Holdable
             for (int i = 0; i < _weaponDefinition.SpreadCount; i++)
             {
                 float angle = startAngle + step * i;
-                Vector2 spreadDir = baseDirection.Rotated(angle);
-                SpawnProjectile(spreadDir, damage, projDef);
+                SpawnProjectile(baseDirection.Rotated(angle));
             }
         }
     }
@@ -93,14 +85,20 @@ public partial class Weapon : Holdable
         return _projectileSpawnLocationNode != null ? _projectileSpawnLocationNode.GlobalPosition : _owner.GlobalPosition;
     }
 
-    private void SpawnProjectile(Vector2 direction, float damage, ProjectileDefinition projDef)
+    private void SpawnProjectile(Vector2 direction)
     {
-        if (projDef.ProjectileScene == null) return;
-
-        var projectile = projDef.ProjectileScene.Instantiate<Projectile>();
+        var projectile = _weaponDefinition.ProjectileScene.Instantiate<Projectile>();
         projectile.GlobalPosition = GetSpawnPosition();
-        projectile.Initialize(direction, damage, projDef, _owner);
 
+        var projectileParams = new ProjectileParams
+        {
+            Speed = _weaponDefinition.Speed,
+            Damage = _weaponDefinition.Damage,
+            Lifetime = _weaponDefinition.Lifetime,
+            AffectedByGravity = _weaponDefinition.ProjectileAffectedByGravity,
+        };
+
+        projectile.Initialize(direction, projectileParams, _owner);
         _owner.GetParent().AddChild(projectile);
     }
 }

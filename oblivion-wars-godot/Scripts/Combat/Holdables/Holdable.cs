@@ -2,7 +2,6 @@ using Godot;
 
 public abstract partial class Holdable : Node2D
 {
-    protected float _useCooldown = 0.2f;
     protected float _timeSinceLastUse = 999f;
     protected Node2D _owner;
 
@@ -16,9 +15,11 @@ public abstract partial class Holdable : Node2D
         _timeSinceLastUse += (float)delta;
     }
 
+    protected virtual float GetUseCooldown() => 0.2f;
+
     public bool CanUse()
     {
-        return _timeSinceLastUse >= _useCooldown;
+        return _timeSinceLastUse >= GetUseCooldown();
     }
 
     protected void ResetCooldown()

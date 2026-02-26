@@ -22,8 +22,9 @@ public partial class NPCAIParameters : Resource
     [Export] public float AttackRange = 200.0f;
 
     [ExportGroup("Behavior")]
-    // Whether to attack player first.  True means will attack player if detected.  False means won't attack player unless shot first.
+    // Whether the NPC attacks the player.  If false, the NPC is a bullet sponge.
     [Export] public bool Aggressive = true;
+    // TODO: public bool FirstStrike - whether to attack player frist before player hits them.
 
     // When the NPC starts to flee from the player out of detection range.
     // Set to 0 for no flee threshold, otherwise it is a fractional amount (1 being will always flee)

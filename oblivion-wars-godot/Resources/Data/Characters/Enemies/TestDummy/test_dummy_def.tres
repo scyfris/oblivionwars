@@ -18,5 +18,6 @@ AIBehaviorData = ExtResource("1_gruc5")
 IsBoss = true
 DropTable = Array[ExtResource("2_lst3f")]([SubResource("Resource_i4fh1")])
 EntityId = "target_dummy"
+MaxHealth = 10000.0
 LeftWeapon = ExtResource("4_lst3f")
 metadata/_custom_type_script = "uid://dbdtd1ea68ii6"

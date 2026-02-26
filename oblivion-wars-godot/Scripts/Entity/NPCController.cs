@@ -144,7 +144,7 @@ public partial class NPCController : Node
         // Priority order — highest priority first
         if (healthPercent <= _definition.AIBehaviorData.FleeHealthThreshold)
             _stateTree.Dispatch(Event(NPCTransitionEvent.HealthLow));
-        else if (IsPlayerInDetectRange())
+        else if (_definition.AIBehaviorData.Aggressive && IsPlayerInDetectRange())
             _stateTree.Dispatch(Event(NPCTransitionEvent.PlayerDetected));
         else if (!IsPlayerInDetectRange())
             _stateTree.Dispatch(Event(NPCTransitionEvent.PlayerLost));

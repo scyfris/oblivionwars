@@ -3,8 +3,12 @@
 [ext_resource type="Script" uid="uid://dxlgvqoptb0ki" path="res://Scripts/Systems/EffectsSystem.cs" id="1_effects"]
 [ext_resource type="PackedScene" uid="uid://bkdeav6v5wgew" path="res://Scenes/Effects/BulletImpactWall.tscn" id="2_wall"]
 [ext_resource type="PackedScene" uid="uid://cmhla0vjurf35" path="res://Scenes/Effects/BulletImpactEnemy.tscn" id="3_enemy"]
+[ext_resource type="Material" uid="uid://j7aymnlp6uxo" path="res://Resources/Shaders/hit_flash_shader_material.tres" id="4_xdgle"]
 
 [node name="EffectsSystem" type="Node" unique_id=1357468922]
 script = ExtResource("1_effects")
 HitEffectNormal = ExtResource("2_wall")
 HitEffectEnemy = ExtResource("3_enemy")
+HitFlashMaterial = ExtResource("4_xdgle")
+HitFlashDuration = 0.1
+HitFlashTransition = 7
