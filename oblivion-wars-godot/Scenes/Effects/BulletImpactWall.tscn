@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bkdeav6v5wgew"]
 
-[ext_resource type="Script" uid="uid://sa85cv1suao6" path="res://Scripts/Effects/AutoFreeParticle.cs" id="1_script"]
+[ext_resource type="Script" uid="uid://sa85cv1suao6" path="res://Scripts/Effects/AutoFreeParticle.cs" id="1_0x3ds"]
 
 [sub_resource type="Curve" id="Curve_scale"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.0058823824), -2.0, 0.0, 0, 0]
@@ -27,4 +27,4 @@ scale_amount_min = 10.0
 scale_amount_max = 15.0
 scale_amount_curve = SubResource("Curve_scale")
 color_ramp = SubResource("Gradient_color")
-script = ExtResource("1_script")
+script = ExtResource("1_0x3ds")

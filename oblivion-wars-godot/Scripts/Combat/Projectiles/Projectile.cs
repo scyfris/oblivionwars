@@ -14,7 +14,6 @@ public abstract partial class Projectile : Area2D
     private float _hitscanTrailTimer = 0f;
     private float _hitscanTrailDuration = 0f;
     private float _hitscanTrailInitialWidth = 0f;
-    private Color _hitscanTrailColor;
     private Vector2 _hitscanFrom;
     private Vector2 _hitscanTo;
 
@@ -60,7 +59,6 @@ public abstract partial class Projectile : Area2D
             _trail.AddPoint(to);
             _trail.Visible = true;
             _hitscanTrailInitialWidth = _trail.Width;
-            _hitscanTrailColor = _trail.DefaultColor;
 
             // Apply gradient from definition if set
             if (_projectileDefinition?.TrailGradient != null)
@@ -151,18 +149,7 @@ public abstract partial class Projectile : Area2D
         }
         catch (System.ObjectDisposedException) { }
 
-        SpawnHitEffect();
         QueueFree();
-    }
-
-    protected void SpawnHitEffect()
-    {
-        if (_projectileDefinition?.HitEffect == null) return;
-
-        var effect = _projectileDefinition.HitEffect.Instantiate<Node2D>();
-        effect.GlobalPosition = GlobalPosition;
-        effect.Rotation = _direction.Angle() + Mathf.Pi;
-        GetTree().Root.AddChild(effect);
     }
 
     protected virtual void OnHit(Node2D body)

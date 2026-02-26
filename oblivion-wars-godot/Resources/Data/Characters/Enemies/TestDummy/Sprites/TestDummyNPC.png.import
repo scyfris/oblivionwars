@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://degmoqfpjxpbh"
-path="res://.godot/imported/TestDummyNPC.png-8fa11cf097b4734f51321efb743046d3.ctex"
+path="res://.godot/imported/TestDummyNPC.png-48604977698f0fda124ec676a2827bc1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Resources/Sprites/TestDummyNPC.png"
-dest_files=["res://.godot/imported/TestDummyNPC.png-8fa11cf097b4734f51321efb743046d3.ctex"]
+source_file="res://Resources/Data/Characters/Enemies/TestDummy/Sprites/TestDummyNPC.png"
+dest_files=["res://.godot/imported/TestDummyNPC.png-48604977698f0fda124ec676a2827bc1.ctex"]
 
 [params]
 

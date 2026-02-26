@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bwpnrn34w5mva" path="res://Scripts/Entity/NPCEntityCharacterBody2D.cs" id="1_npc"]
 [ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/TestDummy/test_dummy_def.tres" id="2_def"]
-[ext_resource type="Texture2D" uid="uid://degmoqfpjxpbh" path="res://Resources/Sprites/TestDummyNPC.png" id="3_7oewm"]
+[ext_resource type="Texture2D" uid="uid://degmoqfpjxpbh" path="res://Resources/Data/Characters/Enemies/TestDummy/Sprites/TestDummyNPC.png" id="3_7oewm"]
 [ext_resource type="Resource" uid="uid://bv4jpxnmqlkb2" path="res://Resources/Data/Physics/npc_physics_settings.tres" id="3_iqlxx"]
 [ext_resource type="Script" uid="uid://brlpnvstlgdf3" path="res://Scripts/UI/DebugModeFilter.cs" id="4_gebkd"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
@@ -17,9 +17,6 @@
 [ext_resource type="Script" uid="uid://qe0mdxyjfalp" path="res://Scripts/Debug/TileGridDebugGizmo.cs" id="16_gebkd"]
 [ext_resource type="Resource" uid="uid://dxwmrw8fynbn5" path="res://Resources/Data/Characters/Enemies/Shared/AI/BehaviorParams/SHARED_flee_basic.tres" id="17_3vs80"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
-size = Vector2(56, 121)
-
 [sub_resource type="SpriteFrames" id="SpriteFrames_iqlxx"]
 animations = [{
 "frames": [{
@@ -30,6 +27,9 @@ animations = [{
 "name": &"default",
 "speed": 5.0
 }]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
+size = Vector2(59, 125.00001)
 
 [node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_controller", "_flipRoot", "_spriteNode")]
 script = ExtResource("1_npc")
@@ -44,25 +44,25 @@ _physicsDef = ExtResource("3_iqlxx")
 script = ExtResource("5_holdable")
 _weaponPositionNode = NodePath("../FlipRoot/WeaponPosition")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1232872331]
-position = Vector2(-31, -60.499992)
-shape = SubResource("RectangleShape2D_dummy")
-
 [node name="FlipRoot" type="Node2D" parent="." unique_id=1454104269]
 
 [node name="WeaponPosition" type="Node2D" parent="FlipRoot" unique_id=1053823199]
 position = Vector2(1, -60)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="FlipRoot" unique_id=1131916459]
-position = Vector2(-31.499998, -63.749996)
+position = Vector2(0, -63.749996)
 scale = Vector2(1.9687501, 1.9765624)
 sprite_frames = SubResource("SpriteFrames_iqlxx")
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1232872331]
+position = Vector2(0, -62.499996)
+shape = SubResource("RectangleShape2D_dummy")
+
 [node name="HealthLabel" type="Label" parent="." unique_id=1674419487]
-offset_left = -30.0
-offset_top = -80.0
-offset_right = 30.0
-offset_bottom = -57.0
+offset_left = -59.0
+offset_top = -151.0
+offset_right = 1.0
+offset_bottom = -128.0
 text = "50/50"
 horizontal_alignment = 1
 
@@ -75,10 +75,10 @@ script = ExtResource("4_gebkd")
 
 [node name="StateLabelDebug" type="Label" parent="Debug" unique_id=2119354597]
 layout_mode = 0
-offset_left = -38.0
-offset_top = -104.0
-offset_right = 55.0
-offset_bottom = -81.0
+offset_left = -67.0
+offset_top = -175.0
+offset_right = 26.0
+offset_bottom = -152.0
 text = "StateDebug"
 
 [node name="NPCDebugRangeGizmo" parent="." unique_id=1741832860 instance=ExtResource("6_gebkd")]

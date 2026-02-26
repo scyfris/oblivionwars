@@ -1,6 +1,5 @@
 [gd_resource type="Resource" script_class="ProjectileDefinition" format=3 uid="uid://d17y8xwqekvkh"]
 
-[ext_resource type="PackedScene" uid="uid://bkdeav6v5wgew" path="res://Scenes/Effects/BulletImpact.tscn" id="1_624km"]
 [ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="2_vfvjo"]
 [ext_resource type="Script" uid="uid://ccc31phpdd2at" path="res://Scripts/Data/Definitions/ProjectileDefinition.cs" id="3_a12jl"]
 
@@ -8,7 +7,8 @@
 script = ExtResource("3_a12jl")
 ProjectileId = "bullet"
 Speed = 2000.0
-TrailDuration = 0.1
+TrailDuration = 0.5
+TrailWidenScale = 2.7
+TrailLength = 0
 ProjectileScene = ExtResource("2_vfvjo")
-HitEffect = ExtResource("1_624km")
 metadata/_custom_type_script = "uid://ccc31phpdd2at"

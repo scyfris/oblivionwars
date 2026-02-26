@@ -1,21 +1,13 @@
 [gd_resource type="Resource" script_class="ProjectileDefinition" format=3 uid="uid://d4mosgvbycq4v"]
 
-[ext_resource type="PackedScene" uid="uid://bkdeav6v5wgew" path="res://Scenes/Effects/BulletImpact.tscn" id="1_sygui"]
 [ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="2_uswka"]
 [ext_resource type="Script" uid="uid://ccc31phpdd2at" path="res://Scripts/Data/Definitions/ProjectileDefinition.cs" id="3_t0f8e"]
-
-[sub_resource type="Gradient" id="Gradient_sygui"]
-offsets = PackedFloat32Array(0, 0.34511435, 0.94178796, 1)
-colors = PackedColorArray(0.50140655, 0.5014065, 0.5014065, 0, 0.54, 0, 0, 1, 0.61, 0.61, 0.61, 0, 0.8, 0.8, 0.8, 1)
 
 [resource]
 script = ExtResource("3_t0f8e")
 ProjectileId = "raycast_bullet"
 Speed = 0.0
-TrailDuration = 0.5
-TrailWidenScale = 2.0
-TrailGradient = SubResource("Gradient_sygui")
+TrailDuration = 0.2
 TrailLength = 1
 ProjectileScene = ExtResource("2_uswka")
-HitEffect = ExtResource("1_sygui")
 metadata/_custom_type_script = "uid://ccc31phpdd2at"

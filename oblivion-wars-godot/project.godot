@@ -24,6 +24,7 @@ EventBus="res://Scripts/Core/Events/EventBus.cs"
 SaveManager="res://Scripts/Core/SaveManager.cs"
 GlobalStateManager="*res://Scenes/Globals/GlobalStateManager.tscn"
 GlobalDefinitions="*uid://cusa02dp3x88j"
+EffectsSystem="*res://Scenes/Globals/EffectsSystem.tscn"
 
 [display]
 

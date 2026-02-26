@@ -27,6 +27,7 @@
 [ext_resource type="PackedScene" uid="uid://27ca1evhhhhg" path="res://Scenes/Debug/debug_grid_gizmo.tscn" id="20_dry3g"]
 [ext_resource type="TileSet" uid="uid://cifh4slrp6lmq" path="res://Resources/Tilemaps/kenney_abstract-platformer/Godot/KenneyAbstractPlatformer-TileSet.tres" id="26_iwpsl"]
 [ext_resource type="Script" uid="uid://ce2ke5b3y4uqa" path="res://Scripts/UI/DebugOverlay.cs" id="26_ul1mu"]
+[ext_resource type="Script" uid="uid://dxlgvqoptb0ki" path="res://Scripts/Systems/EffectsSystem.cs" id="28_dry3g"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
 size = Vector2(28, 64)
@@ -244,3 +245,6 @@ tile_set = ExtResource("26_iwpsl")
 
 [node name="Checkpoint_Prototype" parent="LevelManager/LevelSceneContainer" unique_id=1067059194 instance=ExtResource("3_am6fp")]
 position = Vector2(1701, 322)
+
+[node name="EffectsSystem" type="Node" parent="." unique_id=160228222]
+script = ExtResource("28_dry3g")

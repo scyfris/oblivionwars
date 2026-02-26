@@ -231,7 +231,6 @@ public partial class NPCController : Node
         if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
             return;
 
-        GD.Print("AIMATPLAYER");
         UpdateAim(_targetPlayer.GlobalPosition);
     }
 

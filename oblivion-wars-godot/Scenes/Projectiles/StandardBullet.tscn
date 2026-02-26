@@ -13,8 +13,10 @@ _trail = NodePath("Trail")
 shape = SubResource("CircleShape2D_bullet")
 
 [node name="Visual" type="Polygon2D" parent="." unique_id=808775647]
-color = Color(1, 0.8, 0.2, 1)
-polygon = PackedVector2Array(-4, -2, 6, 0, -4, 2)
+position = Vector2(-1, 0)
+scale = Vector2(1, 2.25)
+color = Color(1, 0.8, 0.078431375, 1)
+polygon = PackedVector2Array(-2, -1.3333334, 5, -0.8888889, 5, 0.8888889, -2, 1.3333334)
 
 [node name="Trail" type="Line2D" parent="." unique_id=1751117491]
 width = 2.0

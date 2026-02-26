@@ -53,10 +53,7 @@ public partial class Weapon : Holdable
         var projDef = _weaponDefinition.Projectile;
         float damage = projDef.Damage * _weaponDefinition.DamageScale;
 
-        if (projDef.Speed == 0)
-            FireInstant(damage, projDef);
-        else
-            FireProjectile(damage, projDef);
+        FireProjectile(damage, projDef);
 
         ResetCooldown();
 
@@ -105,88 +102,5 @@ public partial class Weapon : Holdable
         projectile.Initialize(direction, damage, projDef, _owner);
 
         _owner.GetParent().AddChild(projectile);
-    }
-
-    private void FireInstant(float damage, ProjectileDefinition projDef)
-    {
-        Vector2 baseDirection = AimDirection;
-
-        if (_weaponDefinition.SpreadCount <= 1)
-        {
-            FireSingleRay(baseDirection, damage, projDef);
-        }
-        else
-        {
-            float totalAngle = Mathf.DegToRad(_weaponDefinition.SpreadAngle);
-            float startAngle = -totalAngle / 2f;
-            float step = _weaponDefinition.SpreadCount > 1
-                ? totalAngle / (_weaponDefinition.SpreadCount - 1)
-                : 0f;
-
-            for (int i = 0; i < _weaponDefinition.SpreadCount; i++)
-            {
-                float angle = startAngle + step * i;
-                Vector2 spreadDir = baseDirection.Rotated(angle);
-                FireSingleRay(spreadDir, damage, projDef);
-            }
-        }
-    }
-
-    private void FireSingleRay(Vector2 direction, float damage, ProjectileDefinition projDef)
-    {
-        Vector2 spawnPos = GetSpawnPosition();
-
-        var spaceState = _owner.GetWorld2D().DirectSpaceState;
-        var query = PhysicsRayQueryParameters2D.Create(
-            spawnPos,
-            spawnPos + direction * projDef.HitscanRange
-        );
-
-        if (_owner is CollisionObject2D collisionOwner)
-        {
-            query.Exclude = new Godot.Collections.Array<Rid> { collisionOwner.GetRid() };
-        }
-
-        var result = spaceState.IntersectRay(query);
-
-        Vector2 hitPosition;
-        if (result.Count > 0)
-        {
-            hitPosition = (Vector2)result["position"];
-            var hitBody = (Node2D)result["collider"];
-
-            EventBus.Instance.Raise(new HitEvent
-            {
-                TargetInstanceId = hitBody.GetInstanceId(),
-                SourceInstanceId = _owner.GetInstanceId(),
-                BaseDamage = damage,
-                HitDirection = direction,
-                HitPosition = hitPosition,
-                Projectile = projDef
-            });
-        }
-        else
-        {
-            hitPosition = spawnPos + direction * projDef.HitscanRange;
-        }
-
-        // Spawn hit effect at impact point
-        if (result.Count > 0 && projDef.HitEffect != null)
-        {
-            var effect = projDef.HitEffect.Instantiate<Node2D>();
-            effect.GlobalPosition = hitPosition;
-            effect.Rotation = direction.Angle() + Mathf.Pi;
-            _owner.GetTree().Root.AddChild(effect);
-        }
-
-        // Spawn projectile scene for trail VFX
-        if (projDef.ProjectileScene != null)
-        {
-            var trailProjectile = projDef.ProjectileScene.Instantiate<Projectile>();
-            trailProjectile.GlobalPosition = spawnPos;
-            trailProjectile.Initialize(direction, 0, projDef, _owner);
-            _owner.GetParent().AddChild(trailProjectile);
-            trailProjectile.InitializeAsHitscanTrail(spawnPos, hitPosition);
-        }
     }
 }
