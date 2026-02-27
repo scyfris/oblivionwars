@@ -6,6 +6,8 @@ public partial class NPCBehaviorAttack_Basic : LimboState
     [Export] private NPCBehaviorParamsAttack_Basic _settings;
 
     private NPCController _controller;
+    private float _cooldownTimer;
+    private bool _isShooting;
 
     public override void _Setup()
     {
@@ -14,43 +16,84 @@ public partial class NPCBehaviorAttack_Basic : LimboState
 
     public override void _Enter()
     {
-        // TODO: Start aiming at player, begin attack cooldown
+        _cooldownTimer = 0f;
+        _isShooting = false;
     }
 
     public override void _Update(double delta)
     {
+        bool inAttackRange = _controller.IsPlayerInAttackRange();
 
-        // If player is not in attack range, move towards the player.
-        if (_controller.IsPlayerInAttackRange())
+        // Always aim
+        if (_settings.AimMode == AimMode.TrackPlayer)
+            _controller.AimAtPlayer();
+        else
+            _controller.AimAtFacingDir();
+
+        if (inAttackRange)
         {
-            _controller.StopMoving();
-
-            // Update aim
-            if (_settings.AimMode == AimMode.TrackPlayer)
+            // Attack timing: shoot for AttackDuration, pause for AttackCooldown, repeat
+            _cooldownTimer -= (float)delta;
+            if (!_isShooting)
             {
-                _controller.AimAtPlayer();
+                // Waiting between bursts — optionally move toward player
+                if (_settings.MoveTowardsPlayerDuringCooldown)
+                    _controller.StartMoveTowardsPlayer();
+                else
+                    _controller.StopMoving();
+
+                if (_cooldownTimer <= 0f)
+                {
+                    _controller.StartShooting();
+                    _isShooting = true;
+                    _cooldownTimer = _settings.AttackDuration;
+                }
             }
             else
             {
-                _controller.AimAtFacingDir();
+                // Shooting — optionally move while attacking
+                if (_settings.MoveWhileAttacking)
+                    _controller.StartMoveTowardsPlayer();
+                else
+                    _controller.StopMoving();
+
+                if (_cooldownTimer <= 0f)
+                {
+                    _controller.StopShooting();
+                    _isShooting = false;
+                    _cooldownTimer = _settings.AttackCooldown;
+                }
             }
-            
-            // Shoot player
-            _controller.StartShooting();
-        } else
-        {
-            // Move
-            _controller.StopShooting();
-            _controller.StartMoveTowardsPlayer();
         }
-    
-        // TODO: Have a "moveandattach" option that denotes behavior of enemy standing in place whlie shooting or running towards player and shooting.
-        // TODO: Have a "mindistfromplayer" parameter so npc doesn't try to shove itself into the play lol
+        else
+        {
+            // Out of attack range — finish current burst, then chase
+            _cooldownTimer -= (float)delta;
+            if (_isShooting)
+            {
+                if (_settings.MoveWhileAttacking)
+                    _controller.StartMoveTowardsPlayer();
+                else
+                    _controller.StopMoving();
+
+                if (_cooldownTimer <= 0f)
+                {
+                    _controller.StopShooting();
+                    _isShooting = false;
+                    _cooldownTimer = _settings.AttackCooldown;
+                }
+            }
+            else
+            {
+                _controller.StartMoveTowardsPlayer();
+            }
+        }
     }
 
     public override void _Exit()
     {
         _controller.StopMoving();
         _controller.StopShooting();
+        _isShooting = false;
     }
 }

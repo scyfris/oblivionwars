@@ -40,6 +40,19 @@ _walkFacingDirAnimation = "default"
 _walkNonFacingDirAnimation = "default"
 _physicsDef = ExtResource("3_iqlxx")
 
+[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel", "_stateLabel", "_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState")]
+script = ExtResource("6_npcctrl")
+_definition = ExtResource("2_def")
+_npcCharacterBody = NodePath("..")
+_holdableSystem = NodePath("../HoldableSystem")
+_healthLabel = NodePath("../HealthLabel")
+_stateLabel = NodePath("../Debug/StateLabelDebug")
+_stateTree = NodePath("../LimboHSM")
+_idleState = NodePath("../LimboHSM/IdleState")
+_patrolState = NodePath("../LimboHSM/PatrolState")
+_attackState = NodePath("../LimboHSM/AttackState")
+_fleeState = NodePath("../LimboHSM/FleeState")
+
 [node name="HoldableSystem" type="Node" parent="." unique_id=752884601 node_paths=PackedStringArray("_weaponPositionNode")]
 script = ExtResource("5_holdable")
 _weaponPositionNode = NodePath("../FlipRoot/WeaponPosition")
@@ -82,19 +95,6 @@ offset_bottom = -152.0
 text = "StateDebug"
 
 [node name="NPCDebugRangeGizmo" parent="." unique_id=1741832860 instance=ExtResource("6_gebkd")]
-
-[node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel", "_stateLabel", "_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState")]
-script = ExtResource("6_npcctrl")
-_definition = ExtResource("2_def")
-_npcCharacterBody = NodePath("..")
-_holdableSystem = NodePath("../HoldableSystem")
-_healthLabel = NodePath("../HealthLabel")
-_stateLabel = NodePath("../Debug/StateLabelDebug")
-_stateTree = NodePath("../LimboHSM")
-_idleState = NodePath("../LimboHSM/IdleState")
-_patrolState = NodePath("../LimboHSM/PatrolState")
-_attackState = NodePath("../LimboHSM/AttackState")
-_fleeState = NodePath("../LimboHSM/FleeState")
 
 [node name="LimboHSM" type="LimboHSM" parent="." unique_id=924673097]
 

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponRegistryEntry" format=3 uid="uid://br32jyw3q06bj"]
+
+[ext_resource type="Resource" uid="uid://b23wmgf117n4t" path="res://Resources/Data/PlayerWeapons/NPCWeapons/test_dummy_pistol_settings.tres" id="1_oq8ma"]
+[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Resources/Data/PlayerWeapons/pistol/Pistol.tscn" id="2_xgdtv"]
+[ext_resource type="Script" uid="uid://xbn7v88oatsv" path="res://Scripts/Data/Definitions/WeaponRegistryEntry.cs" id="3_ixiht"]
+
+[resource]
+script = ExtResource("3_ixiht")
+Name = "test_dummy_pistol"
+Scene = ExtResource("2_xgdtv")
+Definition = ExtResource("1_oq8ma")
+Description = "The pistol for the test dummy"
+metadata/_custom_type_script = "uid://xbn7v88oatsv"

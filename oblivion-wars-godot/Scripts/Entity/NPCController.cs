@@ -54,6 +54,7 @@ public partial class NPCController : Node
     public NPCEntityCharacterBody2D NPCCharacterBody => _npcCharacterBody;
 
     private PlayerCharacterBody2D _targetPlayer;
+    private bool _isShooting;
 
     public override void _Ready()
     {
@@ -64,13 +65,7 @@ public partial class NPCController : Node
         InitializeRuntimeData();
 
         // Initialize holdables
-        if (_holdableSystem != null)
-        {
-            if (_holdableSystem.UseDebugWeaponScenes)
-                _holdableSystem.Initialize(_npcCharacterBody);
-            else
-                _holdableSystem.InitializeWithDefinition(_npcCharacterBody, Definition);
-        }
+        _holdableSystem?.Initialize(_npcCharacterBody, Definition);
 
         // Find and cache player reference
         _targetPlayer = GetTree().GetFirstNodeInGroup(GroupConstants.Entities.Player) as PlayerCharacterBody2D;
@@ -88,6 +83,8 @@ public partial class NPCController : Node
     public override void _PhysicsProcess(double delta)
     {
         _holdableSystem?.Update(delta);
+        if (_isShooting)
+            UseHoldableHeld(true);
         EvaluateTransitions();
     }
 
@@ -236,12 +233,20 @@ public partial class NPCController : Node
 
     public void StartShooting()
     {
-        UseHoldablePressed(true);
+        if (!_isShooting)
+        {
+            _isShooting = true;
+            UseHoldablePressed(true);
+        }
     }
 
     public void StopShooting()
     {
-        UseHoldableReleased(true);
+        if (_isShooting)
+        {
+            _isShooting = false;
+            UseHoldableReleased(true);
+        }
     }
 
     // ── Holdable API ────────────────────────────────────────

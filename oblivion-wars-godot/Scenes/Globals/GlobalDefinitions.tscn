@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://cusa02dp3x88j"]
 
 [ext_resource type="Script" uid="uid://bovjy216tp4tg" path="res://Scripts/Data/GlobalDefinitions.cs" id="1_a4xi4"]
-[ext_resource type="Resource" path="res://Resources/Data/Weapons/pistol/pistol_registry_entry.tres" id="2_pistol"]
-[ext_resource type="Resource" path="res://Resources/Data/Weapons/Shotgun/shotgun_registry_entry.tres" id="3_shotgun"]
+[ext_resource type="Resource" path="res://Resources/Data/PlayerWeapons/pistol/pistol_registry_entry.tres" id="2_pistol"]
+[ext_resource type="Resource" path="res://Resources/Data/PlayerWeapons/Shotgun/shotgun_registry_entry.tres" id="3_shotgun"]
 [ext_resource type="Resource" path="res://Resources/Data/HazardSettings/hazard_settings_common.tres" id="7_wlc62"]
 
 [node name="GlobalDefinitions" type="Node" unique_id=1238841687]

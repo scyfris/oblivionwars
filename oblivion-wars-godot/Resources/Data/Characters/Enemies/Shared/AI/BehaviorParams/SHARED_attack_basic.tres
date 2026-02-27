@@ -4,4 +4,5 @@
 
 [resource]
 script = ExtResource("1_l60cq")
+AttackCooldown = 2.0
 metadata/_custom_type_script = "uid://bsletdow8rl0u"

@@ -2,9 +2,14 @@ using Godot;
 
 public partial class Weapon : Holdable
 {
-    [Export] private WeaponDefinition _weaponDefinition;
+    private WeaponDefinition _weaponDefinition;
     [Export] private Node2D _projectileSpawnLocationNode;
     [Export] private AnimationPlayer _animationPlayer;
+
+    public void SetDefinition(WeaponDefinition definition)
+    {
+        _weaponDefinition = definition;
+    }
 
     private bool _hasFiredThisPress = false;
 
@@ -22,7 +27,7 @@ public partial class Weapon : Holdable
         Scale = new Vector2(1, parentFlipped ? -1 : 1);
     }
 
-    protected override float GetUseCooldown() => _weaponDefinition?.UseCooldown ?? 0.2f;
+    protected override float GetUseCooldown() => _weaponDefinition?.FireRate ?? 0.2f;
 
     public override void OnUsePressed()
     {

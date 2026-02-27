@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponRegistryEntry" format=3 uid="uid://dt4sysexgy0vb"]
+
+[ext_resource type="Script" uid="uid://xbn7v88oatsv" path="res://Scripts/Data/Definitions/WeaponRegistryEntry.cs" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://obnc23u3yfw0" path="res://Resources/Data/PlayerWeapons/pistol/pistol_icon.png" id="2_icon"]
+[ext_resource type="PackedScene" uid="uid://r33xmyppd6s2" path="res://Resources/Data/PlayerWeapons/pistol/Pistol.tscn" id="3_scene"]
+[ext_resource type="Resource" uid="uid://cww0rvnlhlgj3" path="res://Resources/Data/PlayerWeapons/pistol/pistol_settings.tres" id="4_definition"]
+
+[resource]
+script = ExtResource("1_script")
+Name = "pistol"
+Scene = ExtResource("3_scene")
+Definition = ExtResource("4_definition")
+Description = "Pistol"
+Icon = ExtResource("2_icon")
+metadata/_custom_type_script = "uid://xbn7v88oatsv"

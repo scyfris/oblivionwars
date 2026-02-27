@@ -40,12 +40,7 @@ public partial class PlayerController : Node
 
         // Initialize holdables
         if (_holdableSystem != null)
-        {
-            if (_holdableSystem.UseDebugWeaponScenes)
-                _holdableSystem.Initialize(_characterBody);
-            else
-                _holdableSystem.InitializeWithDefinition(_characterBody, _definition);
-        }
+            _holdableSystem.Initialize(_characterBody, _definition);
 
         // Ensure weapons are unlocked (handles testing without save system / new-game flow)
         var playerState = GlobalStateManager.Instance?.Player;
@@ -186,12 +181,12 @@ public partial class PlayerController : Node
         if (string.IsNullOrEmpty(weaponId) || weaponId == _currentWeaponId) return;
         if (!GlobalStateManager.Instance.Player.IsWeaponUnlocked(weaponId)) return;
 
-        var scene = GlobalDefinitions.Instance?.GetWeaponScene(weaponId);
-        if (scene == null) return;
+        var entry = GlobalDefinitions.Instance?.FindWeaponEntry(weaponId);
+        if (entry?.Scene == null) return;
 
         var prev = _currentWeaponId;
         _currentWeaponId = weaponId;
-        _holdableSystem?.SwapLeft(scene);
+        _holdableSystem?.SwapLeft(entry);
         GlobalStateManager.Instance.Player.CurrentWeaponId = weaponId;
 
         EventBus.Instance?.Raise(new WeaponSwitchedEvent
