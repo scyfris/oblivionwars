@@ -13,6 +13,7 @@ public partial class WeaponDefinition : Resource
     [Export] public float Speed = 800.0f;
     [Export] public float Lifetime = 3.0f;
     [Export] public bool ProjectileAffectedByGravity = false;
+    [Export] public float ProjectileGravityScale = 1.0f;
 
     [ExportGroup("Projectile")]
     [Export] public PackedScene ProjectileScene;

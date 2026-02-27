@@ -6,6 +6,7 @@ public struct ProjectileParams
     public float Damage;
     public float Lifetime;
     public bool AffectedByGravity;
+    public float GravityScale;
 }
 
 public partial class Projectile : Area2D
@@ -14,9 +15,6 @@ public partial class Projectile : Area2D
 
     [ExportGroup("Trail")]
     [Export] protected int _trailLength = 10;
-
-    [ExportGroup("Physics")]
-    [Export] protected float _gravityScale = 1.0f;
 
     protected ProjectileParams _params;
     protected Vector2 _velocity;
@@ -51,7 +49,7 @@ public partial class Projectile : Area2D
     protected virtual void UpdateMovement(double delta)
     {
         if (_params.AffectedByGravity)
-            _velocity.Y += _gravity * _gravityScale * (float)delta;
+            _velocity.Y += _gravity * _params.GravityScale * (float)delta;
 
         Vector2 displacement = _velocity * (float)delta;
         Vector2 nextPosition = GlobalPosition + displacement;

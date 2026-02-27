@@ -96,6 +96,7 @@ public partial class Weapon : Holdable
             Damage = _weaponDefinition.Damage,
             Lifetime = _weaponDefinition.Lifetime,
             AffectedByGravity = _weaponDefinition.ProjectileAffectedByGravity,
+            GravityScale = _weaponDefinition.ProjectileGravityScale,
         };
 
         projectile.Initialize(direction, projectileParams, _owner);
