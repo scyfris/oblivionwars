@@ -6,4 +6,5 @@
 script = ExtResource("1_q8esj")
 DetectionRange = 800.0
 AttackRange = 600.0
+IsFlying = true
 metadata/_custom_type_script = "uid://din66r6aywcws"

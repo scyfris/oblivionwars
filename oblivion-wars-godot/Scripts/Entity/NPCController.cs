@@ -17,6 +17,7 @@ public partial class NPCController : Node
     [Export] private NPCDefinition _definition;
     public NPCDefinition Definition => _definition;
 
+    private bool IsFlying => _definition?.AIBehaviorData?.IsFlying == true;
 
     [ExportGroup("Node References")]
     [Export] private NPCEntityCharacterBody2D _npcCharacterBody;
@@ -66,6 +67,10 @@ public partial class NPCController : Node
 
         // Initialize holdables
         _holdableSystem?.Initialize(_npcCharacterBody, Definition);
+
+        // Configure flying
+        if (_definition?.AIBehaviorData?.IsFlying == true)
+            _npcCharacterBody.GravityEnabled = false;
 
         // Find and cache player reference
         _targetPlayer = GetTree().GetFirstNodeInGroup(GroupConstants.Entities.Player) as PlayerCharacterBody2D;
@@ -166,14 +171,27 @@ public partial class NPCController : Node
             return;
         }
 
-        float dir = _targetPlayer.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
+        float deadzone = _definition.AIBehaviorData.MoveDeadzone;
+        float dirX = _targetPlayer.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
 
-        if (dir > 5f)
+        if (dirX > deadzone)
             StartMoveRight();
-        else if (dir < -5f)
+        else if (dirX < -deadzone)
             StartMoveLeft();
         else
-            StopMoving();
+            _npcCharacterBody.Stop();
+
+        if (IsFlying)
+        {
+            float dirY = _targetPlayer.GlobalPosition.Y - _npcCharacterBody.GlobalPosition.Y;
+
+            if (dirY > deadzone)
+                _npcCharacterBody.StartMoveDown();
+            else if (dirY < -deadzone)
+                _npcCharacterBody.StartMoveUp();
+            else
+                _npcCharacterBody.StopVertical();
+        }
     }
 
     public void StartFleeFromPlayer()
@@ -184,13 +202,23 @@ public partial class NPCController : Node
             return;
         }
 
-        float dir = _targetPlayer.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
+        float dirX = _targetPlayer.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
 
         // Move opposite direction from player
-        if (dir > 0f)
+        if (dirX > 0f)
             StartMoveLeft();
         else
             StartMoveRight();
+
+        if (IsFlying)
+        {
+            float dirY = _targetPlayer.GlobalPosition.Y - _npcCharacterBody.GlobalPosition.Y;
+
+            if (dirY > 0f)
+                _npcCharacterBody.StartMoveUp();
+            else
+                _npcCharacterBody.StartMoveDown();
+        }
     }
 
     // ── Detection ───────────────────────────────────────────

@@ -33,9 +33,11 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     [Export] private CommonPhysicsDef _physicsDef;
 
     // Runtime data
+    public bool GravityEnabled { get; set; } = true;
 
     // Movement
     protected int _moveDirection = 0;
+    protected int _verticalMoveDirection = 0;
 
     // Wall sliding
     protected bool _isWallSliding = false;
@@ -168,10 +170,6 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
     protected virtual void UpdateMovement(double delta)
     {
-        float currentGravity = _isWallSliding
-            ? _physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction
-            : _physicsDef.Gravity;
-
         Vector2 horizontalVelocity;
         if (_wallJumpInputLockTimer > 0 || _wallJumpPushAwayDurationTimer > 0)
         {
@@ -185,16 +183,20 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
         Vector2 newVel = horizontalVelocity;
 
-        float velocityAlongGravity = Velocity.Dot(_gravityDirection);
-        newVel += _gravityDirection * velocityAlongGravity;
-
-        if (!_isWallSliding)
+        if (!GravityEnabled)
         {
-            newVel += _gravityDirection * currentGravity * (float)delta;
+            // Flying: vertical movement driven by _verticalMoveDirection, no gravity
+            newVel += _gravityDirection * _verticalMoveDirection * _physicsDef.MoveSpeed;
+        }
+        else if (_isWallSliding)
+        {
+            newVel += _gravityDirection * (_physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction);
         }
         else
         {
-            newVel = horizontalVelocity + _gravityDirection * (_physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction);
+            float velocityAlongGravity = Velocity.Dot(_gravityDirection);
+            newVel += _gravityDirection * velocityAlongGravity;
+            newVel += _gravityDirection * _physicsDef.Gravity * (float)delta;
         }
 
         Velocity = newVel;
@@ -302,6 +304,22 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     public void Stop()
     {
         _moveDirection = 0;
+        _verticalMoveDirection = 0;
+    }
+
+    public void StartMoveUp()
+    {
+        _verticalMoveDirection = -1;
+    }
+
+    public void StartMoveDown()
+    {
+        _verticalMoveDirection = 1;
+    }
+
+    public void StopVertical()
+    {
+        _verticalMoveDirection = 0;
     }
 
     public void RotateGravityClockwise()

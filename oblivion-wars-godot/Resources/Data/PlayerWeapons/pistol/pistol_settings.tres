@@ -1,14 +1,14 @@
 [gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://cww0rvnlhlgj3"]
 
-[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="2_bullet"]
+[ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Scenes/Projectiles/StandardBullet.tscn" id="1_n31uq"]
+[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="2_npdo2"]
 
 [resource]
-script = ExtResource("1_script")
-UseCooldown = 0.2
+script = ExtResource("2_npdo2")
+FireRate = 0.5
 ScreenShakeScale = 0.0
 ScreenShakeDurationScale = 0.0
 Damage = 2.0
 Speed = 2000.0
-ProjectileScene = ExtResource("2_bullet")
+ProjectileScene = ExtResource("1_n31uq")
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"
