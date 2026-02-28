@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://cygwcj2tkmvgn"]
 
 [ext_resource type="Script" uid="uid://bwpnrn34w5mva" path="res://Scripts/Entity/NPCEntityCharacterBody2D.cs" id="1_npc"]
-[ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/TestDummy/test_dummy_def.tres" id="2_def"]
-[ext_resource type="Texture2D" uid="uid://degmoqfpjxpbh" path="res://Resources/Data/Characters/Enemies/TestDummy/Sprites/TestDummyNPC.png" id="3_7oewm"]
+[ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/TestDummyGrounded/test_dummy_grounded_def.tres" id="2_def"]
+[ext_resource type="Texture2D" uid="uid://degmoqfpjxpbh" path="res://Resources/Data/Characters/Enemies/TestDummyGrounded/Sprites/TestDummyNPC.png" id="3_7oewm"]
 [ext_resource type="Resource" uid="uid://bv4jpxnmqlkb2" path="res://Resources/Data/Physics/npc_physics_settings.tres" id="3_iqlxx"]
 [ext_resource type="Script" uid="uid://brlpnvstlgdf3" path="res://Scripts/UI/DebugModeFilter.cs" id="4_gebkd"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]

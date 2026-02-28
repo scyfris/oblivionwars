@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://ceq74t0uxq1ed" path="res://Scenes/UI/crosshair.tscn" id="3_jxtak"]
 [ext_resource type="Script" uid="uid://b2dl33mekocnv" path="res://Scripts/Camera/CameraController.cs" id="4_camera"]
 [ext_resource type="Resource" uid="uid://dmos2n3cg3lsa" path="res://Resources/Data/Camera/default_camera.tres" id="7_am6fp"]
-[ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Scenes/Characters/NPC.tscn" id="7_sx5r3"]
 [ext_resource type="Script" uid="uid://cv3wphvrguved" path="res://Scripts/Player/PlayerCharacterBody2D.cs" id="8_dry3g"]
 [ext_resource type="Resource" uid="uid://dyya6l2y86ua7" path="res://Resources/Data/Physics/player_physics_settings.tres" id="8_ul1mu"]
 [ext_resource type="Resource" uid="uid://dj7t8h8cwg5cv" path="res://Resources/Data/Characters/Player/player.tres" id="9_ul1mu"]
@@ -28,6 +27,8 @@
 [ext_resource type="TileSet" uid="uid://cifh4slrp6lmq" path="res://Resources/Tilemaps/kenney_abstract-platformer/Godot/KenneyAbstractPlatformer-TileSet.tres" id="26_iwpsl"]
 [ext_resource type="Script" uid="uid://ce2ke5b3y4uqa" path="res://Scripts/UI/DebugOverlay.cs" id="26_ul1mu"]
 [ext_resource type="Script" uid="uid://dxlgvqoptb0ki" path="res://Scripts/Systems/EffectsSystem.cs" id="28_dry3g"]
+[ext_resource type="PackedScene" uid="uid://b83s78jm88pu3" path="res://Resources/Data/Characters/Enemies/TestDummyFlying/target_dummy_flying.tscn" id="28_ul1mu"]
+[ext_resource type="PackedScene" uid="uid://b1bejexrbnxh7" path="res://Resources/Data/Characters/Enemies/TestDummyGrounded/target_dummy_grounded.tscn" id="29_oe441"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rlx2o"]
 size = Vector2(28, 64)
@@ -233,9 +234,6 @@ script = ExtResource("26_ul1mu")
 
 [node name="Enemies" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=645180807]
 
-[node name="TargetDummy" parent="LevelManager/LevelSceneContainer/Enemies" unique_id=749725729 instance=ExtResource("7_sx5r3")]
-position = Vector2(1372, -170)
-
 [node name="Tiles" type="Node2D" parent="LevelManager/LevelSceneContainer" unique_id=199917983]
 
 [node name="TileMapLayer1" type="TileMapLayer" parent="LevelManager/LevelSceneContainer/Tiles" unique_id=77805476]
@@ -248,3 +246,12 @@ position = Vector2(1701, 322)
 
 [node name="EffectsSystem" type="Node" parent="." unique_id=160228222]
 script = ExtResource("28_dry3g")
+
+[node name="TargetDummy" parent="." unique_id=749725729 instance=ExtResource("28_ul1mu")]
+position = Vector2(1693, -404)
+
+[node name="TargetDummy2" parent="." unique_id=1734619180 instance=ExtResource("28_ul1mu")]
+position = Vector2(1220, -59)
+
+[node name="TargetDummy3" parent="." unique_id=744241113 instance=ExtResource("29_oe441")]
+position = Vector2(1109, 261)

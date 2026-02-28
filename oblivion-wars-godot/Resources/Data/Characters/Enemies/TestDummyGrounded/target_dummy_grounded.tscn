@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://b1bejexrbnxh7"]
+
+[ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Resources/Data/Characters/Enemies/Shared/NPC_Base.tscn" id="1_luf00"]
+
+[node name="TargetDummy" unique_id=749725729 instance=ExtResource("1_luf00")]

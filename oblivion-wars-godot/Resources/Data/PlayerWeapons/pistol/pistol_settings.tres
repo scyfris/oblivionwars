@@ -8,7 +8,6 @@ script = ExtResource("2_npdo2")
 FireRate = 0.5
 ScreenShakeScale = 0.0
 ScreenShakeDurationScale = 0.0
-Damage = 2.0
 Speed = 2000.0
 ProjectileScene = ExtResource("1_n31uq")
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"

@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://b83s78jm88pu3"]
+
+[ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Resources/Data/Characters/Enemies/Shared/NPC_Base.tscn" id="1_4etq4"]
+[ext_resource type="Resource" uid="uid://dmg0qo3cuae48" path="res://Resources/Data/Characters/Enemies/TestDummyFlying/test_dummy_flying_def.tres" id="2_j6rjk"]
+
+[node name="TargetDummy" unique_id=749725729 instance=ExtResource("1_4etq4")]
+
+[node name="NPCController" parent="." index="0" unique_id=661337264]
+_definition = ExtResource("2_j6rjk")
