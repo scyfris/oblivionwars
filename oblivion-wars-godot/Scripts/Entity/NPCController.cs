@@ -379,11 +379,18 @@ public partial class NPCController : Node
 
     private void OnHit(HitEvent evt)
     {
-        var target = GodotObject.InstanceFromId(evt.TargetInstanceId);
-        if (target is not EntityCharacterBody2D entity)
+        if (evt.TargetInstanceId != _npcCharacterBody.GetInstanceId())
             return;
 
         float finalDamage = evt.BaseDamage;
+
+        // Apply knockback scaled by resistance
+        if (evt.ImpactForce > 0 && _definition != null)
+        {
+            float knockback = evt.ImpactForce * (1f - _definition.KnockbackResistance);
+            if (knockback > 0)
+                _npcCharacterBody.ApplyKnockback(evt.HitDirection * knockback);
+        }
 
         EventBus.Instance.Raise(new DamageAppliedEvent
         {

@@ -102,6 +102,10 @@ public partial class Weapon : Holdable
             Lifetime = _weaponDefinition.Lifetime,
             AffectedByGravity = _weaponDefinition.ProjectileAffectedByGravity,
             GravityScale = _weaponDefinition.ProjectileGravityScale,
+            ImpactForce = _weaponDefinition.ImpactForce,
+            Explosive = _weaponDefinition.Explosive,
+            ExplosionRadius = _weaponDefinition.ExplosionRadius,
+            ExplosionDamageFalloff = _weaponDefinition.ExplosionDamageFalloff,
         };
 
         projectile.Initialize(direction, projectileParams, _owner);

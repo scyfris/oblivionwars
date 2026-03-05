@@ -7,6 +7,7 @@ public struct HitEvent : IGameEvent
     public ulong TargetInstanceId;
     public ulong SourceInstanceId;
     public float BaseDamage;
+    public float ImpactForce;
     public Vector2 HitDirection;
     public Vector2 HitPosition;
 }

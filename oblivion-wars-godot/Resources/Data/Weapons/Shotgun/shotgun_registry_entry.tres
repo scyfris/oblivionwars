@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="WeaponRegistryEntry" format=3 uid="uid://cutvv6fs5oen"]
 
 [ext_resource type="Script" uid="uid://xbn7v88oatsv" path="res://Scripts/Data/Definitions/WeaponRegistryEntry.cs" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://qg8ncem056sb" path="res://Resources/Data/PlayerWeapons/Shotgun/shotgun_icon.png" id="2_icon"]
-[ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Resources/Data/PlayerWeapons/Shotgun/Shotgun.tscn" id="3_scene"]
-[ext_resource type="Resource" uid="uid://bkksyfiyb5e3y" path="res://Resources/Data/PlayerWeapons/Shotgun/shotgun_settings.tres" id="4_definition"]
+[ext_resource type="Texture2D" uid="uid://qg8ncem056sb" path="res://Resources/Data/Weapons/Shotgun/shotgun_icon.png" id="2_icon"]
+[ext_resource type="PackedScene" uid="uid://dvdmpjfal7jyh" path="res://Resources/Data/Weapons/Shotgun/Shotgun.tscn" id="3_scene"]
+[ext_resource type="Resource" uid="uid://bkksyfiyb5e3y" path="res://Resources/Data/Weapons/Shotgun/shotgun_settings.tres" id="4_definition"]
 
 [resource]
 script = ExtResource("1_script")

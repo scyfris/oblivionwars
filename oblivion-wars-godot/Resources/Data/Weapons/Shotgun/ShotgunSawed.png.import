@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://obnc23u3yfw0"
-path="res://.godot/imported/pistol_icon.png-478d97b2286591d58addcbf9b630daa8.ctex"
+uid="uid://bbd7j2lrncto7"
+path="res://.godot/imported/ShotgunSawed.png-6d102d6b7ed8de35ea5fd1f1afdea608.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Resources/Data/PlayerWeapons/pistol/pistol_icon.png"
-dest_files=["res://.godot/imported/pistol_icon.png-478d97b2286591d58addcbf9b630daa8.ctex"]
+source_file="res://Resources/Data/Weapons/Shotgun/ShotgunSawed.png"
+dest_files=["res://.godot/imported/ShotgunSawed.png-6d102d6b7ed8de35ea5fd1f1afdea608.ctex"]
 
 [params]
 

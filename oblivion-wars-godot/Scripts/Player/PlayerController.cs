@@ -309,8 +309,16 @@ public partial class PlayerController : Node
 
         float finalDamage = evt.BaseDamage;
 
+        // Apply knockback scaled by resistance
+        if (evt.ImpactForce > 0 && _definition != null)
+        {
+            float knockback = evt.ImpactForce * (1f - _definition.KnockbackResistance);
+            if (knockback > 0)
+                _characterBody.ApplyKnockback(evt.HitDirection * knockback);
+        }
+
         PlayerStateCurrent.CurrentHealth -= finalDamage;
-        
+
         EventBus.Instance.Raise(new DamageAppliedEvent
         {
             TargetInstanceId = evt.TargetInstanceId,

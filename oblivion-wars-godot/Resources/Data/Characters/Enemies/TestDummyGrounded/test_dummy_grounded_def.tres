@@ -3,7 +3,7 @@
 [ext_resource type="Resource" uid="uid://chv3j6f420nkj" path="res://Resources/Data/Characters/Enemies/TestDummyGrounded/test_dummy_grounded_ai.tres" id="1_wmh04"]
 [ext_resource type="Script" uid="uid://ckc6l3wdh00w8" path="res://Scripts/Data/Definitions/DropTableEntry.cs" id="2_jx3ok"]
 [ext_resource type="PackedScene" uid="uid://bjcbsg2001eff" path="res://Scenes/LevelComponents/Pickups/CoinPickup.tscn" id="3_6tfqa"]
-[ext_resource type="Resource" uid="uid://br32jyw3q06bj" path="res://Resources/Data/PlayerWeapons/NPCWeapons/test_dummy_pistol_weapon_reg.tres" id="4_m5jvu"]
+[ext_resource type="Resource" uid="uid://br32jyw3q06bj" path="res://Resources/Data/Weapons/NPCWeapons/test_dummy_pistol_weapon_reg.tres" id="4_m5jvu"]
 [ext_resource type="Script" uid="uid://dbdtd1ea68ii6" path="res://Scripts/Data/Definitions/NPC/GlobalSettings/NPCDefinition.cs" id="5_8jjix"]
 
 [sub_resource type="Resource" id="Resource_i4fh1"]

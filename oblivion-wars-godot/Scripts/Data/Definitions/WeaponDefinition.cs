@@ -12,6 +12,8 @@ public partial class WeaponDefinition : Resource
     [Export] public float Damage = 10.0f;
     [Export] public float Speed = 800.0f;
     [Export] public float Lifetime = 3.0f;
+    /// <summary>Knockback impulse applied to hit targets. 0 = no knockback.</summary>
+    [Export] public float ImpactForce = 0.0f;
     [Export] public bool ProjectileAffectedByGravity = false;
     [Export] public float ProjectileGravityScale = 1.0f;
 
@@ -21,4 +23,10 @@ public partial class WeaponDefinition : Resource
     [ExportGroup("Spread")]
     [Export] public int SpreadCount = 1;
     [Export] public float SpreadAngle = 15.0f;
+
+    [ExportGroup("Explosive")]
+    [Export] public bool Explosive = false;
+    [Export] public float ExplosionRadius = 100.0f;
+    /// <summary>Minimum damage fraction at the edge of the explosion radius (1.0 = no falloff).</summary>
+    [Export(PropertyHint.Range, "0,1,0.05")] public float ExplosionDamageFalloff = 0.25f;
 }

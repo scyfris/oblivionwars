@@ -31,13 +31,24 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
     [ExportGroup("Physics")]
     [Export] private CommonPhysicsDef _physicsDef;
+    [Export] private CollisionShape2D _primaryCollisionShape;
 
-    // Runtime data
+    // Runtime data - set from the controller
     public bool GravityEnabled { get; set; } = true;
 
     // Movement
     protected int _moveDirection = 0;
     protected int _verticalMoveDirection = 0;
+
+    // Center of mass offset in local coordinates, computed from the primary collision shape.
+    // Used by explosions to aim knockback at the entity's center rather than its origin (feet).
+    private Vector2 _centerOfMassLocal = Vector2.Zero;
+    public Vector2 GlobalCenterOfMass => GlobalPosition + _centerOfMassLocal;
+
+    // Knockback — additive velocity that decays over time via KnockbackDecayRate.
+    // Always applied on top of normal movement. When airborne, NPC controller
+    // disables movement input so knockback + gravity drive the arc naturally.
+    private Vector2 _knockbackVelocity = Vector2.Zero;
 
     // Wall sliding
     protected bool _isWallSliding = false;
@@ -59,6 +70,10 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         {
             GD.PrintErr($"{Name}: No physics definition on EntytCharacterBody2d resource");
         }
+
+        // Compute center of mass from the primary collision shape's local position
+        if (_primaryCollisionShape != null)
+            _centerOfMassLocal = _primaryCollisionShape.Position;
 
         // Initialize graphics
         if (_wallSlideDustPosition != null && _wallSlideDustScene != null)
@@ -170,6 +185,30 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
     protected virtual void UpdateMovement(double delta)
     {
+        bool hasKnockback = _knockbackVelocity.LengthSquared() > 1f;
+
+        // Decay knockback each frame regardless of grounded/airborne state
+        if (hasKnockback)
+            _knockbackVelocity = _knockbackVelocity.Lerp(Vector2.Zero, _physicsDef.KnockbackDecayRate * (float)delta);
+        else
+            _knockbackVelocity = Vector2.Zero;
+
+        // While airborne with knockback: skip movement input, let velocity + gravity
+        // handle the arc naturally. The initial impulse was applied directly to Velocity
+        // in ApplyKnockback, so we just preserve it and add gravity.
+        if (hasKnockback && !IsOnFloor() && GravityEnabled)
+        {
+            // Preserve current velocity (the arc from the impulse)
+            Vector2 newVel = Velocity;
+            // Apply gravity
+            newVel += _gravityDirection * _physicsDef.Gravity * (float)delta;
+            Velocity = newVel;
+
+            FloorSnapLength = 0f;
+            return;
+        }
+
+        // Horizontal velocity: normal movement input + knockback horizontal component
         Vector2 horizontalVelocity;
         if (_wallJumpInputLockTimer > 0 || _wallJumpPushAwayDurationTimer > 0)
         {
@@ -181,25 +220,41 @@ public partial class EntityCharacterBody2D : CharacterBody2D
             horizontalVelocity = HorizontalDir * _moveDirection * _physicsDef.MoveSpeed;
         }
 
-        Vector2 newVel = horizontalVelocity;
+        // Add knockback's horizontal component on top of movement
+        if (hasKnockback)
+        {
+            float knockbackHorizontal = _knockbackVelocity.Dot(HorizontalDir);
+            horizontalVelocity += HorizontalDir * knockbackHorizontal;
+        }
+
+        Vector2 newGroundVel = horizontalVelocity;
 
         if (!GravityEnabled)
         {
             // Flying: vertical movement driven by _verticalMoveDirection, no gravity
-            newVel += _gravityDirection * _verticalMoveDirection * _physicsDef.MoveSpeed;
+            newGroundVel += _gravityDirection * _verticalMoveDirection * _physicsDef.MoveSpeed;
+            // Add knockback's vertical component for flying entities
+            if (hasKnockback)
+            {
+                float knockbackVertical = _knockbackVelocity.Dot(_gravityDirection);
+                newGroundVel += _gravityDirection * knockbackVertical;
+            }
         }
         else if (_isWallSliding)
         {
-            newVel += _gravityDirection * (_physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction);
+            newGroundVel += _gravityDirection * (_physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction);
         }
         else
         {
+            // Preserve current vertical velocity (gravity accumulation from previous frames)
             float velocityAlongGravity = Velocity.Dot(_gravityDirection);
-            newVel += _gravityDirection * velocityAlongGravity;
-            newVel += _gravityDirection * _physicsDef.Gravity * (float)delta;
+            newGroundVel += _gravityDirection * velocityAlongGravity;
+            newGroundVel += _gravityDirection * _physicsDef.Gravity * (float)delta;
         }
 
-        Velocity = newVel;
+        Velocity = newGroundVel;
+
+        FloorSnapLength = 1f;
     }
 
     protected void ZeroFloorVelocity()
@@ -289,6 +344,18 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         {
             Velocity -= _gravityDirection * velocityAlongGravity;
         }
+    }
+
+    /// <summary>Applies a knockback impulse. Directly modifies Velocity for the launch,
+    /// and stores the horizontal component for gradual decay.</summary>
+    public void ApplyKnockback(Vector2 impulse)
+    {
+        // Apply full impulse directly to velocity for immediate launch
+        Velocity += impulse;
+        // Store knockback for horizontal decay tracking
+        _knockbackVelocity += impulse;
+        // Disable floor snap so the entity can leave the ground
+        FloorSnapLength = 0f;
     }
 
     public void StartMoveLeft()

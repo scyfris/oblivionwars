@@ -31,7 +31,7 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dummy"]
 size = Vector2(59, 125.00001)
 
-[node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_controller", "_flipRoot", "_spriteNode")]
+[node name="TargetDummy" type="CharacterBody2D" unique_id=749725729 node_paths=PackedStringArray("_controller", "_flipRoot", "_spriteNode", "_primaryCollisionShape")]
 script = ExtResource("1_npc")
 _controller = NodePath("NPCController")
 _flipRoot = NodePath("FlipRoot")
@@ -39,6 +39,7 @@ _spriteNode = NodePath("FlipRoot/AnimatedSprite2D")
 _walkFacingDirAnimation = "default"
 _walkNonFacingDirAnimation = "default"
 _physicsDef = ExtResource("3_iqlxx")
+_primaryCollisionShape = NodePath("CollisionShape2D")
 
 [node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel", "_stateLabel", "_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState")]
 script = ExtResource("6_npcctrl")
