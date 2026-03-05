@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponRegistryEntry" format=3 uid="uid://cgp23wmhdqn2m"]
+
+[ext_resource type="Script" uid="uid://xbn7v88oatsv" path="res://Scripts/Data/Definitions/WeaponRegistryEntry.cs" id="1_p2is5"]
+[ext_resource type="Resource" uid="uid://iu6bnxxkuwh8" path="res://Resources/Data/Weapons/MachineGun/machine_gun_settings.tres" id="1_r83p0"]
+[ext_resource type="Texture2D" uid="uid://6pj5f7akfwx2" path="res://Resources/Data/Weapons/MachineGun/machinegun_icon.png" id="2_dmir1"]
+[ext_resource type="PackedScene" uid="uid://bx2i6q2ymntjm" path="res://Resources/Data/Weapons/MachineGun/MachineGun.tscn" id="3_k67ir"]
+
+[resource]
+script = ExtResource("1_p2is5")
+Name = "machinegun"
+Scene = ExtResource("3_k67ir")
+Definition = ExtResource("1_r83p0")
+Description = "Machine gun"
+Icon = ExtResource("2_dmir1")
+metadata/_custom_type_script = "uid://xbn7v88oatsv"

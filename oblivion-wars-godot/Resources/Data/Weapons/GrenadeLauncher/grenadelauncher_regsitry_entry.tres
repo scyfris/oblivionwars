@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponRegistryEntry" format=3 uid="uid://deid1wenpsyc2"]
+
+[ext_resource type="Resource" uid="uid://gxhylvlu26c5" path="res://Resources/Data/Weapons/GrenadeLauncher/grenadelauncher_settings.tres" id="1_ai6ru"]
+[ext_resource type="Texture2D" uid="uid://dm6eaxuqjsu7k" path="res://Resources/Data/Weapons/GrenadeLauncher/grenadelauncher_icon.png" id="2_gkaya"]
+[ext_resource type="PackedScene" uid="uid://dxppw08fifcsy" path="res://Resources/Data/Weapons/GrenadeLauncher/grenade_launcher.tscn" id="3_0hkx1"]
+[ext_resource type="Script" uid="uid://xbn7v88oatsv" path="res://Scripts/Data/Definitions/WeaponRegistryEntry.cs" id="4_ctxqx"]
+
+[resource]
+script = ExtResource("4_ctxqx")
+Name = "grenadelauncher"
+Scene = ExtResource("3_0hkx1")
+Definition = ExtResource("1_ai6ru")
+Description = "Grenade Launcher"
+Icon = ExtResource("2_gkaya")
+metadata/_custom_type_script = "uid://xbn7v88oatsv"

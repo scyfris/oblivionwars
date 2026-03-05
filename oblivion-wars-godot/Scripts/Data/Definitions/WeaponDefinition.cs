@@ -19,6 +19,11 @@ public partial class WeaponDefinition : Resource
 
     [ExportGroup("Projectile")]
     [Export] public PackedScene ProjectileScene;
+    [Export] public bool EnableWallBounce = false;
+    [Export] public bool EnableEnemyBounce = false;
+    [Export] public int MaxBounces = 0;
+    /// <summary>Speed retained after each bounce. 1.0 = fully elastic, 0.5 = loses half speed per bounce.</summary>
+    [Export(PropertyHint.Range, "0,1,0.05")] public float CoefficientOfRestitution = 0.8f;
 
     [ExportGroup("Spread")]
     [Export] public int SpreadCount = 1;
@@ -29,4 +34,8 @@ public partial class WeaponDefinition : Resource
     [Export] public float ExplosionRadius = 100.0f;
     /// <summary>Minimum damage fraction at the edge of the explosion radius (1.0 = no falloff).</summary>
     [Export(PropertyHint.Range, "0,1,0.05")] public float ExplosionDamageFalloff = 0.25f;
+    /// <summary>If > 0, projectile explodes after this many seconds instead of on impact.</summary>
+    [Export] public float TimedExplosion = 0f;
+    /// <summary>When TimedExplosion > 0, immediately explode on enemy contact instead of waiting for timer.</summary>
+    [Export] public bool CancelTimedOnEnemyContact = false;
 }

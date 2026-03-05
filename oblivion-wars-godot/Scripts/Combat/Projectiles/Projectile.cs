@@ -8,9 +8,15 @@ public struct ProjectileParams
     public bool AffectedByGravity;
     public float GravityScale;
     public float ImpactForce;
+    public bool EnableWallBounce;
+    public bool EnableEnemyBounce;
+    public int MaxBounces;
+    public float CoefficientOfRestitution;
     public bool Explosive;
     public float ExplosionRadius;
     public float ExplosionDamageFalloff;
+    public float TimedExplosion;
+    public bool CancelTimedOnEnemyContact;
 }
 
 public partial class Projectile : Area2D
@@ -26,6 +32,8 @@ public partial class Projectile : Area2D
     protected Node2D _shooter;
 
     private float _gravity;
+    private int _bounceCount = 0;
+    private bool _stopped = false;
 
     public override void _Ready()
     {
@@ -52,6 +60,10 @@ public partial class Projectile : Area2D
 
     protected virtual void UpdateMovement(double delta)
     {
+        // Stopped projectiles sit in place waiting for timed explosion
+        if (_stopped)
+            return;
+
         if (_params.AffectedByGravity)
             _velocity.Y += _gravity * _params.GravityScale * (float)delta;
 
@@ -69,12 +81,30 @@ public partial class Projectile : Area2D
         {
             var hitBody = (Node2D)result["collider"];
             var hitPosition = (Vector2)result["position"];
+            var hitNormal = (Vector2)result["normal"];
             GlobalPosition = hitPosition;
 
             if (hitBody != _shooter && GodotObject.IsInstanceValid(hitBody) && !hitBody.IsQueuedForDeletion())
             {
-                OnHit(hitBody);
-                QueueFree();
+                bool isEntity = hitBody is EntityCharacterBody2D;
+
+                // CancelTimedOnEnemyContact takes priority over bouncing —
+                // if set, hitting an entity always triggers immediate explosion
+                if (isEntity && (_params.CancelTimedOnEnemyContact || _params.TimedExplosion <= 0f))
+                {
+                    OnHit(hitBody);
+                    QueueFree();
+                    return;
+                }
+
+                if (ShouldBounce(hitBody))
+                {
+                    Bounce(hitNormal);
+                    return;
+                }
+
+                // Hitting a wall at max bounces: stop-and-wait if timed, otherwise immediate hit
+                HandleTerminalHit(hitBody);
                 return;
             }
         }
@@ -85,6 +115,46 @@ public partial class Projectile : Area2D
 
         if (_params.AffectedByGravity)
             Rotation = _velocity.Angle();
+    }
+
+    /// <summary>Determines if the projectile should bounce off the hit body.</summary>
+    private bool ShouldBounce(Node2D hitBody)
+    {
+        if (_bounceCount >= _params.MaxBounces)
+            return false;
+
+        bool isEntity = hitBody is EntityCharacterBody2D;
+
+        if (isEntity)
+            return _params.EnableEnemyBounce;
+
+        return _params.EnableWallBounce;
+    }
+
+    /// <summary>Reflects velocity off the surface normal and increments bounce count.</summary>
+    private void Bounce(Vector2 normal)
+    {
+        _velocity = _velocity.Bounce(normal) * _params.CoefficientOfRestitution;
+        _bounceCount++;
+        Rotation = _velocity.Angle();
+        // Nudge away from the surface so the next frame's raycast doesn't start inside the collider
+        GlobalPosition += normal * 1.0f;
+    }
+
+    /// <summary>Handles a terminal hit — either immediate OnHit or stop-and-wait for timed explosion.</summary>
+    private void HandleTerminalHit(Node2D hitBody)
+    {
+        if (_params.TimedExplosion > 0f)
+        {
+            // Stop in place and wait for timed explosion
+            _velocity = Vector2.Zero;
+            _stopped = true;
+        }
+        else
+        {
+            OnHit(hitBody);
+            QueueFree();
+        }
     }
 
     private void UpdateTrail()
@@ -102,6 +172,19 @@ public partial class Projectile : Area2D
     protected virtual void UpdateLifetime(double delta)
     {
         _timeAlive += (float)delta;
+
+        // Timed explosion: explode after the timer regardless of position
+        if (_params.TimedExplosion > 0f)
+        {
+            if (_timeAlive >= _params.TimedExplosion)
+            {
+                OnHit(null);
+                QueueFree();
+            }
+            return;
+        }
+
+        // Normal lifetime expiry
         if (_timeAlive >= _params.Lifetime)
         {
             QueueFree();

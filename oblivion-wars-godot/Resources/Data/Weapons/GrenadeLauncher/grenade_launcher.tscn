@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://dxppw08fifcsy"]
+
+[ext_resource type="PackedScene" path="res://Resources/Data/Weapons/WeaponBase.tscn" id="1_4iqkg"]
+
+[node name="GrenadeLauncher" unique_id=256624468 instance=ExtResource("1_4iqkg")]

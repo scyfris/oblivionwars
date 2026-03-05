@@ -103,9 +103,15 @@ public partial class Weapon : Holdable
             AffectedByGravity = _weaponDefinition.ProjectileAffectedByGravity,
             GravityScale = _weaponDefinition.ProjectileGravityScale,
             ImpactForce = _weaponDefinition.ImpactForce,
+            EnableWallBounce = _weaponDefinition.EnableWallBounce,
+            EnableEnemyBounce = _weaponDefinition.EnableEnemyBounce,
+            MaxBounces = _weaponDefinition.MaxBounces,
+            CoefficientOfRestitution = _weaponDefinition.CoefficientOfRestitution,
             Explosive = _weaponDefinition.Explosive,
             ExplosionRadius = _weaponDefinition.ExplosionRadius,
             ExplosionDamageFalloff = _weaponDefinition.ExplosionDamageFalloff,
+            TimedExplosion = _weaponDefinition.TimedExplosion,
+            CancelTimedOnEnemyContact = _weaponDefinition.CancelTimedOnEnemyContact,
         };
 
         projectile.Initialize(direction, projectileParams, _owner);
