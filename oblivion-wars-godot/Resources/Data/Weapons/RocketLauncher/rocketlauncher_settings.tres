@@ -12,7 +12,6 @@ Damage = 20.0
 Speed = 2000.0
 ImpactForce = 2000.0
 ProjectileScene = ExtResource("1_kn312")
-EnableWallBounce = true
 MaxBounces = 1
 Explosive = true
 ExplosionRadius = 200.0

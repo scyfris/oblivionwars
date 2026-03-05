@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_pgfav")
-FireRate = 0.1
+FireRate = 0.07
 ScreenShakeScale = 0.3
 ScreenShakeDurationScale = 0.4
 Speed = 2000.0

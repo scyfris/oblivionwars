@@ -5,6 +5,7 @@ public partial class GameHUD : CanvasLayer
     [Export] private Label _healthLabel;
     [Export] private Label _coinLabel;
     [Export] private Label _weaponLabel;
+    [Export] private TextureRect _weaponIcon;
     [Export] private Label _interactionPrompt;
     [Export] private SaveIndicator _saveIndicator;
 
@@ -102,12 +103,20 @@ public partial class GameHUD : CanvasLayer
         if (string.IsNullOrEmpty(weaponId))
         {
             _weaponLabel.Text = "";
+            if (_weaponIcon != null)
+                _weaponIcon.Texture = null;
             return;
         }
 
         int ammo = GlobalStateManager.Instance?.Player?.GetAmmo(weaponId) ?? 0;
         string ammoText = ammo == -1 ? "INF" : ammo.ToString();
         _weaponLabel.Text = $"{weaponId} | {ammoText}";
+
+        if (_weaponIcon != null)
+        {
+            var entry = GlobalDefinitions.Instance?.FindWeaponEntry(weaponId);
+            _weaponIcon.Texture = entry?.Icon;
+        }
     }
 
     public void ShowInteractionPrompt(string text)
