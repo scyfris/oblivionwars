@@ -11,6 +11,7 @@ public partial class PlayerController : Node
     private AnimatedSprite2D _spriteNode => _characterBody.SpriteNode;
 
     public PlayerCharacterBody2D CharacterBody => _characterBody;
+    public Weapon ActiveWeapon => _holdableSystem?.ActiveWeapon;
 
     // helper for player state
     public PlayerState PlayerStateCurrent => GlobalStateManager.Instance.Player;

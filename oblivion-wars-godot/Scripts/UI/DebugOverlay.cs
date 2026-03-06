@@ -11,6 +11,7 @@ public partial class DebugOverlay : Control
     private CheckBox _cameraGizmoCb;
     private CheckBox _npcRangeGizmoCb;
     private CheckBox _tileGridCb;
+    private CheckBox _spreadConeCb;
     private Input.MouseModeEnum _savedMouseMode;
 
     public override void _Ready()
@@ -149,6 +150,15 @@ public partial class DebugOverlay : Control
         };
         _gizmoSection.AddChild(_tileGridCb);
 
+        _spreadConeCb = new CheckBox();
+        _spreadConeCb.Text = "Spread Cone";
+        _spreadConeCb.Toggled += (pressed) =>
+        {
+            var global = GlobalStateManager.Instance?.Global;
+            if (global != null) global.ShowSpreadCone = pressed;
+        };
+        _gizmoSection.AddChild(_spreadConeCb);
+
         // Spacer
         var spacer = new Control();
         spacer.SizeFlagsVertical = SizeFlags.ExpandFill;
@@ -177,6 +187,7 @@ public partial class DebugOverlay : Control
         _cameraGizmoCb?.SetPressedNoSignal(global.ShowCameraGizmo);
         _npcRangeGizmoCb?.SetPressedNoSignal(global.ShowNPCRangeGizmo);
         _tileGridCb?.SetPressedNoSignal(global.ShowTileGrid);
+        _spreadConeCb?.SetPressedNoSignal(global.ShowSpreadCone);
     }
 
     private void RefreshWeapons()

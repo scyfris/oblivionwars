@@ -13,5 +13,5 @@ Speed = 2000.0
 ImpactForce = 50.0
 ProjectileScene = ExtResource("1_37v3o")
 SpreadCount = 5
-SpreadAngle = 30.0
+VariabilitySpreadPerBulletDeg = 2.0
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"

@@ -27,7 +27,15 @@ public partial class WeaponDefinition : Resource
 
     [ExportGroup("Spread")]
     [Export] public int SpreadCount = 1;
-    [Export] public float SpreadAngle = 15.0f;
+    [Export] public float SpreadAngleDeg = 15.0f;
+    /// <summary>Random per-bullet angular deviation in degrees. For single-bullet weapons this is the accuracy cone; for shotguns it's per-pellet jitter on top of the even spread.</summary>
+    [Export] public float VariabilitySpreadPerBulletDeg = 0f;
+    /// <summary>Degrees of spread added per shot fired (bloom). Accumulates during sustained fire.</summary>
+    [Export] public float RecoilPerShotDeg = 0f;
+    /// <summary>Maximum recoil bloom in degrees. Recoil cannot accumulate beyond this value.</summary>
+    [Export] public float MaxRecoilDeg = 15f;
+    /// <summary>Seconds until recoil bloom fully recovers back to base variability after stopping fire.</summary>
+    [Export] public float RecoilRecoveryTime = 0.5f;
 
     [ExportGroup("Explosive")]
     [Export] public bool Explosive = false;

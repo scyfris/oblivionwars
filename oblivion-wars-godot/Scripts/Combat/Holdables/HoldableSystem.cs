@@ -10,6 +10,8 @@ public partial class HoldableSystem : Node
     private Holdable _rightHoldable;
     private Node2D _owner;
 
+    public Weapon ActiveWeapon => _leftHoldable as Weapon;
+
     public void Initialize(Node2D owner, CharacterDefinition definition)
     {
         _owner = owner;

@@ -11,4 +11,6 @@ ScreenShakeDurationScale = 0.4
 Speed = 2000.0
 ImpactForce = 25.0
 ProjectileScene = ExtResource("1_kmrrv")
+SpreadAngleDeg = 0.0
+RecoilPerShotDeg = 1.0
 metadata/_custom_type_script = "uid://i6xsa0mr56ur"
