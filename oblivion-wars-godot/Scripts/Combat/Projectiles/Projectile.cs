@@ -206,7 +206,7 @@ public partial class Projectile : Area2D
             EventBus.Instance.Raise(new HitEvent
             {
                 TargetInstanceId = body.GetInstanceId(),
-                SourceInstanceId = _shooter?.GetInstanceId() ?? 0,
+                SourceInstanceId = (_shooter != null && GodotObject.IsInstanceValid(_shooter)) ? _shooter.GetInstanceId() : 0,
                 BaseDamage = _params.Damage,
                 ImpactForce = _params.ImpactForce,
                 HitDirection = _velocity.Normalized(),
@@ -231,7 +231,7 @@ public partial class Projectile : Area2D
         queryParams.CollideWithAreas = false;
 
         var results = spaceState.IntersectShape(queryParams);
-        ulong shooterId = _shooter?.GetInstanceId() ?? 0;
+        ulong shooterId = (_shooter != null && GodotObject.IsInstanceValid(_shooter)) ? _shooter.GetInstanceId() : 0;
 
         // Determine the impact body's ID so we can force full damage on it
         ulong impactId = (impactBody != null && GodotObject.IsInstanceValid(impactBody))
