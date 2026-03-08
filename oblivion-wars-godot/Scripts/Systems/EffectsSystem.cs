@@ -8,6 +8,9 @@ public partial class EffectsSystem : GameSystem
     [Export] public PackedScene HitEffectNormal;
     [Export] public PackedScene HitEffectEnemy;
 
+    [ExportGroup("Death Effects")]
+    [Export] public PackedScene DeathEffect;
+
     [ExportGroup("Hit Flash")]
     [Export] public ShaderMaterial HitFlashMaterial;
     [Export] public float HitFlashDuration = 0.15f;
@@ -35,6 +38,16 @@ public partial class EffectsSystem : GameSystem
     protected override void Initialize()
     {
         EventBus.Instance.Subscribe<HitEvent>(OnHitEvent);
+        EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
+    }
+
+    private void OnEntityDied(EntityDiedEvent evt)
+    {
+        if (DeathEffect == null) return;
+
+        var effect = DeathEffect.Instantiate<Node2D>();
+        effect.GlobalPosition = evt.Position;
+        GetTree().Root.AddChild(effect);
     }
 
     private void OnHitEvent(HitEvent evt)

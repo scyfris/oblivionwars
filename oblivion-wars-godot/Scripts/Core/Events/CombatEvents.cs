@@ -16,6 +16,7 @@ public struct EntityDiedEvent : IGameEvent
 {
     public ulong EntityInstanceId;
     public ulong KillerInstanceId;
+    public Vector2 Position;
 }
 
 public struct DamageAppliedEvent : IGameEvent

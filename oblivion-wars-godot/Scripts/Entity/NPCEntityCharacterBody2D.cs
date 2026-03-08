@@ -6,6 +6,7 @@ public partial class NPCEntityCharacterBody2D : EntityCharacterBody2D
     [Export]
     private NPCController _controller;
     public NPCController Controller => _controller;
+    protected override IEntityController EntityController => _controller;
 
     public override void _Ready()
     {

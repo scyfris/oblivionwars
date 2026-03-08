@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://bjcbsg2001eff" path="res://Scenes/LevelComponents/Pickups/CoinPickup.tscn" id="3_gtgt6"]
 [ext_resource type="Resource" uid="uid://br32jyw3q06bj" path="res://Resources/Data/Weapons/NPCWeapons/test_dummy_pistol_weapon_reg.tres" id="4_pb470"]
 [ext_resource type="Script" uid="uid://dbdtd1ea68ii6" path="res://Scripts/Data/Definitions/NPC/GlobalSettings/NPCDefinition.cs" id="5_ycsl5"]
+[ext_resource type="Resource" uid="uid://bv4jpxnmqlkb2" path="res://Resources/Data/Physics/npc_physics_settings.tres" id="6_phys"]
 
 [sub_resource type="Resource" id="Resource_i4fh1"]
 script = ExtResource("2_brcrn")
@@ -18,6 +19,7 @@ AIBehaviorData = ExtResource("1_ju63h")
 IsBoss = true
 DropTable = Array[ExtResource("2_brcrn")]([SubResource("Resource_i4fh1")])
 EntityId = "target_dummy"
-MaxHealth = 10000.0
+MaxHealth = 50.0
+PhysicsDef = ExtResource("6_phys")
 LeftWeapon = ExtResource("4_pb470")
 metadata/_custom_type_script = "uid://dbdtd1ea68ii6"

@@ -25,7 +25,8 @@ public partial class GameHUD : CanvasLayer
 
         if (playerbody == null)
         {
-            GD.PrintErr("Can't find player node!");
+            GD.PrintErr("GameHUD: Can't find player node!");
+            return;
         }
         _playerController = playerbody.Controller;
 
@@ -43,6 +44,12 @@ public partial class GameHUD : CanvasLayer
 
     public override void _Process(double delta)
     {
+        if (_playerController == null)
+        {
+            var playerbody = GetTree().GetFirstNodeInGroup(GroupConstants.Entities.Player) as PlayerCharacterBody2D;
+            _playerController = playerbody?.Controller;
+        }
+
         UpdateInteractionPrompt();
         UpdateHealthDisplay();
         UpdateCoinDisplay();
@@ -59,7 +66,7 @@ public partial class GameHUD : CanvasLayer
 
     private void UpdateHealthDisplay()
     {
-        if (_healthLabel == null) return;
+        if (_healthLabel == null || _playerController == null) return;
 
         _healthLabel.Text = $"HP: {_playerController.PlayerStateCurrent.CurrentHealth:F0}/{_playerController.PlayerStateCurrent.MaxHealth:F0}";
     }

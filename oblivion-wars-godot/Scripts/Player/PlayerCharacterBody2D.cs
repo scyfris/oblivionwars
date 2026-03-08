@@ -5,6 +5,7 @@ public partial class PlayerCharacterBody2D : EntityCharacterBody2D
     [Export]
     private PlayerController _playerController;
     public PlayerController Controller => _playerController;
+    protected override IEntityController EntityController => _playerController;
 
     // Interaction (body stores reference since it's the physical object that overlaps)
     private Interactable _nearestInteractable;

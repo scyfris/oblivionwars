@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_5nmh8")
 DetectionRange = 800.0
-AttackRange = 600.0
+AttackRange = 400.0
 metadata/_custom_type_script = "uid://din66r6aywcws"

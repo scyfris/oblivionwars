@@ -73,7 +73,7 @@ public partial class Projectile : Area2D
         // CCD: raycast from current to next position to catch collisions
         var spaceState = GetWorld2D().DirectSpaceState;
         var query = PhysicsRayQueryParameters2D.Create(GlobalPosition, nextPosition);
-        if (_shooter is CollisionObject2D col)
+        if (_shooter is CollisionObject2D col && GodotObject.IsInstanceValid(col))
             query.Exclude = new Godot.Collections.Array<Rid> { col.GetRid() };
 
         var result = spaceState.IntersectRay(query);

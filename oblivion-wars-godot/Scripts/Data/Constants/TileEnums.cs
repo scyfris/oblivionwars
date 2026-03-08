@@ -1,5 +1,6 @@
 
 // Tile types for surfaces that affect movement.
+// Tile data: "surface_type"
 public enum TileSurfaceType
 {
     Normal = 0,
@@ -9,6 +10,7 @@ public enum TileSurfaceType
 }
 
 // Tile hazards that may affect player.
+// Tiole data: "hazard_type"
 public enum TileHazardType
 {
     None = 0,

@@ -5,16 +5,18 @@
 [resource]
 script = ExtResource("1_script")
 UseDefaultFollowSpeed = false
+FollowSpeed = 7.0
 UseDefaultMinFollowSpeed = false
 UseDefaultFollowOffset = false
+FollowOffset = Vector2(0, -150)
 UseDefaultDeadzone = false
-Deadzone = Vector2(40, 50)
+Deadzone = Vector2(40, 0)
 UseDefaultLookAheadDistance = false
 UseDefaultLookAheadSpeed = false
 UseDefaultZoom = false
 UseDefaultBoundaries = false
 UseBoundaries = true
-BoundBottom = -600.0
+BoundBottom = -100000.0
 UseDefaultRotation = false
 RotationSpeed = 7.0
 MinRotationSpeed = 2.0

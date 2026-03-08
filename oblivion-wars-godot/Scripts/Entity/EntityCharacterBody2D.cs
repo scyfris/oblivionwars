@@ -17,6 +17,13 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     [Export] private string _walkFacingDirAnimation = "walk-facingdir";
     [Export] private string _walkNonFacingDirAnimation = "walk-nonfacingdir";
 
+    [ExportGroup("Squash & Stretch")]
+    [Export] private float _squashStretchLerpSpeed = 12f;
+    [Export] private float _landSquashAmount = 0.7f;
+    [Export] private float _jumpStretchAmount = 1.25f;
+    [Export] private float _fallStretchAmount = 1.15f;
+    [Export] private float _fallStretchMinSpeed = 200f;
+
     [ExportGroup("Wall Slide Effects")]
     [Export] private Node2D _wallSlideDustPosition;
     [Export] private PackedScene _wallSlideDustScene;
@@ -30,8 +37,11 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     public Vector2 AimTarget { get; set; }
 
     [ExportGroup("Physics")]
-    [Export] private CommonPhysicsDef _physicsDef;
     [Export] private CollisionShape2D _primaryCollisionShape;
+
+    // Overloaded by subclasses of EntityCharacterBody2D , they return the actual value.
+    protected virtual IEntityController EntityController => null;
+    private CommonPhysicsDef PhysicsDef => EntityController?.Definition?.PhysicsDef;
 
     // Runtime data - set from the controller
     public bool GravityEnabled { get; set; } = true;
@@ -57,6 +67,10 @@ public partial class EntityCharacterBody2D : CharacterBody2D
     protected float _wallJumpPushAwayDurationTimer = 0f;
     public bool IsWallSliding => _isWallSliding;
 
+    // Squash & stretch
+    private Vector2 _squashStretchScale = Vector2.One;
+    private bool _wasOnFloor = true;
+
     protected int _gravityRotation = 0;
     protected Vector2 _gravityDirection = Vector2.Down;
     protected Vector2 _upDirection = Vector2.Up;
@@ -66,9 +80,9 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
     public override void _Ready()
     {
-        if (_physicsDef == null)
+        if (PhysicsDef == null)
         {
-            GD.PrintErr($"{Name}: No physics definition on EntytCharacterBody2d resource");
+            GD.PrintErr($"{Name}: No physics definition on EntityCharacterBody2D resource");
         }
 
         // Compute center of mass from the primary collision shape's local position
@@ -95,13 +109,52 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         UpdateWallSliding();
         UpdateMovement(delta);
 
+        // Capture fall speed before MoveAndSlide zeros it on landing
+        float preLandFallSpeed = Velocity.Dot(_gravityDirection);
+
         MoveAndSlide();
 
         ZeroFloorVelocity();
         CheckHazardTiles();
 
+        // Detect landing for squash impulse
+        if (IsOnFloor() && !_wasOnFloor && preLandFallSpeed > 0)
+        {
+            float impactRatio = Mathf.Clamp(preLandFallSpeed / 800f, 0f, 1f);
+            float squash = Mathf.Lerp(1f, _landSquashAmount, impactRatio);
+            _squashStretchScale = new Vector2(1f / squash, squash);
+        }
+        _wasOnFloor = IsOnFloor();
+    }
+
+    public override void _Process(double delta)
+    {
+        UpdateSquashStretch(delta);
         UpdateAnimation();
-        
+    }
+
+    // ── Squash & Stretch ───────────────────────────────────
+
+    private void UpdateSquashStretch(double delta)
+    {
+        if (_flipRoot == null) return;
+
+        // While airborne and falling fast, target a vertical stretch
+        if (!IsOnFloor() && GravityEnabled)
+        {
+            float fallSpeed = Velocity.Dot(_gravityDirection);
+            if (fallSpeed > _fallStretchMinSpeed)
+            {
+                float ratio = Mathf.Clamp((fallSpeed - _fallStretchMinSpeed) / 600f, 0f, 1f);
+                float stretch = Mathf.Lerp(1f, _fallStretchAmount, ratio);
+                Vector2 target = new Vector2(1f / stretch, stretch);
+                _squashStretchScale = _squashStretchScale.Lerp(target, _squashStretchLerpSpeed * (float)delta);
+                return;
+            }
+        }
+
+        // Lerp back to (1,1)
+        _squashStretchScale = _squashStretchScale.Lerp(Vector2.One, _squashStretchLerpSpeed * (float)delta);
     }
 
     // ── Animation ─────────────────────────────────────────
@@ -114,7 +167,10 @@ public partial class EntityCharacterBody2D : CharacterBody2D
             _facingRight = _moveDirection > 0;
 
         if (_flipRoot != null)
-            _flipRoot.Scale = new Vector2(_facingRight ? 1 : -1, 1);
+        {
+            float facingX = _facingRight ? 1f : -1f;
+            _flipRoot.Scale = new Vector2(facingX * _squashStretchScale.X, _squashStretchScale.Y);
+        }
 
         if (_moveDirection != 0 && IsOnFloor())
         {
@@ -185,11 +241,17 @@ public partial class EntityCharacterBody2D : CharacterBody2D
 
     protected virtual void UpdateMovement(double delta)
     {
+        if (PhysicsDef == null)
+        {
+            GD.PrintErr($"{Name}: PhysicsDef is null — EntityController={EntityController != null}, Definition={EntityController?.Definition != null}, PhysicsDef={EntityController?.Definition?.PhysicsDef != null}");
+            return;
+        }
+
         bool hasKnockback = _knockbackVelocity.LengthSquared() > 1f;
 
         // Decay knockback each frame regardless of grounded/airborne state
         if (hasKnockback)
-            _knockbackVelocity = _knockbackVelocity.Lerp(Vector2.Zero, _physicsDef.KnockbackDecayRate * (float)delta);
+            _knockbackVelocity = _knockbackVelocity.Lerp(Vector2.Zero, PhysicsDef.KnockbackDecayRate * (float)delta);
         else
             _knockbackVelocity = Vector2.Zero;
 
@@ -201,7 +263,7 @@ public partial class EntityCharacterBody2D : CharacterBody2D
             // Preserve current velocity (the arc from the impulse)
             Vector2 newVel = Velocity;
             // Apply gravity
-            newVel += _gravityDirection * _physicsDef.Gravity * (float)delta;
+            newVel += _gravityDirection * PhysicsDef.Gravity * (float)delta;
             Velocity = newVel;
 
             FloorSnapLength = 0f;
@@ -217,7 +279,7 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         }
         else
         {
-            horizontalVelocity = HorizontalDir * _moveDirection * _physicsDef.MoveSpeed;
+            horizontalVelocity = HorizontalDir * _moveDirection * PhysicsDef.MoveSpeed;
         }
 
         // Add knockback's horizontal component on top of movement
@@ -232,7 +294,7 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         if (!GravityEnabled)
         {
             // Flying: vertical movement driven by _verticalMoveDirection, no gravity
-            newGroundVel += _gravityDirection * _verticalMoveDirection * _physicsDef.MoveSpeed;
+            newGroundVel += _gravityDirection * _verticalMoveDirection * PhysicsDef.MoveSpeed;
             // Add knockback's vertical component for flying entities
             if (hasKnockback)
             {
@@ -242,14 +304,14 @@ public partial class EntityCharacterBody2D : CharacterBody2D
         }
         else if (_isWallSliding)
         {
-            newGroundVel += _gravityDirection * (_physicsDef.Gravity * _physicsDef.WallSlideSpeedFraction);
+            newGroundVel += _gravityDirection * (PhysicsDef.Gravity * PhysicsDef.WallSlideSpeedFraction);
         }
         else
         {
             // Preserve current vertical velocity (gravity accumulation from previous frames)
             float velocityAlongGravity = Velocity.Dot(_gravityDirection);
             newGroundVel += _gravityDirection * velocityAlongGravity;
-            newGroundVel += _gravityDirection * _physicsDef.Gravity * (float)delta;
+            newGroundVel += _gravityDirection * PhysicsDef.Gravity * (float)delta;
         }
 
         Velocity = newGroundVel;
@@ -324,17 +386,18 @@ public partial class EntityCharacterBody2D : CharacterBody2D
             Vector2 jumpDirection = -_gravityDirection;
             Vector2 pushDirection = _wallNormal;
 
-            Velocity = pushDirection * _physicsDef.WallJumpPushAwayForce + jumpDirection * _physicsDef.WallJumpStrength;
+            Velocity = pushDirection * PhysicsDef.WallJumpPushAwayForce + jumpDirection * PhysicsDef.WallJumpStrength;
             _isWallSliding = false;
 
-            _wallJumpInputLockTimer = _physicsDef.WallJumpInputLockDuration;
-            _wallJumpPushAwayDurationTimer = _physicsDef.WallJumpPushAwayDuration;
+            _wallJumpInputLockTimer = PhysicsDef.WallJumpInputLockDuration;
+            _wallJumpPushAwayDurationTimer = PhysicsDef.WallJumpPushAwayDuration;
             return;
         }
 
         if (!IsOnFloor()) return;
 
-        Velocity -= _gravityDirection * _physicsDef.JumpStrength;
+        Velocity -= _gravityDirection * PhysicsDef.JumpStrength;
+        _squashStretchScale = new Vector2(1f / _jumpStretchAmount, _jumpStretchAmount);
     }
 
     public void CancelJump()

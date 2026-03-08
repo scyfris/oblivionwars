@@ -9,13 +9,14 @@ public enum NPCTransitionEvent
     HealthLow,
 }
 
-public partial class NPCController : Node
+public partial class NPCController : Node, IEntityController
 {
     private static StringName Event(NPCTransitionEvent evt) => EnumStringNames<NPCTransitionEvent>.Get(evt);
 
     [ExportGroup("NPC Definition")]
     [Export] private NPCDefinition _definition;
     public NPCDefinition Definition => _definition;
+    CharacterDefinition IEntityController.Definition => _definition;
 
     private bool IsFlying => _definition?.AIBehaviorData?.IsFlying == true;
 
@@ -54,7 +55,7 @@ public partial class NPCController : Node
 
     public NPCEntityCharacterBody2D NPCCharacterBody => _npcCharacterBody;
 
-    private PlayerCharacterBody2D _targetPlayer;
+    private PlayerCharacterBody2D _cachedPlayer;
     private bool _isShooting;
 
     public override void _Ready()
@@ -72,9 +73,6 @@ public partial class NPCController : Node
         if (_definition?.AIBehaviorData?.IsFlying == true)
             _npcCharacterBody.GravityEnabled = false;
 
-        // Find and cache player reference
-        _targetPlayer = GetTree().GetFirstNodeInGroup(GroupConstants.Entities.Player) as PlayerCharacterBody2D;
-
         SetupHSM();
         UpdateHealthLabel();
     }
@@ -83,6 +81,7 @@ public partial class NPCController : Node
     {
         EventBus.Instance?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
+        EventBus.Instance?.Unsubscribe<HitEvent>(OnHit);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -154,7 +153,9 @@ public partial class NPCController : Node
 
     public PlayerCharacterBody2D GetTargetPlayer()
     {
-        return _targetPlayer;
+        if (_cachedPlayer == null || !IsInstanceValid(_cachedPlayer))
+            _cachedPlayer = GetTree().GetFirstNodeInGroup(GroupConstants.Entities.Player) as PlayerCharacterBody2D;
+        return _cachedPlayer;
     }
 
     // ── Movement ────────────────────────────────────────────
@@ -165,14 +166,15 @@ public partial class NPCController : Node
 
     public void StartMoveTowardsPlayer()
     {
-        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
+        var target = GetTargetPlayer();
+        if (target == null)
         {
             StopMoving();
             return;
         }
 
         float deadzone = _definition.AIBehaviorData.MoveDeadzone;
-        float dirX = _targetPlayer.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
+        float dirX = target.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
 
         if (dirX > deadzone)
             StartMoveRight();
@@ -183,7 +185,7 @@ public partial class NPCController : Node
 
         if (IsFlying)
         {
-            float dirY = _targetPlayer.GlobalPosition.Y - _npcCharacterBody.GlobalPosition.Y;
+            float dirY = target.GlobalPosition.Y - _npcCharacterBody.GlobalPosition.Y;
 
             if (dirY > deadzone)
                 _npcCharacterBody.StartMoveDown();
@@ -196,13 +198,14 @@ public partial class NPCController : Node
 
     public void StartFleeFromPlayer()
     {
-        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
+        var target = GetTargetPlayer();
+        if (target == null)
         {
             StopMoving();
             return;
         }
 
-        float dirX = _targetPlayer.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
+        float dirX = target.GlobalPosition.X - _npcCharacterBody.GlobalPosition.X;
 
         // Move opposite direction from player
         if (dirX > 0f)
@@ -212,7 +215,7 @@ public partial class NPCController : Node
 
         if (IsFlying)
         {
-            float dirY = _targetPlayer.GlobalPosition.Y - _npcCharacterBody.GlobalPosition.Y;
+            float dirY = target.GlobalPosition.Y - _npcCharacterBody.GlobalPosition.Y;
 
             if (dirY > 0f)
                 _npcCharacterBody.StartMoveUp();
@@ -225,19 +228,19 @@ public partial class NPCController : Node
 
     public bool IsPlayerInDetectRange()
     {
-        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
-            return false;
+        var target = GetTargetPlayer();
+        if (target == null) return false;
 
-        float distance = _npcCharacterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
+        float distance = _npcCharacterBody.GlobalPosition.DistanceTo(target.GlobalPosition);
         return distance <= _definition.AIBehaviorData.DetectionRange;
     }
 
     public bool IsPlayerInAttackRange()
     {
-        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
-            return false;
+        var target = GetTargetPlayer();
+        if (target == null) return false;
 
-        float distance = _npcCharacterBody.GlobalPosition.DistanceTo(_targetPlayer.GlobalPosition);
+        float distance = _npcCharacterBody.GlobalPosition.DistanceTo(target.GlobalPosition);
         return distance <= _definition.AIBehaviorData.AttackRange;
     }
 
@@ -247,16 +250,16 @@ public partial class NPCController : Node
     {
         float sign = _npcCharacterBody.IsFacingRight ? 1f : -1f;
         Vector2 origin = _holdableSystem.WeaponGlobalPosition;
-        Vector2 target = origin + _npcCharacterBody.HorizontalDir * sign * 100f;
-        UpdateAim(target);
+        Vector2 aimTarget = origin + _npcCharacterBody.HorizontalDir * sign * 100f;
+        UpdateAim(aimTarget);
     }
 
     public void AimAtPlayer()
     {
-        if (_targetPlayer == null || !IsInstanceValid(_targetPlayer))
-            return;
+        var target = GetTargetPlayer();
+        if (target == null) return;
 
-        UpdateAim(_targetPlayer.GlobalPosition);
+        UpdateAim(target.GlobalPosition);
     }
 
     public void StartShooting()
@@ -307,7 +310,7 @@ public partial class NPCController : Node
     private void OnDamageApplied(DamageAppliedEvent evt)
     {
         if (evt.TargetInstanceId != _npcCharacterBody.GetInstanceId()) return;
-        
+
         NPCRuntimeData.CurrentHealth -= evt.FinalDamage;
         if (NPCRuntimeData.CurrentHealth < 0)
             NPCRuntimeData.CurrentHealth = 0;
@@ -317,7 +320,8 @@ public partial class NPCController : Node
             EventBus.Instance.Raise(new EntityDiedEvent
             {
                 EntityInstanceId = evt.TargetInstanceId,
-                KillerInstanceId = 0
+                KillerInstanceId = 0,
+                Position = _npcCharacterBody.GlobalCenterOfMass
             });
         }
 
@@ -379,6 +383,8 @@ public partial class NPCController : Node
 
     private void OnHit(HitEvent evt)
     {
+        if (!GodotObject.IsInstanceValid(_npcCharacterBody) || _npcCharacterBody.IsQueuedForDeletion())
+            return;
         if (evt.TargetInstanceId != _npcCharacterBody.GetInstanceId())
             return;
 

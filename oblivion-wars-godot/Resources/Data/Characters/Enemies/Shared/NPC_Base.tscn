@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://bwpnrn34w5mva" path="res://Scripts/Entity/NPCEntityCharacterBody2D.cs" id="1_npc"]
 [ext_resource type="Resource" uid="uid://ccy1qxn7wx5au" path="res://Resources/Data/Characters/Enemies/TestDummyGrounded/test_dummy_grounded_def.tres" id="2_def"]
 [ext_resource type="Texture2D" uid="uid://degmoqfpjxpbh" path="res://Resources/Data/Characters/Enemies/TestDummyGrounded/Sprites/TestDummyNPC.png" id="3_7oewm"]
-[ext_resource type="Resource" uid="uid://bv4jpxnmqlkb2" path="res://Resources/Data/Physics/npc_physics_settings.tres" id="3_iqlxx"]
 [ext_resource type="Script" uid="uid://brlpnvstlgdf3" path="res://Scripts/UI/DebugModeFilter.cs" id="4_gebkd"]
 [ext_resource type="Script" uid="uid://b8q5jpn8k4gkv" path="res://Scripts/Combat/Holdables/HoldableSystem.cs" id="5_holdable"]
 [ext_resource type="PackedScene" uid="uid://dg2ca2viy4a1u" path="res://Scenes/Debug/npc_debug_range_gizmo.tscn" id="6_gebkd"]
@@ -38,7 +37,6 @@ _flipRoot = NodePath("FlipRoot")
 _spriteNode = NodePath("FlipRoot/AnimatedSprite2D")
 _walkFacingDirAnimation = "default"
 _walkNonFacingDirAnimation = "default"
-_physicsDef = ExtResource("3_iqlxx")
 _primaryCollisionShape = NodePath("CollisionShape2D")
 
 [node name="NPCController" type="Node" parent="." unique_id=661337264 node_paths=PackedStringArray("_npcCharacterBody", "_holdableSystem", "_healthLabel", "_stateLabel", "_stateTree", "_idleState", "_patrolState", "_attackState", "_fleeState")]

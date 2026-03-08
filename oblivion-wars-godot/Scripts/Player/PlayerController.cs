@@ -1,11 +1,12 @@
 using Godot;
 using System.Linq;
 
-public partial class PlayerController : Node
+public partial class PlayerController : Node, IEntityController
 {
     [Export] private PlayerCharacterBody2D _characterBody;
     [Export] private PlayerDefinition _definition;
     public PlayerDefinition Definition => _definition;
+    CharacterDefinition IEntityController.Definition => _definition;
     [Export] private HoldableSystem _holdableSystem;
 
     private AnimatedSprite2D _spriteNode => _characterBody.SpriteNode;
