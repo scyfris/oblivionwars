@@ -10,11 +10,10 @@ point_count = 3
 colors = PackedColorArray(1, 0.050980393, 0.019607844, 1, 1, 0.011764706, 0.011764706, 1)
 
 [node name="EnemyDeathBurst" type="CPUParticles2D" unique_id=961594123]
-emitting = false
 amount = 24
 lifetime = 3.0
 one_shot = true
-explosiveness = 0.95
+explosiveness = 1.0
 emission_shape = 1
 emission_sphere_radius = 8.0
 direction = Vector2(0, -1)
