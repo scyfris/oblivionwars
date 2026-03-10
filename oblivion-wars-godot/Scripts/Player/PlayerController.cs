@@ -34,7 +34,6 @@ public partial class PlayerController : Node, IEntityController
             GD.PrintErr($"{Name}: No EntityID definition on EntytCharacterBody2d resource");
         }
 
-        EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance.Subscribe<ForceWeaponSelectEvent>(OnForceWeaponSelect);
         EventBus.Instance.Subscribe<HitEvent>(OnHit);
@@ -85,7 +84,6 @@ public partial class PlayerController : Node, IEntityController
 
     public override void _ExitTree()
     {
-        EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
         EventBus.Instance?.Unsubscribe<ForceWeaponSelectEvent>(OnForceWeaponSelect);
     }
@@ -258,11 +256,20 @@ public partial class PlayerController : Node, IEntityController
         SelectWeapon(evt.WeaponId);
     }
 
-    private void OnEntityDied(EntityDiedEvent evt)
+    /// <summary>
+    /// Triggers the full death sequence: notifies external systems, then respawns.
+    /// Can be called internally (health reached 0) or externally (force-kill).
+    /// </summary>
+    public void Die()
     {
-        if (evt.EntityInstanceId != _characterBody.GetInstanceId()) return;
-
         GD.Print("Player died! Respawning from checkpoint...");
+
+        EventBus.Instance.Raise(new EntityDiedEvent
+        {
+            EntityInstanceId = _characterBody.GetInstanceId(),
+            KillerInstanceId = 0,
+            Position = _characterBody.GlobalPosition
+        });
 
         if (SaveManager.Instance != null && SaveManager.Instance.ActiveSlotIndex >= 0)
         {
@@ -335,13 +342,7 @@ public partial class PlayerController : Node, IEntityController
             PlayerStateCurrent.CurrentHealth = 0;
 
         if (PlayerStateCurrent.CurrentHealth <= 0)
-        {
-            EventBus.Instance.Raise(new EntityDiedEvent
-            {
-                EntityInstanceId = evt.TargetInstanceId,
-                KillerInstanceId = 0
-            });
-        }
+            Die();
     }
 
     private void OnHazardContact(HazardContactEvent evt)

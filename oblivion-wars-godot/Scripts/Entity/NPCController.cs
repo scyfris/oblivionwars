@@ -61,7 +61,6 @@ public partial class NPCController : Node, IEntityController
     public override void _Ready()
     {
         EventBus.Instance.Subscribe<DamageAppliedEvent>(OnDamageApplied);
-        EventBus.Instance.Subscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance.Subscribe<HitEvent>(OnHit);
 
         InitializeRuntimeData();
@@ -80,7 +79,6 @@ public partial class NPCController : Node, IEntityController
     public override void _ExitTree()
     {
         EventBus.Instance?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
-        EventBus.Instance?.Unsubscribe<EntityDiedEvent>(OnEntityDied);
         EventBus.Instance?.Unsubscribe<HitEvent>(OnHit);
     }
 
@@ -315,26 +313,28 @@ public partial class NPCController : Node, IEntityController
         if (NPCRuntimeData.CurrentHealth < 0)
             NPCRuntimeData.CurrentHealth = 0;
 
-        if (NPCRuntimeData.CurrentHealth <= 0)
-        {
-            EventBus.Instance.Raise(new EntityDiedEvent
-            {
-                EntityInstanceId = evt.TargetInstanceId,
-                KillerInstanceId = 0,
-                Position = _npcCharacterBody.GlobalCenterOfMass
-            });
-        }
-
-
         UpdateHealthLabel();
+
+        if (NPCRuntimeData.CurrentHealth <= 0)
+            Die();
     }
 
-    private void OnEntityDied(EntityDiedEvent evt)
+    /// <summary>
+    /// Triggers the full death sequence: drops, notifies external systems, then frees the entity.
+    /// Can be called internally (health reached 0) or externally (force-kill from spawner, etc.).
+    /// </summary>
+    public void Die()
     {
-        if (evt.EntityInstanceId != _npcCharacterBody.GetInstanceId()) return;
-
         GD.Print($"NPC {_definition?.EntityId ?? "unknown"} died!");
         SpawnDrops();
+
+        EventBus.Instance.Raise(new EntityDiedEvent
+        {
+            EntityInstanceId = _npcCharacterBody.GetInstanceId(),
+            KillerInstanceId = 0,
+            Position = _npcCharacterBody.GlobalCenterOfMass
+        });
+
         _npcCharacterBody.QueueFree();
         QueueFree();
     }

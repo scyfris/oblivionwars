@@ -12,6 +12,7 @@ public partial class DebugOverlay : Control
     private CheckBox _npcRangeGizmoCb;
     private CheckBox _tileGridCb;
     private CheckBox _spreadConeCb;
+    private CheckBox _spawnerGizmoCb;
     private Input.MouseModeEnum _savedMouseMode;
 
     public override void _Ready()
@@ -159,6 +160,15 @@ public partial class DebugOverlay : Control
         };
         _gizmoSection.AddChild(_spreadConeCb);
 
+        _spawnerGizmoCb = new CheckBox();
+        _spawnerGizmoCb.Text = "Spawner Debug";
+        _spawnerGizmoCb.Toggled += (pressed) =>
+        {
+            var global = GlobalStateManager.Instance?.Global;
+            if (global != null) global.ShowSpawnerGizmo = pressed;
+        };
+        _gizmoSection.AddChild(_spawnerGizmoCb);
+
         // Spacer
         var spacer = new Control();
         spacer.SizeFlagsVertical = SizeFlags.ExpandFill;
@@ -188,6 +198,7 @@ public partial class DebugOverlay : Control
         _npcRangeGizmoCb?.SetPressedNoSignal(global.ShowNPCRangeGizmo);
         _tileGridCb?.SetPressedNoSignal(global.ShowTileGrid);
         _spreadConeCb?.SetPressedNoSignal(global.ShowSpreadCone);
+        _spawnerGizmoCb?.SetPressedNoSignal(global.ShowSpawnerGizmo);
     }
 
     private void RefreshWeapons()
