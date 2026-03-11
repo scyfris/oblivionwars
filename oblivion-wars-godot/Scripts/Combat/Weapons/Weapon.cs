@@ -1,142 +1,176 @@
 using Godot;
-using System;
 
-/// <summary>
-/// Data-driven weapon class. Handles both projectile and hitscan weapons
-/// based on WeaponDefinition data. No per-weapon subclasses needed.
-/// </summary>
 public partial class Weapon : Holdable
 {
-	[Export] protected WeaponDefinition _weaponDefinition;
-	[Export] private Line2D _bulletTrail;
-	[Export] private AnimationPlayer _animationPlayer;
+    private WeaponDefinition _weaponDefinition;
+    [Export] private Node2D _projectileSpawnLocationNode;
+    [Export] private AnimationPlayer _animationPlayer;
 
-	private float _trailTimer = 0f;
+    public void SetDefinition(WeaponDefinition definition)
+    {
+        _weaponDefinition = definition;
+    }
 
-	public override void _Ready()
-	{
-		if (_weaponDefinition != null)
-		{
-			_useCooldown = _weaponDefinition.UseCooldown;
-		}
-	}
+    private bool _hasFiredThisPress = false;
+    private float _currentRecoilDeg = 0f;
+    private float _timeSinceLastShot = 0f;
+    private bool _isFiring = false;
 
-	public override void Update(double delta)
-	{
-		base.Update(delta);
+    private Vector2 AimDirection => GlobalTransform.X.Normalized();
 
-		// Fade out bullet trail
-		if (_bulletTrail != null && _trailTimer > 0)
-		{
-			_trailTimer -= (float)delta;
-			if (_trailTimer <= 0)
-			{
-				_bulletTrail.Visible = false;
-			}
-		}
-	}
+    public override void UpdateAim(Vector2 targetPosition)
+    {
+        LookAt(targetPosition);
 
-	public override void Use(Vector2 targetPosition)
-	{
-		if (!CanUse()) return;
+        // When under a parent with negative X scale (FlipRoot facing left),
+        // the sprite appears flipped vertically. Correct by checking the
+        // parent's transform determinant.
+        var pt = GetParent<Node2D>().GlobalTransform;
+        bool parentFlipped = (pt.X.X * pt.Y.Y - pt.X.Y * pt.Y.X) < 0;
+        Scale = new Vector2(1, parentFlipped ? -1 : 1);
+    }
 
-		if (_weaponDefinition.ProjectileScene != null)
-			FireProjectile(targetPosition);
-		else
-			FireHitscan(targetPosition);
+    protected override float GetUseCooldown() => _weaponDefinition?.FireRate ?? 0.2f;
 
-		ResetCooldown();
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
 
-		// Trigger animation if present
-		_animationPlayer?.Play("shoot");
+        if (!_isFiring && _currentRecoilDeg > 0f && _weaponDefinition != null)
+        {
+            _timeSinceLastShot += (float)delta;
+            if (_weaponDefinition.RecoilRecoveryTime > 0f)
+            {
+                float t = Mathf.Clamp(_timeSinceLastShot / _weaponDefinition.RecoilRecoveryTime, 0f, 1f);
+                _currentRecoilDeg = Mathf.Lerp(_currentRecoilDeg, 0f, t);
+                if (_currentRecoilDeg < 0.01f)
+                    _currentRecoilDeg = 0f;
+            }
+            else
+            {
+                _currentRecoilDeg = 0f;
+            }
+        }
+    }
 
-		// Apply screen shake
-		if (CameraController.Instance != null && _weaponDefinition.ScreenShake > 0)
-		{
-			CameraController.Instance.Shake(_weaponDefinition.ScreenShake);
-		}
-	}
+    /// <summary>Current recoil bloom in degrees (without base variability).</summary>
+    public float CurrentRecoilDeg => _currentRecoilDeg;
+    /// <summary>Maximum recoil bloom cap from the weapon definition.</summary>
+    public float MaxRecoilDeg => _weaponDefinition?.MaxRecoilDeg ?? 0f;
+    /// <summary>Current per-bullet variability in degrees (base + recoil bloom).</summary>
+    public float CurrentSpreadDeg => (_weaponDefinition?.VariabilitySpreadPerBulletDeg ?? 0f) + _currentRecoilDeg;
 
-	private void FireProjectile(Vector2 targetPosition)
-	{
-		Vector2 baseDirection = (targetPosition - _owner.GlobalPosition).Normalized();
+    /// <summary>Total angular radius in degrees from aim center to the outermost possible bullet.
+    /// For multi-pellet weapons this includes half the fan angle plus per-bullet variability.
+    /// This is what the crosshair circle should represent.</summary>
+    public float TotalSpreadRadiusDeg
+    {
+        get
+        {
+            if (_weaponDefinition == null) return 0f;
+            float halfFan = _weaponDefinition.SpreadCount > 1 ? _weaponDefinition.SpreadAngleDeg / 2f : 0f;
+            return halfFan + CurrentSpreadDeg;
+        }
+    }
 
-		if (_weaponDefinition.SpreadCount <= 1)
-		{
-			SpawnProjectile(baseDirection);
-		}
-		else
-		{
-			// Spread pattern: distribute projectiles evenly across the spread angle
-			float totalAngle = Mathf.DegToRad(_weaponDefinition.SpreadAngle);
-			float startAngle = -totalAngle / 2f;
-			float step = _weaponDefinition.SpreadCount > 1
-				? totalAngle / (_weaponDefinition.SpreadCount - 1)
-				: 0f;
+    public override void OnUsePressed()
+    {
+        _hasFiredThisPress = false;
+        _isFiring = true;
+        TryFire();
+    }
 
-			for (int i = 0; i < _weaponDefinition.SpreadCount; i++)
-			{
-				float angle = startAngle + step * i;
-				Vector2 spreadDir = baseDirection.Rotated(angle);
-				SpawnProjectile(spreadDir);
-			}
-		}
+    public override void OnUseHeld()
+    {
+        if (!_weaponDefinition.IsAutomatic && _hasFiredThisPress) return;
+        TryFire();
+    }
 
-		GD.Print($"Weapon fired {_weaponDefinition.SpreadCount} projectile(s)!");
-	}
+    public override void OnUseReleased()
+    {
+        _hasFiredThisPress = false;
+        _isFiring = false;
+    }
 
-	private void SpawnProjectile(Vector2 direction)
-	{
-		var projectile = _weaponDefinition.ProjectileScene.Instantiate<Projectile>();
-		projectile.GlobalPosition = _owner.GlobalPosition + _weaponDefinition.ProjectileSpawnOffset;
-		projectile.Initialize(direction, _weaponDefinition.Damage, _owner);
+    private void TryFire()
+    {
+        if (!CanUse() || _weaponDefinition?.ProjectileScene == null) return;
+        _hasFiredThisPress = true;
 
-		// Add to scene tree (as sibling of owner, not child)
-		_owner.GetParent().AddChild(projectile);
-	}
+        FireProjectile();
 
-	private void FireHitscan(Vector2 targetPosition)
-	{
-		Vector2 direction = (targetPosition - _owner.GlobalPosition).Normalized();
+        _currentRecoilDeg = Mathf.Min(_currentRecoilDeg + _weaponDefinition.RecoilPerShotDeg, _weaponDefinition.MaxRecoilDeg);
+        _timeSinceLastShot = 0f;
 
-		var spaceState = _owner.GetWorld2D().DirectSpaceState;
-		var query = PhysicsRayQueryParameters2D.Create(
-			_owner.GlobalPosition,
-			_owner.GlobalPosition + direction * _weaponDefinition.HitscanRange
-		);
+        ResetCooldown();
 
-		// Exclude the shooter from the raycast
-		if (_owner is CollisionObject2D collisionOwner)
-		{
-			query.Exclude = new Godot.Collections.Array<Rid> { collisionOwner.GetRid() };
-		}
+        _animationPlayer?.Play("shoot");
 
-		var result = spaceState.IntersectRay(query);
+        if (_owner is PlayerCharacterBody2D && CameraController.Instance != null && _weaponDefinition.ScreenShakeScale > 0)
+            CameraController.Instance.Shake(_weaponDefinition.ScreenShakeScale, _weaponDefinition.ScreenShakeDurationScale);
+    }
 
-		if (result.Count > 0)
-		{
-			var hitPosition = (Vector2)result["position"];
-			var hitBody = (Node2D)result["collider"];
+    private float GetRandomSpreadRad()
+    {
+        float spreadDeg = CurrentSpreadDeg;
+        if (spreadDeg <= 0f) return 0f;
+        return Mathf.DegToRad((float)GD.RandRange(-spreadDeg, spreadDeg));
+    }
 
-			GD.Print($"Weapon hitscan hit: {hitBody.Name} at {hitPosition}");
-			ShowBulletTrail(_owner.GlobalPosition, hitPosition);
-		}
-		else
-		{
-			ShowBulletTrail(_owner.GlobalPosition, _owner.GlobalPosition + direction * _weaponDefinition.HitscanRange);
-		}
+    private void FireProjectile()
+    {
+        Vector2 baseDirection = AimDirection;
 
-		GD.Print("Weapon fired hitscan!");
-	}
+        if (_weaponDefinition.SpreadCount <= 1)
+        {
+            SpawnProjectile(baseDirection.Rotated(GetRandomSpreadRad()));
+        }
+        else
+        {
+            float totalAngle = Mathf.DegToRad(_weaponDefinition.SpreadAngleDeg);
+            float startAngle = -totalAngle / 2f;
+            float step = _weaponDefinition.SpreadCount > 1
+                ? totalAngle / (_weaponDefinition.SpreadCount - 1)
+                : 0f;
 
-	private void ShowBulletTrail(Vector2 from, Vector2 to)
-	{
-		if (_bulletTrail == null) return;
+            for (int i = 0; i < _weaponDefinition.SpreadCount; i++)
+            {
+                float angle = startAngle + step * i + GetRandomSpreadRad();
+                SpawnProjectile(baseDirection.Rotated(angle));
+            }
+        }
+    }
 
-		_bulletTrail.ClearPoints();
-		_bulletTrail.AddPoint(from);
-		_bulletTrail.AddPoint(to);
-		_bulletTrail.Visible = true;
-		_trailTimer = _weaponDefinition.TrailDuration;
-	}
+    private Vector2 GetSpawnPosition()
+    {
+        return _projectileSpawnLocationNode != null ? _projectileSpawnLocationNode.GlobalPosition : _owner.GlobalPosition;
+    }
+
+    private void SpawnProjectile(Vector2 direction)
+    {
+        var projectile = _weaponDefinition.ProjectileScene.Instantiate<Projectile>();
+        projectile.GlobalPosition = GetSpawnPosition();
+
+        var projectileParams = new ProjectileParams
+        {
+            Speed = _weaponDefinition.Speed,
+            Damage = _weaponDefinition.Damage,
+            Lifetime = _weaponDefinition.Lifetime,
+            AffectedByGravity = _weaponDefinition.ProjectileAffectedByGravity,
+            GravityScale = _weaponDefinition.ProjectileGravityScale,
+            ImpactForce = _weaponDefinition.ImpactForce,
+            EnableWallBounce = _weaponDefinition.EnableWallBounce,
+            EnableEnemyBounce = _weaponDefinition.EnableEnemyBounce,
+            MaxBounces = _weaponDefinition.MaxBounces,
+            CoefficientOfRestitution = _weaponDefinition.CoefficientOfRestitution,
+            Explosive = _weaponDefinition.Explosive,
+            ExplosionRadius = _weaponDefinition.ExplosionRadius,
+            ExplosionDamageFalloff = _weaponDefinition.ExplosionDamageFalloff,
+            TimedExplosion = _weaponDefinition.TimedExplosion,
+            CancelTimedOnEnemyContact = _weaponDefinition.CancelTimedOnEnemyContact,
+        };
+
+        projectile.Initialize(direction, projectileParams, _owner);
+        _owner.GetParent().AddChild(projectile);
+    }
 }

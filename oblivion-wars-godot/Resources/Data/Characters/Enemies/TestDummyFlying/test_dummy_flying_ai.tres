@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="NPCAIParameters" format=3 uid="uid://dprup8up42lsk"]
+
+[ext_resource type="Script" uid="uid://din66r6aywcws" path="res://Scripts/Data/Definitions/NPC/GlobalSettings/NPCAIParameters.cs" id="1_2a2bn"]
+
+[resource]
+script = ExtResource("1_2a2bn")
+DetectionRange = 800.0
+AttackRange = 400.0
+IsFlying = true
+metadata/_custom_type_script = "uid://din66r6aywcws"

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="NPCBehaviorParamsAttack_Basic" format=3 uid="uid://cmcxybx5awxqs"]
+
+[ext_resource type="Script" uid="uid://bsletdow8rl0u" path="res://Scripts/Data/Definitions/NPC/NPCBehaviorParams/NPCBehaviorParamsAttack_Basic.cs" id="1_l60cq"]
+
+[resource]
+script = ExtResource("1_l60cq")
+AttackCooldown = 2.0
+metadata/_custom_type_script = "uid://bsletdow8rl0u"

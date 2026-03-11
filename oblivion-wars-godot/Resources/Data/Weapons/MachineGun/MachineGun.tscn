@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bx2i6q2ymntjm"]
+
+[ext_resource type="PackedScene" path="res://Resources/Data/Weapons/WeaponBase.tscn" id="1_wot0p"]
+
+[node name="MachineGun" unique_id=644404022 instance=ExtResource("1_wot0p")]
+
+[node name="Placeholder" parent="." index="0"]
+offset_right = 35.0
+offset_bottom = 0.0
+color = Color(0.8080586, 0.33855253, 0, 1)

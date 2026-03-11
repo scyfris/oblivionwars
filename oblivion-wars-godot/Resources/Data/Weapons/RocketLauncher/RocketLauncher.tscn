@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c0otkkgvr82cd"]
+
+[ext_resource type="PackedScene" path="res://Resources/data/Weapons/WeaponBase.tscn" id="1_x82ni"]
+
+[node name="RocketLauncher" unique_id=2127350264 instance=ExtResource("1_x82ni")]
+
+[node name="Placeholder" parent="." index="0"]
+offset_right = 84.0
+offset_bottom = 10.0
+color = Color(0.91394484, 0, 0.4138117, 1)

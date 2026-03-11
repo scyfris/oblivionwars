@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LevelDefinition" format=3 uid="uid://baf1aaw72tsob"]
+
+[ext_resource type="Script" uid="uid://cy4xjqftr6ngc" path="res://Scripts/Data/Definitions/LevelDefinition.cs" id="1_sjo1k"]
+
+[resource]
+script = ExtResource("1_sjo1k")
+LevelId = "test"
+LevelDisplayName = "Test Level"
+ScenePath = "uid://dm2070rwmwh2j"

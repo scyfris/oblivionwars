@@ -1,0 +1,24 @@
+[gd_resource type="BehaviorTree" format=3 uid="uid://dl61h776nxf7c"]
+
+[sub_resource type="BlackboardPlan" id="BlackboardPlan_k866t"]
+var/health/name = &"health"
+var/health/type = 3
+var/health/value = 0.0
+var/health/hint = 0
+var/health/hint_string = "Written to by WriteHealthToBlackboard"
+var/max_health/name = &"max_health"
+var/max_health/type = 3
+var/max_health/value = 0.0
+var/max_health/hint = 0
+var/max_health/hint_string = "Written to by WriteHealthToBlackboard"
+var/result_health_percentage/name = &"result_health_percentage"
+var/result_health_percentage/type = 3
+var/result_health_percentage/value = 0.0
+var/result_health_percentage/hint = 0
+var/result_health_percentage/hint_string = "Written to by MathDiv"
+
+[sub_resource type="BTSequence" id="BTSequence_tm37k"]
+
+[resource]
+blackboard_plan = SubResource("BlackboardPlan_k866t")
+root_task = SubResource("BTSequence_tm37k")

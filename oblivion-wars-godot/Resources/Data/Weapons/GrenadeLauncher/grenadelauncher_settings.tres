@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://gxhylvlu26c5"]
+
+[ext_resource type="PackedScene" uid="uid://dpq3s5f61p7r3" path="res://Resources/Data/Projectiles/StandardBullet.tscn" id="1_e10ux"]
+[ext_resource type="Script" uid="uid://i6xsa0mr56ur" path="res://Scripts/Data/Definitions/WeaponDefinition.cs" id="2_52g3i"]
+
+[resource]
+script = ExtResource("2_52g3i")
+FireRate = 1.0
+ScreenShakeScale = 0.7
+ScreenShakeDurationScale = 0.4
+Damage = 30.0
+Speed = 1000.0
+Lifetime = 10.0
+ImpactForce = 1000.0
+ProjectileAffectedByGravity = true
+ProjectileScene = ExtResource("1_e10ux")
+EnableWallBounce = true
+MaxBounces = 5
+CoefficientOfRestitution = 0.6
+Explosive = true
+TimedExplosion = 4.0
+CancelTimedOnEnemyContact = true
+metadata/_custom_type_script = "uid://i6xsa0mr56ur"

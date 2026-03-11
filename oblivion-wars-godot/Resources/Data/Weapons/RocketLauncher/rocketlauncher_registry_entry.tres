@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponRegistryEntry" format=3 uid="uid://36kumf8m27qv"]
+
+[ext_resource type="Script" uid="uid://xbn7v88oatsv" path="res://Scripts/Data/Definitions/WeaponRegistryEntry.cs" id="1_v1p1q"]
+[ext_resource type="Resource" uid="uid://0da6lrugbn2b" path="res://Resources/Data/Weapons/RocketLauncher/rocketlauncher_settings.tres" id="1_wncpw"]
+[ext_resource type="Texture2D" uid="uid://cb62mase28poh" path="res://Resources/Data/Weapons/RocketLauncher/rocketlauncher_icon.png" id="2_3dv8a"]
+[ext_resource type="PackedScene" uid="uid://c0otkkgvr82cd" path="res://Resources/Data/Weapons/RocketLauncher/RocketLauncher.tscn" id="3_2htyk"]
+
+[resource]
+script = ExtResource("1_v1p1q")
+Name = "rocketlauncher"
+Scene = ExtResource("3_2htyk")
+Definition = ExtResource("1_wncpw")
+Description = "A boom stick."
+Icon = ExtResource("2_3dv8a")
+metadata/_custom_type_script = "uid://xbn7v88oatsv"

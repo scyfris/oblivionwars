@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://cusa02dp3x88j"]
+
+[ext_resource type="Script" uid="uid://bovjy216tp4tg" path="res://Scripts/Data/GlobalDefinitions.cs" id="1_a4xi4"]
+[ext_resource type="Resource" uid="uid://dt4sysexgy0vb" path="res://Resources/Data/Weapons/Pistol/pistol_registry_entry.tres" id="2_pistol"]
+[ext_resource type="Resource" uid="uid://cutvv6fs5oen" path="res://Resources/Data/Weapons/Shotgun/shotgun_registry_entry.tres" id="3_shotgun"]
+[ext_resource type="Resource" uid="uid://36kumf8m27qv" path="res://Resources/Data/Weapons/RocketLauncher/rocketlauncher_registry_entry.tres" id="4_7kibm"]
+[ext_resource type="Resource" uid="uid://cgp23wmhdqn2m" path="res://Resources/Data/Weapons/MachineGun/machinegun_regsitry_entry.tres" id="5_elplc"]
+[ext_resource type="Resource" uid="uid://deid1wenpsyc2" path="res://Resources/Data/Weapons/GrenadeLauncher/grenadelauncher_regsitry_entry.tres" id="6_wlc62"]
+[ext_resource type="Resource" path="res://Resources/Data/HazardSettings/hazard_settings_common.tres" id="7_wlc62"]
+
+[node name="GlobalDefinitions" type="Node" unique_id=1238841687]
+script = ExtResource("1_a4xi4")
+Weapons = [ExtResource("2_pistol"), ExtResource("3_shotgun"), ExtResource("4_7kibm"), ExtResource("5_elplc"), ExtResource("6_wlc62")]
+HazardDefs = ExtResource("7_wlc62")

@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://dpq3s5f61p7r3"]
+
+[ext_resource type="Script" uid="uid://cs1e3lth4fnx7" path="res://Scripts/Combat/Projectiles/Projectile.cs" id="1_rucup"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bullet"]
+radius = 4.0
+
+[node name="StandardBullet" type="Area2D" unique_id=759644214 node_paths=PackedStringArray("_trail")]
+script = ExtResource("1_rucup")
+_trail = NodePath("Trail")
+_trailLength = 5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1975654421]
+shape = SubResource("CircleShape2D_bullet")
+
+[node name="Visual" type="Polygon2D" parent="." unique_id=808775647]
+position = Vector2(-1, 0)
+scale = Vector2(1, 2.25)
+color = Color(1, 0.8, 0.078431375, 1)
+polygon = PackedVector2Array(-2, -1.3333334, 5, -0.8888889, 5, 0.8888889, -2, 1.3333334)
+
+[node name="Trail" type="Line2D" parent="." unique_id=1751117491]
+width = 2.0
+default_color = Color(0.85, 0.85, 0.88, 0.8)

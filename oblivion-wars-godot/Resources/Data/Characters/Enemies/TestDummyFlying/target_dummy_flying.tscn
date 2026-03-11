@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://b83s78jm88pu3"]
+
+[ext_resource type="PackedScene" uid="uid://cygwcj2tkmvgn" path="res://Resources/Data/Characters/Enemies/Shared/NPC_Base.tscn" id="1_4etq4"]
+[ext_resource type="Resource" uid="uid://dmg0qo3cuae48" path="res://Resources/Data/Characters/Enemies/TestDummyFlying/test_dummy_flying_def.tres" id="2_j6rjk"]
+[ext_resource type="Texture2D" uid="uid://yrvph70h3ah" path="res://Resources/Data/Characters/Enemies/TestDummyFlying/Sprites/TestDummyFlyingNPC.png" id="3_u10hy"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mfurn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_u10hy")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="TargetDummyFlying" unique_id=749725729 instance=ExtResource("1_4etq4")]
+
+[node name="NPCController" parent="." index="0" unique_id=661337264]
+_definition = ExtResource("2_j6rjk")
+
+[node name="AnimatedSprite2D" parent="FlipRoot" parent_id_path=PackedInt32Array(1454104269) index="1" unique_id=1131916459]
+sprite_frames = SubResource("SpriteFrames_mfurn")
+
+[node name="CollisionShape2D" parent="." index="3" unique_id=1232872331]
+position = Vector2(0, -49.999996)

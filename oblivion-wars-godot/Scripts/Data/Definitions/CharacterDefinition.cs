@@ -1,11 +1,5 @@
 using Godot;
 
-public enum PersistenceMode
-{
-    None,
-    FlagsOnly,
-    Full
-}
 
 [GlobalClass]
 public partial class CharacterDefinition : Resource
@@ -13,12 +7,16 @@ public partial class CharacterDefinition : Resource
     [ExportGroup("Identity")]
     [Export] public string EntityId = "";
 
+
     [ExportGroup("Stats")]
     [Export] public float MaxHealth = 100.0f;
-    [Export] public float MoveSpeed = 300.0f;
-    [Export] public float KnockbackResistance = 0.0f;
-    [Export] public float Mass = 1.0f;
+    /// <summary>0 = full knockback, 1 = immune. Scales incoming impact force by (1 - resistance).</summary>
+    [Export(PropertyHint.Range, "0,1,0.05")] public float KnockbackResistance = 0.0f;
 
-    [ExportGroup("Persistence")]
-    [Export] public PersistenceMode Persistence = PersistenceMode.None;
+    [ExportGroup("Physics")]
+    [Export] public CommonPhysicsDef PhysicsDef;
+
+    [ExportGroup("Loadout")]
+    [Export] public WeaponRegistryEntry LeftWeapon;
+    [Export] public WeaponRegistryEntry RightWeapon;
 }

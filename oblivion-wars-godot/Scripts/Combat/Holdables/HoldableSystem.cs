@@ -1,89 +1,108 @@
 using Godot;
-using System;
 
-/// <summary>
-/// Manages left and right holdable slots for an entity.
-/// Instantiates holdable scenes, positions them, and routes Use() calls.
-/// Works with any entity (player or NPC) - input-agnostic.
-/// </summary>
 public partial class HoldableSystem : Node
 {
-	[Export] private PackedScene _leftHoldableScene;
-	[Export] private PackedScene _rightHoldableScene;
+    [ExportGroup("Positioning")]
+    [Export] private Node2D _weaponPositionNode;
+    public Vector2 WeaponGlobalPosition => _weaponPositionNode != null ? _weaponPositionNode.GlobalPosition : _owner.GlobalPosition;
 
-	private Holdable _leftHoldable;
-	private Holdable _rightHoldable;
-	private Node2D _owner;
+    private Holdable _leftHoldable;
+    private Holdable _rightHoldable;
+    private Node2D _owner;
 
-	public void Initialize(Node2D owner)
-	{
-		_owner = owner;
+    public Weapon ActiveWeapon => _leftHoldable as Weapon;
 
-		if (_leftHoldableScene != null)
-		{
-			_leftHoldable = InstantiateHoldable(_leftHoldableScene);
-		}
+    public void Initialize(Node2D owner, CharacterDefinition definition)
+    {
+        _owner = owner;
 
-		if (_rightHoldableScene != null)
-		{
-			_rightHoldable = InstantiateHoldable(_rightHoldableScene);
-		}
-	}
+        if (definition == null)
+        {
+            GD.PrintErr($"[HoldableSystem] '{owner.Name}': Initialize called with null definition. Assign a CharacterDefinition to the entity.");
+            return;
+        }
 
-	public void Update(double delta)
-	{
-		_leftHoldable?.Update(delta);
-		_rightHoldable?.Update(delta);
-	}
+        if (definition.LeftWeapon == null && definition.RightWeapon == null)
+        {
+            GD.PrintErr($"[HoldableSystem] '{owner.Name}': CharacterDefinition '{definition.ResourceName}' has no weapons assigned (LeftWeapon / RightWeapon). Assign WeaponRegistryEntry resources in the definition.");
+            return;
+        }
 
-	public void UseLeft(Vector2 targetPosition)
-	{
-		_leftHoldable?.Use(targetPosition);
-	}
+        if (definition.LeftWeapon != null)
+            _leftHoldable = InstantiateHoldable(definition.LeftWeapon);
 
-	public void UseRight(Vector2 targetPosition)
-	{
-		_rightHoldable?.Use(targetPosition);
-	}
+        if (definition.RightWeapon != null)
+            _rightHoldable = InstantiateHoldable(definition.RightWeapon);
+    }
 
-	public void SwapLeft(PackedScene newScene)
-	{
-		if (_leftHoldable != null)
-		{
-			_leftHoldable.OnUnequip();
-			_leftHoldable.QueueFree();
-			_leftHoldable = null;
-		}
+    public void Update(double delta)
+    {
+        _leftHoldable?.Update(delta);
+        _rightHoldable?.Update(delta);
+    }
 
-		if (newScene != null)
-		{
-			_leftHoldableScene = newScene;
-			_leftHoldable = InstantiateHoldable(newScene);
-		}
-	}
+    public void UpdateAim(Vector2 target)
+    {
+        _leftHoldable?.UpdateAim(target);
+        _rightHoldable?.UpdateAim(target);
+    }
 
-	public void SwapRight(PackedScene newScene)
-	{
-		if (_rightHoldable != null)
-		{
-			_rightHoldable.OnUnequip();
-			_rightHoldable.QueueFree();
-			_rightHoldable = null;
-		}
+    public void PressLeft() { _leftHoldable?.OnUsePressed(); }
+    public void PressRight() { _rightHoldable?.OnUsePressed(); }
+    public void HeldLeft() { _leftHoldable?.OnUseHeld(); }
+    public void HeldRight() { _rightHoldable?.OnUseHeld(); }
+    public void ReleaseLeft() { _leftHoldable?.OnUseReleased(); }
+    public void ReleaseRight() { _rightHoldable?.OnUseReleased(); }
 
-		if (newScene != null)
-		{
-			_rightHoldableScene = newScene;
-			_rightHoldable = InstantiateHoldable(newScene);
-		}
-	}
+    public void SwapLeft(WeaponRegistryEntry entry)
+    {
+        if (_leftHoldable != null)
+        {
+            _leftHoldable.OnUnequip();
+            _leftHoldable.QueueFree();
+            _leftHoldable = null;
+        }
 
-	private Holdable InstantiateHoldable(PackedScene scene)
-	{
-		var instance = scene.Instantiate<Holdable>();
-		AddChild(instance);
-		instance.InitOwner(_owner);
-		instance.OnEquip();
-		return instance;
-	}
+        if (entry != null)
+            _leftHoldable = InstantiateHoldable(entry);
+    }
+
+    public void SwapRight(WeaponRegistryEntry entry)
+    {
+        if (_rightHoldable != null)
+        {
+            _rightHoldable.OnUnequip();
+            _rightHoldable.QueueFree();
+            _rightHoldable = null;
+        }
+
+        if (entry != null)
+            _rightHoldable = InstantiateHoldable(entry);
+    }
+
+    private Holdable InstantiateHoldable(WeaponRegistryEntry entry)
+    {
+        if (entry.Scene == null)
+        {
+            GD.PrintErr($"[HoldableSystem] '{_owner.Name}': WeaponRegistryEntry '{entry.Name}' has no Scene assigned.");
+            return null;
+        }
+
+        if (entry.Definition == null)
+        {
+            GD.PrintErr($"[HoldableSystem] '{_owner.Name}': WeaponRegistryEntry '{entry.Name}' has no Definition assigned.");
+            return null;
+        }
+
+        var instance = entry.Scene.Instantiate<Holdable>();
+        var parent = _weaponPositionNode != null ? (Node)_weaponPositionNode : this;
+        parent.AddChild(instance);
+        instance.InitOwner(_owner);
+
+        if (instance is Weapon weapon)
+            weapon.SetDefinition(entry.Definition);
+
+        instance.OnEquip();
+        return instance;
+    }
 }

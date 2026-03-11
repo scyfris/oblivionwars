@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bqy5w7xk8jv6f"]
+
+[ext_resource type="Script" path="res://Scripts/Core/GlobalStateManager.cs" id="1"]
+
+[node name="GlobalStateManager" type="Node"]
+script = ExtResource("1")

@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://j7aymnlp6uxo"]
+
+[ext_resource type="Shader" uid="uid://bh75lvj57gqyp" path="res://Resources/Shaders/hit_flash.gdshader" id="1_2sm2j"]
+
+[resource]
+shader = ExtResource("1_2sm2j")
+shader_parameter/flash_amount = 0.0

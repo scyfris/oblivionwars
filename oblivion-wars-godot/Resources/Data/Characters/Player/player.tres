@@ -1,11 +1,10 @@
 [gd_resource type="Resource" script_class="PlayerDefinition" format=3 uid="uid://dj7t8h8cwg5cv"]
 
 [ext_resource type="Script" uid="uid://dtfitj2e1hyf6" path="res://Scripts/Data/Definitions/PlayerDefinition.cs" id="1_c1nx3"]
+[ext_resource type="Resource" uid="uid://dyya6l2y86ua7" path="res://Resources/Data/Physics/player_physics_settings.tres" id="2_phys"]
 
 [resource]
 script = ExtResource("1_c1nx3")
-WallSlideSpeedFraction = 0.1
-WallJumpPushAwayDuration = 0.25
-WallJumpInputLockDuration = 0.1
-MoveSpeed = 400.0
+EntityId = "player"
+PhysicsDef = ExtResource("2_phys")
 metadata/_custom_type_script = "uid://dtfitj2e1hyf6"

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Spawning/EnemySpawner.cs" id="1_spawner"]
+[ext_resource type="PackedScene" path="res://Scenes/Debug/spawner_debug_gizmo.tscn" id="2_gizmo"]
+
+[node name="EnemySpawner" type="Node2D"]
+script = ExtResource("1_spawner")
+
+[node name="SpawnerDebugGizmo" parent="." instance=ExtResource("2_gizmo")]

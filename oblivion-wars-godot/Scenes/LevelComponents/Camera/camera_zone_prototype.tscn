@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://b2yqnakepg1ry"]
+
+[ext_resource type="Script" uid="uid://chfm8yp5xogig" path="res://Scripts/Camera/CameraZone.cs" id="1_xvgik"]
+[ext_resource type="Resource" uid="uid://cmq8e4k64txg7" path="res://Scenes/LevelComponents/Camera/camera_zone_prototype_def.tres" id="2_17s50"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yi6kr"]
+size = Vector2(1624, 514)
+
+[node name="CameraZonePrototype" type="Area2D" unique_id=1854573610]
+script = ExtResource("1_xvgik")
+IsDefaultZone = false
+LockAxisYWorld = true
+_settingsResource = ExtResource("2_17s50")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1230944827]
+position = Vector2(-267, 81)
+shape = SubResource("RectangleShape2D_yi6kr")
